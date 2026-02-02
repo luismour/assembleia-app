@@ -75,21 +75,27 @@ def remover_grupo(numero: str, x_admin_token: str = Header(None)):
 def get_dados_admin(x_admin_token: str = Header(None)):
     verificar_admin(x_admin_token)
     if "grupos_meta" not in db: db["grupos_meta"] = {}
-    total_possivel = sum(db["grupos_meta"].values())
+    total_delegados = sum(db["grupos_meta"].values())
+
+    total_votos_possiveis = total_delegados * 2 
 
     resultado = []
     for p in reversed(db["pautas"]):
         contagem = {"favor": 0, "contra": 0, "abstencao": 0}
-        for v in p.votos.values():
-            if v in contagem:
-                contagem[v] += 1
+
+        for lista_votos in p.votos.values():
+            for v in lista_votos:
+                if v in contagem:
+                    contagem[v] += 1
         
+        total_realizado = sum(len(v) for v in p.votos.values())
+
         resultado.append({
             "id": p.id,
             "titulo": p.titulo,
             "status": p.status,
-            "total_votos": len(p.votos),
-            "esperados": total_possivel,
+            "total_votos": total_realizado,
+            "esperados": total_votos_possiveis,
             "resultados": contagem
         })
     return resultado
