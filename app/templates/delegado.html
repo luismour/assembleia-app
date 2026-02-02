@@ -31,21 +31,73 @@
             display: flex; flex-direction: column;
         }
 
-        /* --- HEADER IGUAL AO TELÃO --- */
+        /* --- TELA DE BOAS-VINDAS (SPLASH SCREEN) --- */
+        .welcome-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #001f44 100%);
+            z-index: 9999;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: white; text-align: center;
+            padding: 30px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .welcome-logo {
+            width: 120px; height: auto;
+            margin-bottom: 30px;
+            /* Deixa a logo toda branca para ficar elegante no fundo azul */
+            filter: brightness(0) invert(1); 
+            animation: floatLogo 3s ease-in-out infinite;
+        }
+
+        .welcome-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.2em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .welcome-subtitle {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+            opacity: 0.8;
+            letter-spacing: 3px;
+            margin-top: 5px;
+            margin-bottom: 60px;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .btn-start {
+            background: white; color: var(--primary-blue);
+            padding: 18px 40px; border-radius: 50px;
+            border: none; font-size: 1.1em; font-weight: 800;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            animation: slideUp 1s ease-out;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .btn-start:active { transform: scale(0.95); }
+
+        .hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
+
+        /* --- HEADER DO APP --- */
         .mobile-header {
             background: var(--primary-blue);
-            color: white;
+            color: white; 
             padding: 15px 20px;
             display: flex; align-items: center; gap: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             position: sticky; top: 0; z-index: 100;
         }
-        
         .header-logo { height: 45px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-        
         .header-text { line-height: 1.1; }
-        .header-title { font-family: 'Oswald', sans-serif; font-size: 1.1em; text-transform: uppercase; display: block; }
-        .header-subtitle { font-family: 'Poppins', sans-serif; font-size: 0.75em; opacity: 0.8; letter-spacing: 2px; display: block; }
+        .header-title { font-family: 'Oswald', sans-serif; font-size: 1.1em; text-transform: uppercase; display: block; color: #ffffff; font-weight: 500; }
+        .header-subtitle { font-family: 'Poppins', sans-serif; font-size: 0.75em; color: rgba(255, 255, 255, 0.8); letter-spacing: 2px; display: block; }
 
         /* --- CONTAINER PRINCIPAL --- */
         #app { flex-grow: 1; display: flex; flex-direction: column; }
@@ -53,13 +105,9 @@
 
         /* --- CARDS E INPUTS --- */
         .card-modern {
-            background: white;
-            border-radius: 24px;
-            padding: 30px 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-            text-align: center;
-            border: 1px solid rgba(0,0,0,0.05);
-            animation: slideUp 0.5s ease;
+            background: white; border-radius: 24px; padding: 30px 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center;
+            border: 1px solid rgba(0,0,0,0.05); animation: slideUp 0.5s ease;
         }
 
         .cred-input {
@@ -67,99 +115,70 @@
             border: 2px solid #e1e8ed; border-radius: 16px;
             font-size: 1.5em; text-align: center;
             text-transform: uppercase; font-weight: 700; color: var(--primary-blue);
-            font-family: 'Source Code Pro', monospace;
-            transition: 0.3s;
+            font-family: 'Source Code Pro', monospace; transition: 0.3s;
         }
         .cred-input:focus { border-color: var(--primary-blue); outline: none; box-shadow: 0 0 0 4px rgba(0, 45, 98, 0.1); }
 
         /* --- BOTÕES --- */
         .btn-main {
-            width: 100%; padding: 18px;
-            border-radius: 16px; border: none;
+            width: 100%; padding: 18px; border-radius: 16px; border: none;
             font-size: 1.1em; font-weight: 700; font-family: 'Poppins', sans-serif;
-            color: white; cursor: pointer;
-            transition: transform 0.1s, filter 0.2s;
+            color: white; cursor: pointer; transition: transform 0.1s;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .btn-main:active { transform: scale(0.98); }
-        
         .btn-login { background: var(--primary-blue); }
         .btn-favor { background: linear-gradient(135deg, #2ecc71, #27ae60); margin-bottom: 12px; }
         .btn-contra { background: linear-gradient(135deg, #e74c3c, #c0392b); margin-bottom: 12px; }
         .btn-abs   { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
 
-        /* --- BADGES E CHIPS --- */
-        .user-badge {
-            background: #eef2f7; color: var(--primary-blue);
-            padding: 8px 20px; border-radius: 30px;
-            font-weight: 700; font-size: 0.9em;
-            display: inline-block; margin-bottom: 20px;
-        }
-        
-        .status-badge {
-            padding: 6px 15px; border-radius: 20px;
-            font-size: 0.75em; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 1px; display: inline-block; margin-bottom: 15px;
-        }
+        /* --- ELEMENTOS DE UI --- */
+        .user-badge { background: #eef2f7; color: var(--primary-blue); padding: 8px 20px; border-radius: 30px; font-weight: 700; font-size: 0.9em; display: inline-block; margin-bottom: 20px; }
+        .status-badge { padding: 6px 15px; border-radius: 20px; font-size: 0.75em; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 15px; }
         .status-aberta { background: #d4edda; color: #155724; }
-        .status-aguardando { background: #fff3cd; color: #856404; }
-
-        /* --- ESTADO DE ESPERA (ANIMAÇÃO) --- */
+        
         .waiting-state { padding: 40px 0; }
-        .scout-icon {
-            font-size: 5em; color: var(--primary-blue);
-            display: inline-block;
-            margin-bottom: 20px;
-            animation: floatPulse 3s ease-in-out infinite;
-            filter: drop-shadow(0 10px 15px rgba(0,45,98,0.2));
-        }
-        .waiting-text {
-            font-family: 'Poppins', sans-serif; font-weight: 600;
-            color: #7f8c8d; font-size: 1.1em;
-            animation: fadeIn 2s infinite alternate;
-        }
+        .scout-icon { font-size: 5em; color: var(--primary-blue); display: inline-block; margin-bottom: 20px; animation: floatPulse 3s ease-in-out infinite; filter: drop-shadow(0 10px 15px rgba(0,45,98,0.2)); }
+        .waiting-text { font-family: 'Poppins', sans-serif; font-weight: 600; color: #7f8c8d; font-size: 1.1em; animation: fadeIn 2s infinite alternate; }
+        
+        .success-state { background: #f0fdf4; border: 2px dashed #86efac; padding: 40px 20px; border-radius: 20px; color: #166534; }
+        .check-anim { font-size: 4em; display: block; margin-bottom: 10px; animation: popIn 0.5s; }
 
-        /* --- ESTADO DE SUCESSO --- */
-        .success-state {
-            background: #f0fdf4; border: 2px dashed #86efac;
-            padding: 40px 20px; border-radius: 20px;
-            color: #166534;
-        }
-        .check-anim { font-size: 4em; display: block; margin-bottom: 10px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        /* --- MENU INFERIOR --- */
-        .bottom-nav {
-            display: flex; justify-content: space-around;
-            padding: 15px; background: white;
-            border-top: 1px solid #eee;
-            position: sticky; bottom: 0;
-        }
-        .nav-item {
-            background: none; border: none;
-            color: #999; font-weight: 600; font-family: 'Poppins';
-            font-size: 0.9em; padding: 10px 20px; border-radius: 12px;
-            transition: 0.3s;
-        }
+        .bottom-nav { display: flex; justify-content: space-around; padding: 15px; background: white; border-top: 1px solid #eee; position: sticky; bottom: 0; }
+        .nav-item { background: none; border: none; color: #999; font-weight: 600; font-family: 'Poppins'; font-size: 0.9em; padding: 10px 20px; border-radius: 12px; transition: 0.3s; }
         .nav-item.active { background: #eef2f7; color: var(--primary-blue); }
 
-        /* --- KEYFRAMES --- */
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes floatPulse { 
-            0%, 100% { transform: translateY(0) scale(1); } 
-            50% { transform: translateY(-15px) scale(1.1); } 
-        }
+        /* --- ANIMAÇÕES --- */
+        @keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes floatPulse { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.1); } }
         @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0.4; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Título da Pauta */
         h2 { font-family: 'Poppins', sans-serif; color: #1a1a1a; margin: 10px 0 25px 0; line-height: 1.3; }
 
     </style>
 </head>
 <body>
     <div id="app">
+        
+        <div class="welcome-overlay" :class="{ 'hidden': !mostrarWelcome }">
+            <img src="/static/logo-pe.svg" alt="Logo" class="welcome-logo">
+            
+            <h1 class="welcome-title">Assembleia Regional</h1>
+            <p class="welcome-subtitle">PERNAMBUCO</p>
+            
+            <button @click="iniciarApp" class="btn-start">
+                INICIAR <span>➜</span>
+            </button>
+        </div>
+
         <header class="mobile-header">
             <img src="/static/logo-pe.svg" alt="Logo" class="header-logo">
+            <div class="header-text">
+                <span class="header-title">Escoteiros do Brasil</span>
+                <span class="header-subtitle">PERNAMBUCO</span>
+            </div>
         </header>
 
         <div class="content-area">
@@ -172,14 +191,12 @@
                 <input v-model="credencial" placeholder="Ex: 107-1" class="cred-input" @keyup.enter="login" maxlength="8">
                 
                 <button @click="login" class="btn-main btn-login">
-                    ENTRAR NA ASSEMBLEIA
+                    ENTRAR
                 </button>
             </div>
 
             <div v-else class="card-modern">
-                <div class="user-badge">
-                    👤 ${ user.nome }
-                </div>
+                <div class="user-badge">👤 ${ user.nome }</div>
 
                 <div v-if="!dados || !dados.pauta">
                      <div class="waiting-state">
@@ -198,23 +215,15 @@
                             <p style="color: #666; margin-bottom: 20px; font-size: 0.95em;">
                                 Selecione sua opção de voto:
                             </p>
-                            <button @click="votar('favor')" class="btn-main btn-favor">
-                                👍 A FAVOR
-                            </button>
-                            <button @click="votar('contra')" class="btn-main btn-contra">
-                                👎 CONTRA
-                            </button>
-                            <button @click="votar('abstencao')" class="btn-main btn-abs">
-                                ✋ ABSTENÇÃO
-                            </button>
+                            <button @click="votar('favor')" class="btn-main btn-favor">👍 A FAVOR</button>
+                            <button @click="votar('contra')" class="btn-main btn-contra">👎 CONTRA</button>
+                            <button @click="votar('abstencao')" class="btn-main btn-abs">✋ ABSTENÇÃO</button>
                         </div>
 
                         <div v-else class="success-state">
                             <span class="check-anim">✅</span>
                             <h3 style="margin: 0; font-family: 'Poppins';">Voto Registrado!</h3>
-                            <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
-                                Aguarde o encerramento.
-                            </div>
+                            <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">Aguarde o encerramento.</div>
                         </div>
                     </div>
 
@@ -232,40 +241,24 @@
         </div>
 
         <div v-if="user" class="bottom-nav">
-            <button class="nav-item" :class="{active: view === 'votar'}" @click="view = 'votar'">
-                🗳️ Votar
-            </button>
-            <button class="nav-item" :class="{active: view === 'historico'}" @click="carregarHistorico">
-                🕒 Histórico
-            </button>
-            <button class="nav-item" @click="sair" style="color: #e74c3c;">
-                🚪 Sair
-            </button>
+            <button class="nav-item" :class="{active: view === 'votar'}" @click="view = 'votar'">🗳️ Votar</button>
+            <button class="nav-item" :class="{active: view === 'historico'}" @click="carregarHistorico">🕒 Histórico</button>
+            <button class="nav-item" @click="sair" style="color: #e74c3c;">🚪 Sair</button>
         </div>
 
         <div v-if="view === 'historico'" style="position:fixed; top:80px; left:0; right:0; bottom:70px; background:white; padding:20px; overflow-y:auto; z-index:50;">
             <h2 style="color: var(--primary-blue); border-bottom: 2px solid #eee; padding-bottom: 10px;">Meu Histórico</h2>
-            
-            <div v-if="historico.length === 0" style="text-align:center; color:#999; margin-top:50px;">
-                Nenhum voto registrado ainda.
-            </div>
-
+            <div v-if="historico.length === 0" style="text-align:center; color:#999; margin-top:50px;">Nenhum voto registrado ainda.</div>
             <div v-for="h in historico" :key="h.titulo" style="background:#f8f9fa; padding:15px; border-radius:12px; margin-bottom:15px;">
                 <div style="font-weight:bold; color:#333; margin-bottom:5px;">${ h.titulo }</div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:0.8em; background:#eee; padding:3px 8px; border-radius:5px;">${ h.status }</span>
                     <div>
-                        <span v-for="v in h.votos" style="font-size:0.8em; font-weight:bold; text-transform:uppercase; color:white; padding:4px 8px; border-radius:5px; margin-left:5px;" 
-                              :style="{background: v=='favor'?'#2ecc71':(v=='contra'?'#e74c3c':'#95a5a6')}">
-                            ${ v }
-                        </span>
+                        <span v-for="v in h.votos" style="font-size:0.8em; font-weight:bold; text-transform:uppercase; color:white; padding:4px 8px; border-radius:5px; margin-left:5px;" :style="{background: v=='favor'?'#2ecc71':(v=='contra'?'#e74c3c':'#95a5a6')}">${ v }</span>
                     </div>
                 </div>
             </div>
-            
-            <button @click="view = 'votar'" style="width:100%; padding:15px; background:#eee; border:none; border-radius:10px; font-weight:bold; margin-top:20px;">
-                VOLTAR PARA VOTAÇÃO
-            </button>
+            <button @click="view = 'votar'" style="width:100%; padding:15px; background:#eee; border:none; border-radius:10px; font-weight:bold; margin-top:20px;">VOLTAR PARA VOTAÇÃO</button>
         </div>
 
     </div>
@@ -274,8 +267,16 @@
         const { createApp } = Vue
         createApp({
             delimiters: ['${', '}'],
-            data() { return { credencial: '', user: null, dados: null, view: 'votar', historico: [] } },
+            data() { 
+                return { 
+                    mostrarWelcome: true, // Começa mostrando a tela de boas-vindas
+                    credencial: '', user: null, dados: null, view: 'votar', historico: [] 
+                } 
+            },
             methods: {
+                iniciarApp() {
+                    this.mostrarWelcome = false; // Esconde a tela e mostra o login
+                },
                 async login() { 
                     if(!this.credencial) return;
                     try { 
@@ -285,9 +286,7 @@
                     } catch (e) { alert('Credencial inválida ou erro de conexão.'); } 
                 },
                 async votar(op) { 
-                    // Feedback tátil simples (vibração se suportado)
                     if (navigator.vibrate) navigator.vibrate(50);
-                    
                     if(confirm('Confirmar seu voto: ' + op.toUpperCase() + '?')) { 
                         try {
                             await axios.post('/api/votar', { credencial: this.user.id, pauta_id: this.dados.pauta.id, opcao: op }); 
@@ -301,15 +300,10 @@
                 },
                 async carregarHistorico() {
                     this.view = 'historico';
-                    try {
-                        const res = await axios.get('/api/historico?credencial='+this.user.id);
-                        this.historico = res.data;
-                    } catch { alert('Erro ao carregar histórico'); }
+                    try { const res = await axios.get('/api/historico?credencial='+this.user.id); this.historico = res.data; } catch { alert('Erro ao carregar histórico'); }
                 },
                 sair() { 
-                    if(confirm('Deseja realmente sair?')) {
-                        this.user = null; this.dados = null; this.view = 'votar';
-                    }
+                    if(confirm('Deseja realmente sair?')) { this.user = null; this.dados = null; this.view = 'votar'; }
                 },
                 poll() { this.load(); setInterval(() => { if(this.view==='votar' && this.user) this.load(); }, 2000); }
             }
