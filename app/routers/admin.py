@@ -79,7 +79,8 @@ def get_dados_admin(x_admin_token: str = Header(None)):
     verificar_admin(x_admin_token)
     if "grupos_meta" not in db: db["grupos_meta"] = {}
     total_delegados = sum(db["grupos_meta"].values())
-    total_votos_possiveis = total_delegados * 2 
+    
+    total_votos_possiveis = total_delegados 
 
     resultado = []
     for p in reversed(db["pautas"]):

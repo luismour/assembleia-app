@@ -4,7 +4,7 @@ from typing import List, Optional
 
 router = APIRouter(prefix="/api")
 
-# --- DATABASE ---
+# --- BANCO DE DADOS EM MEMÓRIA ---
 db = {
     "pautas": [],
     "usuarios": {},        
@@ -12,7 +12,7 @@ db = {
     "grupos_meta": {}      
 }
 
-# --- MODELS ---
+# --- MODELOS ---
 class LoginRequest(BaseModel):
     credencial: str
 
@@ -26,9 +26,7 @@ class Pauta:
         self.id = id
         self.titulo = titulo
         self.status = "AGUARDANDO" 
-        # Structure change: credencial -> list of votes
-        # Ex: { "107-1": ["favor"], "15-2": ["favor", "abstencao"] }
-        self.votos = {} 
+        self.votos = {} # { "107-1": ["favor"] }
 
 def get_pauta_ativa():
     for p in db["pautas"]:
@@ -38,7 +36,7 @@ def get_pauta_ativa():
         return db["pautas"][-1]
     return None
 
-# --- ROUTERS ---
+# --- ROTAS ---
 
 @router.post("/login")
 def login_delegado(credencial: str):
@@ -56,11 +54,9 @@ def get_pauta_ativa_endpoint(credencial: Optional[str] = None):
     
     if credencial and credencial in pauta.votos:
         votos_usuario = pauta.votos[credencial]
-        # Logic: Can vote if they have less than 2 votes
-        if len(votos_usuario) >= 2:
+        if len(votos_usuario) >= 1:
             pode_votar = False
 
-    # Count votes (flattening the lists)
     contagem = {"favor": 0, "contra": 0, "abstencao": 0}
     for lista_votos in pauta.votos.values():
         for v in lista_votos:
@@ -91,13 +87,12 @@ def registrar_voto(dados: VotoRequest):
     if pauta_alvo.status != "ABERTA": raise HTTPException(400, "A votação não está aberta.")
     if dados.credencial not in db["usuarios"]: raise HTTPException(401, "Usuário inválido")
 
-    # Initialize list if not exists
     if dados.credencial not in pauta_alvo.votos:
         pauta_alvo.votos[dados.credencial] = []
 
-    # Check limit of 2 votes
-    if len(pauta_alvo.votos[dados.credencial]) >= 2:
-        raise HTTPException(400, "Você já registrou seus 2 votos nesta pauta.")
+
+    if len(pauta_alvo.votos[dados.credencial]) >= 1:
+        raise HTTPException(400, "Você já votou nesta pauta.")
 
     pauta_alvo.votos[dados.credencial].append(dados.opcao)
     return {"msg": "Voto computado"}
@@ -108,10 +103,9 @@ def get_historico(credencial: str):
         raise HTTPException(404, "Usuário não encontrado")
     
     historico = []
-    # Iterate backwards to show newest first
     for p in reversed(db["pautas"]):
         votos = p.votos.get(credencial, [])
-        if votos: # Only show agendas where they voted
+        if votos or p.status == "ENCERRADA":
             historico.append({
                 "titulo": p.titulo,
                 "status": p.status,

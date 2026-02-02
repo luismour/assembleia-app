@@ -3,98 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Votação</title>
+    <title>Votação Escoteira</title>
+    
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --primary-color: #003366; --scout-purple: #6a1b9a; }
-        body { font-family: 'Inter', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
-        .card { background: white; max-width: 450px; margin: 20px auto; padding: 30px 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; }
+        :root {
+            --primary-blue: #002d62;
+            --scout-purple: #6a1b9a;
+            --bg-light: #f4f6f8;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --neutral: #95a5a6;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-light); 
+            margin: 0; padding: 0; 
+            color: #333; 
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+
+        /* --- HEADER IGUAL AO TELÃO --- */
+        .mobile-header {
+            background: var(--primary-blue);
+            color: white;
+            padding: 15px 20px;
+            display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            position: sticky; top: 0; z-index: 100;
+        }
         
-        .btn-vote { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 12px; font-size: 1.2em; font-weight: 700; color: white; cursor: pointer; transition: transform 0.1s; font-family: 'Poppins'; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .btn-vote:active { transform: scale(0.97); }
-        .btn-favor { background: #2ecc71; }
-        .btn-contra { background: #e74c3c; }
-        .btn-abs { background: #95a5a6; }
-
-        .cred-input { padding: 15px; width: 100%; box-sizing: border-box; margin: 20px 0; border: 3px solid #e0e0e0; border-radius: 12px; font-size: 1.8em; text-align: center; text-transform: uppercase; font-weight: 700; color: var(--primary-color); }
-        .btn-login { background: var(--primary-color); width: 100%; padding: 18px; font-size: 1.2em; border-radius: 12px; color:white; border:none; font-weight:bold; }
+        .header-logo { height: 45px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
         
-        /* Chips e Historico */
-        .voto-chip { display: inline-block; padding: 5px 12px; border-radius: 15px; color: white; font-size: 0.85em; font-weight: bold; margin: 2px; text-transform: uppercase; }
-        .bg-favor { background: #2ecc71; } .bg-contra { background: #e74c3c; } .bg-abstencao { background: #95a5a6; }
+        .header-text { line-height: 1.1; }
+        .header-title { font-family: 'Oswald', sans-serif; font-size: 1.1em; text-transform: uppercase; display: block; }
+        .header-subtitle { font-family: 'Poppins', sans-serif; font-size: 0.75em; opacity: 0.8; letter-spacing: 2px; display: block; }
 
-        .nav-btn { background: none; border: none; padding: 10px 15px; font-size: 1em; color: #666; cursor: pointer; border-bottom: 2px solid transparent; }
-        .nav-btn.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); font-weight: bold; }
+        /* --- CONTAINER PRINCIPAL --- */
+        #app { flex-grow: 1; display: flex; flex-direction: column; }
+        .content-area { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; max-width: 500px; margin: 0 auto; width: 100%; }
 
-        .hist-item { text-align: left; border-bottom: 1px solid #eee; padding: 15px 0; }
-        .hist-header { font-weight: bold; font-family: 'Poppins'; margin-bottom: 5px; color: var(--primary-color); }
-        .status-mini { font-size: 0.7em; padding: 2px 8px; border-radius: 10px; background: #eee; color: #555; vertical-align: middle; }
+        /* --- CARDS E INPUTS --- */
+        .card-modern {
+            background: white;
+            border-radius: 24px;
+            padding: 30px 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+            animation: slideUp 0.5s ease;
+        }
+
+        .cred-input {
+            width: 100%; padding: 18px; margin: 25px 0;
+            border: 2px solid #e1e8ed; border-radius: 16px;
+            font-size: 1.5em; text-align: center;
+            text-transform: uppercase; font-weight: 700; color: var(--primary-blue);
+            font-family: 'Source Code Pro', monospace;
+            transition: 0.3s;
+        }
+        .cred-input:focus { border-color: var(--primary-blue); outline: none; box-shadow: 0 0 0 4px rgba(0, 45, 98, 0.1); }
+
+        /* --- BOTÕES --- */
+        .btn-main {
+            width: 100%; padding: 18px;
+            border-radius: 16px; border: none;
+            font-size: 1.1em; font-weight: 700; font-family: 'Poppins', sans-serif;
+            color: white; cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .btn-main:active { transform: scale(0.98); }
+        
+        .btn-login { background: var(--primary-blue); }
+        .btn-favor { background: linear-gradient(135deg, #2ecc71, #27ae60); margin-bottom: 12px; }
+        .btn-contra { background: linear-gradient(135deg, #e74c3c, #c0392b); margin-bottom: 12px; }
+        .btn-abs   { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
+
+        /* --- BADGES E CHIPS --- */
+        .user-badge {
+            background: #eef2f7; color: var(--primary-blue);
+            padding: 8px 20px; border-radius: 30px;
+            font-weight: 700; font-size: 0.9em;
+            display: inline-block; margin-bottom: 20px;
+        }
+        
+        .status-badge {
+            padding: 6px 15px; border-radius: 20px;
+            font-size: 0.75em; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1px; display: inline-block; margin-bottom: 15px;
+        }
+        .status-aberta { background: #d4edda; color: #155724; }
+        .status-aguardando { background: #fff3cd; color: #856404; }
+
+        /* --- ESTADO DE ESPERA (ANIMAÇÃO) --- */
+        .waiting-state { padding: 40px 0; }
+        .scout-icon {
+            font-size: 5em; color: var(--primary-blue);
+            display: inline-block;
+            margin-bottom: 20px;
+            animation: floatPulse 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 15px rgba(0,45,98,0.2));
+        }
+        .waiting-text {
+            font-family: 'Poppins', sans-serif; font-weight: 600;
+            color: #7f8c8d; font-size: 1.1em;
+            animation: fadeIn 2s infinite alternate;
+        }
+
+        /* --- ESTADO DE SUCESSO --- */
+        .success-state {
+            background: #f0fdf4; border: 2px dashed #86efac;
+            padding: 40px 20px; border-radius: 20px;
+            color: #166534;
+        }
+        .check-anim { font-size: 4em; display: block; margin-bottom: 10px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* --- MENU INFERIOR --- */
+        .bottom-nav {
+            display: flex; justify-content: space-around;
+            padding: 15px; background: white;
+            border-top: 1px solid #eee;
+            position: sticky; bottom: 0;
+        }
+        .nav-item {
+            background: none; border: none;
+            color: #999; font-weight: 600; font-family: 'Poppins';
+            font-size: 0.9em; padding: 10px 20px; border-radius: 12px;
+            transition: 0.3s;
+        }
+        .nav-item.active { background: #eef2f7; color: var(--primary-blue); }
+
+        /* --- KEYFRAMES --- */
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes floatPulse { 
+            0%, 100% { transform: translateY(0) scale(1); } 
+            50% { transform: translateY(-15px) scale(1.1); } 
+        }
+        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0.4; } to { opacity: 1; } }
+
+        /* Título da Pauta */
+        h2 { font-family: 'Poppins', sans-serif; color: #1a1a1a; margin: 10px 0 25px 0; line-height: 1.3; }
+
     </style>
 </head>
 <body>
     <div id="app">
-        <div v-if="!user" class="card">
-            <h2 style="color:var(--primary-color);">Credenciamento</h2>
-            <input v-model="credencial" placeholder="Ex: 107-1" class="cred-input" @keyup.enter="login">
-            <button @click="login" class="btn-login">ACESSAR</button>
-        </div>
+        <header class="mobile-header">
+            <img src="/static/logo-pe.svg" alt="Logo" class="header-logo">
+            <div class="header-text">
+                <span class="header-title">Escoteiros do Brasil</span>
+                <span class="header-subtitle">PERNAMBUCO</span>
+            </div>
+        </header>
 
-        <div v-else>
-            <div style="display:flex; justify-content:center; gap:20px; margin-bottom:10px;">
-                <button class="nav-btn" :class="{active: view === 'votar'}" @click="view = 'votar'">Votar</button>
-                <button class="nav-btn" :class="{active: view === 'historico'}" @click="carregarHistorico">Histórico</button>
+        <div class="content-area">
+            
+            <div v-if="!user" class="card-modern">
+                <div style="font-size: 3em; margin-bottom: 10px;">⚜️</div>
+                <h2 style="color: var(--primary-blue);">Credenciamento</h2>
+                <p style="color: #666; font-size: 0.9em;">Insira sua credencial para acessar a votação.</p>
+                
+                <input v-model="credencial" placeholder="Ex: 107-1" class="cred-input" @keyup.enter="login" maxlength="8">
+                
+                <button @click="login" class="btn-main btn-login">
+                    ENTRAR NA ASSEMBLEIA
+                </button>
             </div>
 
-            <div class="card" v-if="view === 'votar'">
-                <div style="background:#eef2f7; color:var(--primary-color); padding:10px 20px; border-radius:30px; display:inline-block; font-weight:600; margin-bottom:20px;">${ user.nome }</div>
+            <div v-else class="card-modern">
+                <div class="user-badge">
+                    👤 ${ user.nome }
+                </div>
 
-                <div v-if="dados && dados.pauta">
-                    <span style="background:#34495e; color:white; padding:5px 15px; border-radius:20px; font-size:0.8em; font-weight:bold;">${ dados.pauta.status }</span>
-                    <h2 style="margin:15px 0; font-family:'Poppins';">${ dados.pauta.titulo }</h2>
+                <div v-if="!dados || !dados.pauta">
+                     <div class="waiting-state">
+                        <div class="scout-icon">⚜️</div>
+                        <div class="waiting-text">Conectando à mesa...</div>
+                    </div>
+                </div>
+
+                <div v-else-if="dados.pauta">
                     
-                    <div v-if="dados.meus_votos.length > 0" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 12px; border: 1px dashed #ccc;">
-                        <span style="font-size:0.8em; color:#666; display:block; margin-bottom:5px;">Votos Registrados:</span>
-                        <span v-for="(v, i) in dados.meus_votos" :key="i" :class="['voto-chip', 'bg-'+v]">${ v }</span>
-                    </div>
-
                     <div v-if="dados.pauta.status === 'ABERTA'">
-                        <div v-if="dados.pode_votar">
-                            <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">
-                                Registrando <strong>Voto ${ dados.meus_votos.length + 1 }</strong> de 2
-                            </p>
-                            <button @click="votar('favor')" class="btn-vote btn-favor">👍 A FAVOR</button>
-                            <button @click="votar('contra')" class="btn-vote btn-contra">👎 CONTRA</button>
-                            <button @click="votar('abstencao')" class="btn-vote btn-abs">✋ ABSTENÇÃO</button>
-                        </div>
-                        <div v-else style="background:#e8f8f5; padding:30px 20px; border-radius:16px; color:#27ae60;">
-                            <div style="font-size:3em;">✅</div><h3>Todos os votos confirmados!</h3>
-                        </div>
-                    </div>
-                    <div v-else><h3 style="color:#f39c12;">Aguardando início...</h3></div>
-                </div>
-                <div v-else style="padding:40px 0; opacity:0.5;"><h3>Aguardando...</h3></div>
-                
-                <button @click="sair" style="background:none; border:none; color:#999; margin-top:20px; text-decoration:underline;">Sair</button>
-            </div>
+                        <span class="status-badge status-aberta">Votação Aberta</span>
+                        <h2>${ dados.pauta.titulo }</h2>
 
-            <div class="card" v-if="view === 'historico'">
-                <h3 style="color:var(--primary-color);">Meu Histórico</h3>
-                <div v-if="historico.length === 0" style="color:#999; padding:20px;">Nenhum voto registrado.</div>
-                
-                <div v-for="h in historico" class="hist-item">
-                    <div class="hist-header">${ h.titulo }</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="status-mini">${ h.status }</span>
-                        <div>
-                            <span v-for="v in h.votos" :class="['voto-chip', 'bg-'+v]">${ v }</span>
+                        <div v-if="dados.pode_votar">
+                            <p style="color: #666; margin-bottom: 20px; font-size: 0.95em;">
+                                Selecione sua opção de voto:
+                            </p>
+                            <button @click="votar('favor')" class="btn-main btn-favor">
+                                👍 A FAVOR
+                            </button>
+                            <button @click="votar('contra')" class="btn-main btn-contra">
+                                👎 CONTRA
+                            </button>
+                            <button @click="votar('abstencao')" class="btn-main btn-abs">
+                                ✋ ABSTENÇÃO
+                            </button>
+                        </div>
+
+                        <div v-else class="success-state">
+                            <span class="check-anim">✅</span>
+                            <h3 style="margin: 0; font-family: 'Poppins';">Voto Registrado!</h3>
+                            <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
+                                Aguarde o encerramento.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else class="waiting-state">
+                        <div class="scout-icon">⚜️</div>
+                        <div class="waiting-text">
+                            Aguardando a pauta...<br>
+                            <span style="font-size: 0.8em; color: var(--primary-blue); font-weight:bold; margin-top:10px; display:block;">
+                                ${ dados.pauta.titulo }
+                            </span>
                         </div>
                     </div>
                 </div>
-                <button @click="view = 'votar'" style="margin-top:20px; padding:10px 20px; border-radius:8px; border:none; background:#eee; font-weight:bold;">Voltar</button>
             </div>
         </div>
+
+        <div v-if="user" class="bottom-nav">
+            <button class="nav-item" :class="{active: view === 'votar'}" @click="view = 'votar'">
+                🗳️ Votar
+            </button>
+            <button class="nav-item" :class="{active: view === 'historico'}" @click="carregarHistorico">
+                🕒 Histórico
+            </button>
+            <button class="nav-item" @click="sair" style="color: #e74c3c;">
+                🚪 Sair
+            </button>
+        </div>
+
+        <div v-if="view === 'historico'" style="position:fixed; top:80px; left:0; right:0; bottom:70px; background:white; padding:20px; overflow-y:auto; z-index:50;">
+            <h2 style="color: var(--primary-blue); border-bottom: 2px solid #eee; padding-bottom: 10px;">Meu Histórico</h2>
+            
+            <div v-if="historico.length === 0" style="text-align:center; color:#999; margin-top:50px;">
+                Nenhum voto registrado ainda.
+            </div>
+
+            <div v-for="h in historico" :key="h.titulo" style="background:#f8f9fa; padding:15px; border-radius:12px; margin-bottom:15px;">
+                <div style="font-weight:bold; color:#333; margin-bottom:5px;">${ h.titulo }</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.8em; background:#eee; padding:3px 8px; border-radius:5px;">${ h.status }</span>
+                    <div>
+                        <span v-for="v in h.votos" style="font-size:0.8em; font-weight:bold; text-transform:uppercase; color:white; padding:4px 8px; border-radius:5px; margin-left:5px;" 
+                              :style="{background: v=='favor'?'#2ecc71':(v=='contra'?'#e74c3c':'#95a5a6')}">
+                            ${ v }
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <button @click="view = 'votar'" style="width:100%; padding:15px; background:#eee; border:none; border-radius:10px; font-weight:bold; margin-top:20px;">
+                VOLTAR PARA VOTAÇÃO
+            </button>
+        </div>
+
     </div>
 
     <script>
@@ -103,14 +280,29 @@
             delimiters: ['${', '}'],
             data() { return { credencial: '', user: null, dados: null, view: 'votar', historico: [] } },
             methods: {
-                async login() { try { const res = await axios.post('/api/login?credencial='+this.credencial.trim().toUpperCase()); this.user = res.data; this.poll(); } catch { alert('Erro'); } },
+                async login() { 
+                    if(!this.credencial) return;
+                    try { 
+                        const res = await axios.post('/api/login?credencial='+this.credencial.trim().toUpperCase()); 
+                        this.user = res.data; 
+                        this.poll(); 
+                    } catch (e) { alert('Credencial inválida ou erro de conexão.'); } 
+                },
                 async votar(op) { 
-                    if(confirm('Confirmar voto?')) { 
-                        await axios.post('/api/votar', { credencial: this.user.id, pauta_id: this.dados.pauta.id, opcao: op }); 
-                        this.load(); 
+                    // Feedback tátil simples (vibração se suportado)
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    
+                    if(confirm('Confirmar seu voto: ' + op.toUpperCase() + '?')) { 
+                        try {
+                            await axios.post('/api/votar', { credencial: this.user.id, pauta_id: this.dados.pauta.id, opcao: op }); 
+                            this.load(); 
+                        } catch(e) { alert(e.response.data.detail); }
                     } 
                 },
-                async load() { try { const res = await axios.get('/api/pauta-ativa?credencial='+this.user.id); this.dados = res.data; } catch {} },
+                async load() { 
+                    if(!this.user) return;
+                    try { const res = await axios.get('/api/pauta-ativa?credencial='+this.user.id); this.dados = res.data; } catch {} 
+                },
                 async carregarHistorico() {
                     this.view = 'historico';
                     try {
@@ -118,8 +310,12 @@
                         this.historico = res.data;
                     } catch { alert('Erro ao carregar histórico'); }
                 },
-                sair() { this.user = null; },
-                poll() { this.load(); setInterval(() => { if(this.view==='votar') this.load(); }, 2000); }
+                sair() { 
+                    if(confirm('Deseja realmente sair?')) {
+                        this.user = null; this.dados = null; this.view = 'votar';
+                    }
+                },
+                poll() { this.load(); setInterval(() => { if(this.view==='votar' && this.user) this.load(); }, 2000); }
             }
         }).mount('#app')
     </script>
