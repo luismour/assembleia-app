@@ -52,22 +52,61 @@
         .btn-telao:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(106, 27, 154, 0.4); }
         .btn-logout { background: none; color: var(--accent-red); border: none; cursor: pointer; font-weight: 600; }
 
-        .row-input { display: flex; gap: 10px; align-items: center; }
-        input { 
-            padding: 14px; font-size: 16px; border: 2px solid #eee; border-radius: 10px; outline: none; transition: 0.3s; font-family: 'Inter';
+        /* --- NOVO ESTILO DO FORMULÁRIO DE CREDENCIAMENTO --- */
+        .form-credenciamento {
+            display: grid;
+            grid-template-columns: 1fr 140px 160px; 
+            gap: 15px; 
+            align-items: end; 
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #eef2f6;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            margin-bottom: 30px;
         }
-        input:focus { border-color: var(--accent-blue); }
-        
-        button { 
-            padding: 12px 24px; cursor: pointer; border: none; border-radius: 10px; font-weight: 700; color: white; transition: 0.2s; font-family: 'Poppins';
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+
+        .input-group {
+            display: flex; flex-direction: column; gap: 8px;
         }
-        button:active { transform: translateY(2px); box-shadow: none; }
-        
-        .btn-add { background: var(--accent-green); }
-        .btn-open { background: var(--accent-blue); }
-        .btn-close { background: var(--accent-red); }
-        .btn-del { background: var(--accent-red); font-size: 0.8em; padding: 8px 14px; box-shadow: none;}
+
+        .input-label {
+            font-size: 0.85em; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px;
+        }
+
+        .modern-input {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0; border-radius: 8px;
+            font-size: 1.1em; font-weight: 600; color: #334155;
+            transition: all 0.2s; background: #f8fafc;
+            width: 100%; box-sizing: border-box;
+        }
+
+        .modern-input:focus {
+            border-color: var(--accent-blue); background: white;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn-modern-add {
+            background: var(--accent-green); color: white;
+            height: 52px; border-radius: 8px;
+            font-weight: 700; font-size: 1em;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: transform 0.1s; border: none; cursor: pointer; width: 100%;
+        }
+        .btn-modern-add:hover { background: #27ae60; transform: translateY(-1px); }
+        .btn-modern-add:active { transform: scale(0.98); }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .form-credenciamento { grid-template-columns: 1fr; }
+        }
+
+        /* Estilos Gerais de Botões */
+        .btn-add { background: var(--accent-green); padding: 12px 20px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;}
+        .btn-open { background: var(--accent-blue); padding: 12px 20px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;}
+        .btn-close { background: var(--accent-red); padding: 12px 20px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;}
+        .btn-del { background: var(--accent-red); font-size: 0.8em; padding: 8px 14px; box-shadow: none; border:none; border-radius:6px; color:white; font-weight:bold; cursor:pointer;}
         
         .pauta-item { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
         .pauta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -93,7 +132,7 @@
         .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-light); }
         .login-box { width: 100%; max-width: 400px; text-align: center; padding: 40px; }
         .login-input { width: 100%; box-sizing: border-box; margin: 20px 0; text-align: center; letter-spacing: 2px; }
-        .btn-login { background: var(--primary-color); width: 100%; padding: 15px; font-size: 1.1em; }
+        .btn-login { background: var(--primary-color); width: 100%; padding: 15px; font-size: 1.1em; border:none; color:white; font-weight:bold; cursor:pointer; border-radius: 8px;}
     </style>
 </head>
 <body>
@@ -133,8 +172,8 @@
                     <div>
                         <div class="card" style="background: #f8fafd; border-color: var(--accent-blue);">
                             <h3 style="margin-top:0; color: var(--primary-color);">Nova Pauta</h3>
-                            <div class="row-input">
-                                <input v-model="novaPautaTexto" placeholder="Título da pauta..." @keyup.enter="criarPauta" style="flex-grow: 1;">
+                            <div style="display:flex; gap:10px;">
+                                <input v-model="novaPautaTexto" class="modern-input" placeholder="Título da pauta..." @keyup.enter="criarPauta" style="flex-grow: 1;">
                                 <button @click="criarPauta" class="btn-add">CRIAR</button>
                             </div>
                         </div>
@@ -182,19 +221,21 @@
                 </div>
 
                 <div v-show="abaAtual === 'grupos'" class="card">
-                    <h3 style="color: var(--primary-color);">Credenciamento</h3>
-                    <p style="color: #666; margin-bottom: 25px;">Cadastre o numeral e a quantidade de delegados do grupo.</p>
+                    <h3 style="color: var(--primary-color); margin-bottom: 20px;">Credenciamento</h3>
                     
-                    <div class="row-input" style="background: #f8fafd; padding: 25px; border-radius: 12px; border: 1px dashed var(--accent-blue); margin-bottom: 30px; align-items: flex-end;">
-                        <div style="flex-grow: 1;">
-                            <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:0.9em;">Numeral</label>
-                            <input v-model="novoGrupoInput" placeholder="Ex: 107" style="width: 100%; font-weight: bold;" @keyup.enter="cadastrarGrupo">
+                    <div class="form-credenciamento">
+                        <div class="input-group">
+                            <label class="input-label">Numeral do Grupo</label>
+                            <input v-model="novoGrupoInput" class="modern-input" placeholder="Ex: 107" @keyup.enter="cadastrarGrupo">
                         </div>
-                        <div style="width: 150px;">
-                            <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:0.9em;">Qtd. Delegados</label>
-                            <input v-model="novoGrupoQtd" type="number" min="1" style="width: 100%; text-align: center;">
+                        <div class="input-group">
+                            <label class="input-label">Delegados</label>
+                            <input v-model="novoGrupoQtd" type="number" min="1" class="modern-input" style="text-align: center;">
                         </div>
-                        <button @click="cadastrarGrupo" class="btn-add" style="padding: 14px 30px; margin-bottom: 2px;">CADASTRAR</button>
+                        <button @click="cadastrarGrupo" class="btn-modern-add">
+                            <span>CADASTRAR</span> 
+                            <span style="font-size:1.2em;">+</span>
+                        </button>
                     </div>
 
                     <h3>Grupos Presentes (${ grupos.length })</h3>

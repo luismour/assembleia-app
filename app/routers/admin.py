@@ -51,6 +51,8 @@ def cadastrar_grupo(dados: GrupoInput, x_admin_token: str = Header(None)):
     verificar_admin(x_admin_token)
     
     if "grupos_meta" not in db: db["grupos_meta"] = {}
+    if "usuarios" not in db: db["usuarios"] = {}    
+    if "lista_grupos" not in db: db["lista_grupos"] = []
 
     if dados.numero in db["grupos_meta"]:
         raise HTTPException(status_code=400, detail="Grupo já cadastrado.")
@@ -61,6 +63,7 @@ def cadastrar_grupo(dados: GrupoInput, x_admin_token: str = Header(None)):
 
     for i in range(1, dados.quantidade + 1):
         credencial = f"{dados.numero}-{i}"
+        
         db["usuarios"][credencial] = {
             "id": credencial, 
             "nome": f"Delegado {i} - GE {dados.numero}/PE",
