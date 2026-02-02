@@ -11,7 +11,7 @@
     
     <style>
         :root {
-            --primary-color: #003366; 
+            --primary-color: #003366;
             --scout-purple: #6a1b9a;
             --accent-green: #2ecc71;
             --accent-red: #e74c3c;
@@ -21,67 +21,45 @@
             --card-shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-light); 
-            color: var(--text-dark); 
-            margin: 0; 
-            padding-bottom: 40px;
-        }
-
+        body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-dark); margin: 0; padding-bottom: 40px; }
         h1, h2, h3, h4, .tab-btn { font-family: 'Poppins', sans-serif; }
 
         .header-pe {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--scout-purple) 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            margin-bottom: 30px;
+            color: white; padding: 20px; text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 30px;
         }
-        .header-pe h1 { margin: 0; font-size: 1.8em; font-weight: 700; letter-spacing: 0.5px; }
+        .header-pe h1 { margin: 0; font-size: 1.8em; font-weight: 700; }
         .header-pe p { margin: 5px 0 0; opacity: 0.9; font-size: 0.9em; }
 
         .container { max-width: 1200px; margin: auto; padding: 0 20px; }
 
         .card { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 16px; 
-            margin-bottom: 25px; 
-            box-shadow: var(--card-shadow); 
-            border: 1px solid rgba(0,0,0,0.05);
+            background: white; padding: 25px; border-radius: 16px; margin-bottom: 25px; 
+            box-shadow: var(--card-shadow); border: 1px solid rgba(0,0,0,0.05);
         }
         
         .tabs-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;}
         .tabs { display: flex; gap: 10px; background: #e0e7ec; padding: 5px; border-radius: 12px; }
         .tab-btn { 
-            padding: 10px 20px; border: none; background: transparent; color: #666; 
-            cursor: pointer; border-radius: 10px; font-size: 0.95em; font-weight: 600; 
-            transition: 0.3s ease;
+            padding: 10px 20px; border: none; background: transparent; color: #666; cursor: pointer; border-radius: 10px; font-size: 0.95em; font-weight: 600; transition: 0.3s ease;
         }
         .tab-btn:hover { color: var(--primary-color); }
         .tab-btn.active { background: white; color: var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         
         .controls-right { display: flex; gap: 10px; align-items: center; }
-        .btn-telao { 
-            background: var(--scout-purple); text-decoration: none; display: inline-block;
-            color: white; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 0.9em;
-            box-shadow: 0 4px 10px rgba(106, 27, 154, 0.3); transition: 0.2s;
-        }
+        .btn-telao { background: var(--scout-purple); text-decoration: none; color: white; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 0.9em; transition: 0.2s; }
         .btn-telao:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(106, 27, 154, 0.4); }
-        .btn-logout { background: none; color: var(--accent-red); border: none; cursor: pointer; font-weight: 600; font-family: 'Poppins'; }
+        .btn-logout { background: none; color: var(--accent-red); border: none; cursor: pointer; font-weight: 600; }
 
-        .row-input { display: flex; gap: 10px; }
+        .row-input { display: flex; gap: 10px; align-items: center; }
         input { 
-            padding: 14px; font-size: 16px; border: 2px solid #eee; border-radius: 10px; 
-            outline: none; transition: 0.3s; flex-grow: 1; font-family: 'Inter';
+            padding: 14px; font-size: 16px; border: 2px solid #eee; border-radius: 10px; outline: none; transition: 0.3s; font-family: 'Inter';
         }
         input:focus { border-color: var(--accent-blue); }
         
         button { 
-            padding: 12px 24px; cursor: pointer; border: none; border-radius: 10px; 
-            font-weight: 700; color: white; transition: 0.2s; font-family: 'Poppins'; letter-spacing: 0.5px;
+            padding: 12px 24px; cursor: pointer; border: none; border-radius: 10px; font-weight: 700; color: white; transition: 0.2s; font-family: 'Poppins';
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         button:active { transform: translateY(2px); box-shadow: none; }
@@ -97,7 +75,6 @@
         .badge { padding: 6px 12px; border-radius: 30px; font-size: 0.75em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
         .aberta { background: #d4edda; color: #155724; }
         .encerrada { background: #f8d7da; color: #721c24; }
-        .aguardando { background: #fff3cd; color: #856404; }
         
         .grid-layout { display: grid; grid-template-columns: 1fr 450px; gap: 25px; }
         .chart-container { position: relative; height: 350px; width: 100%; display: flex; justify-content: center; margin: 20px 0; }
@@ -105,7 +82,13 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; }
         th { text-align: left; padding: 15px; color: #888; font-size: 0.9em; text-transform: uppercase; font-weight: 600; }
         td { padding: 15px; border-top: 1px solid #eee; }
-        tr:hover td { background-color: #f9fbfd; }
+        
+        .cred-chip {
+            background: #eef2f7; color: var(--primary-color); 
+            padding: 5px 10px; border-radius: 6px; 
+            font-family: 'Source Code Pro', monospace; font-weight: 700;
+            margin-right: 5px; display: inline-block; margin-bottom: 5px;
+        }
 
         .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-light); }
         .login-box { width: 100%; max-width: 400px; text-align: center; padding: 40px; }
@@ -120,9 +103,8 @@
             <div class="card login-box">
                 <div style="color: var(--primary-color); font-size: 3em; margin-bottom: 10px;">⚜️</div>
                 <h2 style="color: var(--primary-color);">Mesa Diretora</h2>
-                <p style="color: #666;">Assembleia Regional Escoteira - PE</p>
-                <input type="password" v-model="senhaInput" class="login-input" placeholder="Senha de Acesso" @keyup.enter="logar">
-                <button @click="logar" class="btn-login">ACESSAR PAINEL</button>
+                <input type="password" v-model="senhaInput" class="login-input" placeholder="Senha" @keyup.enter="logar">
+                <button @click="logar" class="btn-login">ACESSAR</button>
             </div>
         </div>
 
@@ -137,14 +119,12 @@
             <div class="container">
                 <div class="tabs-container">
                     <div class="tabs">
-                        <button class="tab-btn" :class="{active: abaAtual === 'votacao'}" @click="abaAtual = 'votacao'">📊 Gestão de Votação</button>
+                        <button class="tab-btn" :class="{active: abaAtual === 'votacao'}" @click="abaAtual = 'votacao'">📊 Votação</button>
                         <button class="tab-btn" :class="{active: abaAtual === 'grupos'}" @click="abaAtual = 'grupos'">📝 Credenciamento</button>
                     </div>
                     
                     <div class="controls-right">
-                        <a href="/telao" target="_blank" class="btn-telao">
-                            🖥️ ABRIR TELÃO
-                        </a>
+                        <a href="/telao" target="_blank" class="btn-telao">🖥️ ABRIR TELÃO</a>
                         <button @click="logout" class="btn-logout">Sair</button>
                     </div>
                 </div>
@@ -152,15 +132,15 @@
                 <div v-show="abaAtual === 'votacao'" class="grid-layout">
                     <div>
                         <div class="card" style="background: #f8fafd; border-color: var(--accent-blue);">
-                            <h3 style="margin-top:0; color: var(--primary-color);">Nova Pauta em Discussão</h3>
+                            <h3 style="margin-top:0; color: var(--primary-color);">Nova Pauta</h3>
                             <div class="row-input">
-                                <input v-model="novaPautaTexto" placeholder="Digite o título da pauta..." @keyup.enter="criarPauta">
-                                <button @click="criarPauta" class="btn-add">CRIAR PAUTA</button>
+                                <input v-model="novaPautaTexto" placeholder="Título da pauta..." @keyup.enter="criarPauta" style="flex-grow: 1;">
+                                <button @click="criarPauta" class="btn-add">CRIAR</button>
                             </div>
                         </div>
 
                         <div class="card">
-                             <h3 style="margin-top:0; margin-bottom: 20px;">Histórico de Pautas</h3>
+                             <h3 style="margin-top:0; margin-bottom: 20px;">Histórico</h3>
                             <div v-for="pauta in pautas" :key="pauta.id" class="pauta-item">
                                 <div class="pauta-header">
                                     <div>
@@ -173,47 +153,48 @@
                                     </div>
                                 </div>
                                 <div style="font-size: 0.9em; color: #666; display: flex; justify-content: space-between; background: #f9f9f9; padding: 10px; border-radius: 8px;">
-                                    <span>Quórum Atual: <strong>${ pauta.total_votos }</strong> / ${ pauta.esperados }</span>
+                                    <span>Votos: <strong>${ pauta.total_votos }</strong> / ${ pauta.esperados }</span>
                                     <span v-if="pauta.status === 'ENCERRADA'" style="font-family: 'Poppins';">
                                         <span style="color: var(--accent-green)">Favor: ${ pauta.resultados.favor }</span> | 
-                                        <span style="color: var(--accent-red)">Contra: ${ pauta.resultados.contra }</span> | 
-                                        <span>Abs: ${ pauta.resultados.abstencao }</span>
+                                        <span style="color: var(--accent-red)">Contra: ${ pauta.resultados.contra }</span>
                                     </span>
                                 </div>
                             </div>
-                             <p v-if="pautas.length === 0" style="text-align: center; color: #999;">Nenhuma pauta criada.</p>
+                             <p v-if="pautas.length === 0" style="text-align: center; color: #999;">Nenhuma pauta.</p>
                         </div>
                     </div>
 
                     <div style="position: sticky; top: 20px; height: fit-content;">
                         <div class="card" style="text-align: center; border-top: 4px solid var(--primary-color);">
-                            <h3 style="color: var(--primary-color);">Monitoramento (Mesa)</h3>
+                            <h3 style="color: var(--primary-color);">Monitoramento</h3>
                             <div v-if="pautaAtiva">
-                                <h4 style="font-size: 1.1em; margin-bottom: 5px;">${ pautaAtiva.titulo }</h4>
+                                <h4>${ pautaAtiva.titulo }</h4>
                                 <span :class="['badge', pautaAtiva.status.toLowerCase()]" style="margin-bottom:15px; display:inline-block;">${ pautaAtiva.status }</span>
-                                
-                                <div class="chart-container">
-                                    <canvas id="graficoVotos"></canvas>
-                                </div>
-                                
+                                <div class="chart-container"><canvas id="graficoVotos"></canvas></div>
                                 <h2 style="font-size: 3em; margin: 10px 0; color: var(--primary-color);">${ pautaAtiva.total_votos }</h2>
-                                <p style="color:#777; font-weight: 600; text-transform: uppercase; font-size: 0.8em; letter-spacing: 1px;">Votos Computados</p>
                             </div>
                             <div v-else style="padding: 40px 0; color: #aaa;">
                                 <div style="font-size: 3em; margin-bottom: 10px; opacity: 0.3;">📊</div>
-                                <p>Aguardando abertura de votação.</p>
+                                <p>Aguardando...</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div v-show="abaAtual === 'grupos'" class="card">
-                    <h3 style="color: var(--primary-color);">Credenciamento de Grupos</h3>
-                    <p style="color: #666; margin-bottom: 25px;">Cadastre o numeral do grupo. O sistema gera automaticamente <strong>2 credenciais (Delegado 1 e 2)</strong>.</p>
+                    <h3 style="color: var(--primary-color);">Credenciamento</h3>
+                    <p style="color: #666; margin-bottom: 25px;">Cadastre o numeral e a quantidade de delegados do grupo.</p>
                     
-                    <div class="row-input" style="background: #f8fafd; padding: 25px; border-radius: 12px; border: 1px dashed var(--accent-blue); margin-bottom: 30px;">
-                        <input v-model="novoGrupoInput" placeholder="Numeral do Grupo (Ex: 107)" style="max-width: 250px; text-align: center; font-weight: bold; font-size: 1.2em;" @keyup.enter="cadastrarGrupo">
-                        <button @click="cadastrarGrupo" class="btn-add" style="padding: 14px 30px;">CADASTRAR +</button>
+                    <div class="row-input" style="background: #f8fafd; padding: 25px; border-radius: 12px; border: 1px dashed var(--accent-blue); margin-bottom: 30px; align-items: flex-end;">
+                        <div style="flex-grow: 1;">
+                            <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:0.9em;">Numeral</label>
+                            <input v-model="novoGrupoInput" placeholder="Ex: 107" style="width: 100%; font-weight: bold;" @keyup.enter="cadastrarGrupo">
+                        </div>
+                        <div style="width: 150px;">
+                            <label style="display:block; margin-bottom:5px; font-weight:bold; font-size:0.9em;">Qtd. Delegados</label>
+                            <input v-model="novoGrupoQtd" type="number" min="1" style="width: 100%; text-align: center;">
+                        </div>
+                        <button @click="cadastrarGrupo" class="btn-add" style="padding: 14px 30px; margin-bottom: 2px;">CADASTRAR</button>
                     </div>
 
                     <h3>Grupos Presentes (${ grupos.length })</h3>
@@ -221,23 +202,23 @@
                         <thead>
                             <tr>
                                 <th>Unidade Escoteira</th>
-                                <th>Credenciais (Login)</th>
+                                <th>Credenciais Geradas</th>
                                 <th>Ação</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="g in grupos" :key="g">
-                                <td><strong>GE ${ g }/PE</strong></td>
+                            <tr v-for="g in grupos" :key="g.numero">
+                                <td><strong>GE ${ g.numero }/PE</strong></td>
                                 <td>
-                                    <span style="background: #eef2f7; color: var(--primary-color); padding: 5px 10px; border-radius: 5px; font-family: 'Source Code Pro', monospace; font-weight: 700;">${ g }-1</span>
-                                    &nbsp;&nbsp;
-                                    <span style="background: #eef2f7; color: var(--primary-color); padding: 5px 10px; border-radius: 5px; font-family: 'Source Code Pro', monospace; font-weight: 700;">${ g }-2</span>
+                                    <span v-for="i in g.quantidade" :key="i" class="cred-chip">
+                                        ${ g.numero }-${ i }
+                                    </span>
                                 </td>
-                                <td><button @click="removerGrupo(g)" class="btn-del">Remover</button></td>
+                                <td><button @click="removerGrupo(g.numero)" class="btn-del">Remover</button></td>
                             </tr>
                         </tbody>
                     </table>
-                    <p v-if="grupos.length === 0" style="text-align: center; color: #999; padding: 40px;">Nenhum grupo credenciado ainda.</p>
+                    <p v-if="grupos.length === 0" style="text-align: center; color: #999; padding: 40px;">Nenhum grupo credenciado.</p>
                 </div>
             </div>
         </div>
@@ -253,26 +234,26 @@
                 return { 
                     token: localStorage.getItem('admin_token') || null,
                     senhaInput: '', abaAtual: 'votacao',
-                    pautas: [], grupos: [], novaPautaTexto: '', novoGrupoInput: '', pautaAtiva: null 
+                    pautas: [], grupos: [], novaPautaTexto: '', 
+                    novoGrupoInput: '', novoGrupoQtd: 2,
+                    pautaAtiva: null 
                 } 
             },
             methods: {
-                // --- AUTH ---
                 async logar() {
                     try {
                         const res = await axios.post('/api/admin/login', { senha: this.senhaInput });
                         this.token = res.data.token; localStorage.setItem('admin_token', this.token);
                         this.configurarAxios(); this.fetchDados(); this.fetchGrupos();
-                    } catch (e) { alert('Senha incorreta! (Dica: saps)'); }
+                    } catch (e) { alert('Senha incorreta!'); }
                 },
                 logout() {
-                    if(confirm("Deseja sair da mesa?")) {
-                        axios.post('/api/admin/logout'); this.token = null; localStorage.removeItem('admin_token'); this.senhaInput = '';
+                    if(confirm("Sair?")) {
+                        axios.post('/api/admin/logout'); this.token = null; localStorage.removeItem('admin_token');
                     }
                 },
                 configurarAxios() { if (this.token) axios.defaults.headers.common['x-admin-token'] = this.token; },
                 
-                // --- DADOS ---
                 async fetchDados() {
                     if (!this.token) return;
                     try {
@@ -296,9 +277,8 @@
                     if (!this.pautaAtiva || this.abaAtual !== 'votacao') return;
                     const ctx = document.getElementById('graficoVotos');
                     if (!ctx) return;
-
-                    const dadosVotos = [this.pautaAtiva.resultados.favor, this.pautaAtiva.resultados.contra, this.pautaAtiva.resultados.abstencao];
-                    const cores = ['#2ecc71', '#e74c3c', '#95a5a6'];
+                    const dadosVotos = [this.pautaAtiva.resultados.favor, this.pautaAtiva.resultados.contra];
+                    const cores = ['#2ecc71', '#e74c3c'];
 
                     if (chartInstance) {
                         chartInstance.data.datasets[0].data = dadosVotos;
@@ -307,7 +287,7 @@
                         chartInstance = new Chart(ctx, {
                             type: 'doughnut',
                             data: {
-                                labels: ['A Favor', 'Contra', 'Abstenção'],
+                                labels: ['Favor', 'Contra'],
                                 datasets: [{ data: dadosVotos, backgroundColor: cores, borderWidth: 0, hoverOffset: 10 }]
                             },
                             options: { 
@@ -318,12 +298,22 @@
                         });
                     }
                 },
-                // --- GRUPOS ---
+                
                 async fetchGrupos() { if (!this.token) return; const res = await axios.get('/api/grupos'); this.grupos = res.data; },
+                
                 async cadastrarGrupo() {
                     if(!this.novoGrupoInput) return;
-                    try { await axios.post('/api/grupos', { numero: this.novoGrupoInput }); this.novoGrupoInput = ''; this.fetchGrupos(); this.fetchDados(); } catch (e) { alert(e.response.data.detail); }
+                    try { 
+                        await axios.post('/api/grupos', { 
+                            numero: this.novoGrupoInput,
+                            quantidade: this.novoGrupoQtd 
+                        }); 
+                        this.novoGrupoInput = ''; 
+                        this.novoGrupoQtd = 2;
+                        this.fetchGrupos(); this.fetchDados(); 
+                    } catch (e) { alert(e.response.data.detail); }
                 },
+                
                 async removerGrupo(num) {
                     if(!confirm('Remover grupo ' + num + '?')) return; await axios.delete('/api/grupos/' + num); this.fetchGrupos(); this.fetchDados();
                 }
