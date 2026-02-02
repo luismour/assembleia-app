@@ -21,8 +21,12 @@
         
         .card-telao { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); width: 100%; max-width: 1600px; height: 80vh; border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; padding: 60px; box-sizing: border-box; align-items: center; border: 1px solid white; margin: auto; }
         
+        /* STATUS */
         .status-badge { font-size: 1.2em; padding: 8px 25px; border-radius: 50px; text-transform: uppercase; font-weight: 800; display: inline-block; margin-bottom: 30px; }
-        .aberta { background: #d4edda; color: #155724; } .encerrada { background: #f8d7da; color: #721c24; }
+        .aberta { background: #d4edda; color: #155724; } 
+        .encerrada { background: #f8d7da; color: #721c24; }
+        .aguardando { background: #fff3cd; color: #856404; border: 2px solid #ffeeba; } /* NOVO */
+
         .total-votos { font-size: 8em; font-weight: 800; color: #2c3e50; font-family: 'Poppins'; line-height: 1; letter-spacing: -2px; }
         
         /* Legenda */
@@ -62,7 +66,8 @@
                     <div class="custom-legend">
                         <div class="legend-item"><span class="dot" style="background:#27ae60"></span> ${ pautaAtiva.resultados.favor }</div>
                         <div class="legend-item"><span class="dot" style="background:#c0392b"></span> ${ pautaAtiva.resultados.contra }</div>
-                        <div class="legend-item"><span class="dot" style="background:#95a5a6"></span> ${ pautaAtiva.resultados.abstencao }</div> </div>
+                        <div class="legend-item"><span class="dot" style="background:#95a5a6"></span> ${ pautaAtiva.resultados.abstencao }</div>
+                    </div>
                 </div>
                 <div style="height:100%; display:flex; justify-content:center; align-items:center;"><canvas id="graficoTelao"></canvas></div>
             </div>
@@ -98,7 +103,6 @@
                     this.$nextTick(() => {
                         const ctx = document.getElementById('graficoTelao');
                         if (!ctx) return;
-                        // --- DADOS COM ABSTENCAO ---
                         const dados = [this.pautaAtiva.resultados.favor, this.pautaAtiva.resultados.contra, this.pautaAtiva.resultados.abstencao];
                         if (chartInstance) { chartInstance.data.datasets[0].data = dados; chartInstance.update(); }
                         else {

@@ -25,10 +25,12 @@ class Pauta:
     def __init__(self, id, titulo):
         self.id = id
         self.titulo = titulo
-        self.status = "CRIADA"
+        # CORREÇÃO AQUI: Status inicial agora é AGUARDANDO
+        self.status = "AGUARDANDO" 
         self.votos = {} 
 
 def get_pauta_ativa():
+    # Retorna pauta ABERTA, ou a última criada (seja AGUARDANDO ou ENCERRADA)
     for p in db["pautas"]:
         if p.status == "ABERTA":
             return p
@@ -50,7 +52,7 @@ def get_pauta_ativa_endpoint(credencial: Optional[str] = None):
     ja_votou = False
     if credencial and credencial in pauta.votos: ja_votou = True
 
-    # --- AQUI: ADICIONADA ABSTENCAO ---
+    # Contagem COM Abstenção
     contagem = {"favor": 0, "contra": 0, "abstencao": 0}
     for v in pauta.votos.values():
         if v in contagem:
@@ -76,7 +78,11 @@ def registrar_voto(dados: VotoRequest):
             break
     
     if not pauta_alvo: raise HTTPException(404, "Pauta não encontrada")
-    if pauta_alvo.status != "ABERTA": raise HTTPException(400, "Votação encerrada.")
+    
+    # Só permite votar se estiver estritamente ABERTA
+    if pauta_alvo.status != "ABERTA": 
+        raise HTTPException(400, "A votação não está aberta.")
+        
     if dados.credencial not in db["usuarios"]: raise HTTPException(401, "Usuário inválido")
 
     pauta_alvo.votos[dados.credencial] = dados.opcao

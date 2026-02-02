@@ -79,7 +79,6 @@ def get_dados_admin(x_admin_token: str = Header(None)):
 
     resultado = []
     for p in reversed(db["pautas"]):
-        # --- AQUI: ADICIONADA ABSTENCAO ---
         contagem = {"favor": 0, "contra": 0, "abstencao": 0}
         for v in p.votos.values():
             if v in contagem:
