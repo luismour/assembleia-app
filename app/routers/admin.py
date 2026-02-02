@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from app.routers.delegado import db
+import io
+from openpyxl import Workbook
 
 router = APIRouter(prefix="/api")
 
@@ -76,13 +79,12 @@ def get_dados_admin(x_admin_token: str = Header(None)):
     verificar_admin(x_admin_token)
     if "grupos_meta" not in db: db["grupos_meta"] = {}
     total_delegados = sum(db["grupos_meta"].values())
-
     total_votos_possiveis = total_delegados * 2 
 
     resultado = []
     for p in reversed(db["pautas"]):
         contagem = {"favor": 0, "contra": 0, "abstencao": 0}
-
+        
         for lista_votos in p.votos.values():
             for v in lista_votos:
                 if v in contagem:
@@ -120,3 +122,45 @@ def mudar_status_pauta(id: str, dados: StatusPauta, x_admin_token: str = Header(
             p.status = dados.status
             return {"msg": "Status atualizado"}
     raise HTTPException(404, "Pauta não encontrada")
+
+@router.get("/exportar")
+def exportar_relatorio(x_admin_token: str = Header(None), token: str = Query(None)):
+    token_final = x_admin_token or token
+    if token_final != "token-secreto-admin-123":
+        raise HTTPException(status_code=401, detail="Não autorizado")
+    
+    wb = Workbook()
+    
+    ws_resumo = wb.active
+    ws_resumo.title = "Resumo Geral"
+    ws_resumo.append(["ID", "Título da Pauta", "Status", "Total Votos", "Favor", "Contra", "Abstenção"])
+    
+    for p in db["pautas"]:
+        favor = 0
+        contra = 0
+        abstencao = 0
+        total = 0
+        
+        for lista_votos in p.votos.values():
+            for v in lista_votos:
+                total += 1
+                if v == "favor": favor += 1
+                elif v == "contra": contra += 1
+                elif v == "abstencao": abstencao += 1
+        
+        ws_resumo.append([p.id, p.titulo, p.status, total, favor, contra, abstencao])
+
+    ws_detalhado = wb.create_sheet(title="Votos Detalhados")
+    ws_detalhado.append(["Pauta", "Credencial", "Voto"])
+    
+    for p in db["pautas"]:
+        for credencial, lista_votos in p.votos.items():
+            for voto in lista_votos:
+                ws_detalhado.append([p.titulo, credencial, voto])
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    
+    headers = {'Content-Disposition': 'attachment; filename="Relatorio_Votacao.xlsx"'}
+    return StreamingResponse(buffer, headers=headers, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

@@ -38,10 +38,9 @@
 
         .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
         
-        /* CORES DE STATUS */
         .aberta { background: #d4edda; color: #155724; } 
         .encerrada { background: #f8d7da; color: #721c24; }
-        .aguardando { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; } /* NOVO */
+        .aguardando { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         
         .grid-layout { display: grid; grid-template-columns: 1fr 450px; gap: 25px; }
         .chart-container { position: relative; height: 350px; display: flex; justify-content: center; margin: 20px 0; }
@@ -72,6 +71,7 @@
                         <button class="tab-btn" :class="{active: abaAtual === 'grupos'}" @click="abaAtual = 'grupos'">📝 Credenciamento</button>
                     </div>
                     <div class="controls-right">
+                        <button @click="baixarExcel" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:5px;">📥 Excel</button>
                         <a href="/telao" target="_blank" class="btn-telao">🖥️ TELÃO</a>
                         <button @click="logout" style="background:none; border:none; color:red; cursor:pointer; font-weight:bold;">Sair</button>
                     </div>
@@ -161,7 +161,6 @@
                     try { 
                         const res = await axios.get('/api/dados-admin'); this.pautas = res.data; 
                         const aberta = this.pautas.find(p => p.status === 'ABERTA');
-                        // Se não tem aberta, pega a última que foi criada (seja AGUARDANDO ou ENCERRADA)
                         this.pautaAtiva = aberta ? aberta : (this.pautas.length > 0 ? this.pautas[0] : null);
                         this.updateChart();
                     } catch { if(this.token) this.logout(); }
@@ -172,7 +171,6 @@
                     if (!this.pautaAtiva || this.abaAtual !== 'votacao') return;
                     const ctx = document.getElementById('graficoVotos');
                     if (!ctx) return;
-                    // DADOS RESTAURADOS
                     const dados = [this.pautaAtiva.resultados.favor, this.pautaAtiva.resultados.contra, this.pautaAtiva.resultados.abstencao];
                     if (chartInstance) { chartInstance.data.datasets[0].data = dados; chartInstance.update(); }
                     else {
@@ -185,7 +183,8 @@
                 },
                 async fetchGrupos() { const res = await axios.get('/api/grupos'); this.grupos = res.data; },
                 async cadastrarGrupo() { if(!this.novoGrupoInput) return; await axios.post('/api/grupos', { numero: this.novoGrupoInput, quantidade: this.novoGrupoQtd }); this.novoGrupoInput=''; this.novoGrupoQtd=2; this.fetchGrupos(); this.fetchDados(); },
-                async removerGrupo(n) { if(confirm('Remover?')) { await axios.delete('/api/grupos/'+n); this.fetchGrupos(); this.fetchDados(); } }
+                async removerGrupo(n) { if(confirm('Remover?')) { await axios.delete('/api/grupos/'+n); this.fetchGrupos(); this.fetchDados(); } },
+                baixarExcel() { if (!this.token) return; window.location.href = `/api/exportar?token=${this.token}`; }
             },
             mounted() { this.init(); setInterval(() => { if(this.token && this.abaAtual === 'votacao') this.fetchDados(); }, 2000); }
         }).mount('#app')
