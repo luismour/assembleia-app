@@ -44,95 +44,65 @@
         }
         
         .welcome-logo {
-            width: 120px; height: auto;
-            margin-bottom: 30px;
-            /* Deixa a logo toda branca para ficar elegante no fundo azul */
-            filter: brightness(0) invert(1); 
+            width: 120px; height: auto; margin-bottom: 30px;
+            filter: brightness(0) invert(1); /* Logo branca no splash */
             animation: floatLogo 3s ease-in-out infinite;
         }
 
-        .welcome-title {
-            font-family: 'Oswald', sans-serif;
-            font-size: 2.2em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin: 0;
-            animation: fadeIn 1s ease-out;
-        }
-
-        .welcome-subtitle {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1em;
-            opacity: 0.8;
-            letter-spacing: 3px;
-            margin-top: 5px;
-            margin-bottom: 60px;
-            animation: fadeIn 1.5s ease-out;
-        }
-
-        .btn-start {
-            background: white; color: var(--primary-blue);
-            padding: 18px 40px; border-radius: 50px;
-            border: none; font-size: 1.1em; font-weight: 800;
-            font-family: 'Poppins', sans-serif;
-            cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
-            animation: slideUp 1s ease-out;
-            display: flex; align-items: center; gap: 10px;
-        }
+        .welcome-title { font-family: 'Oswald', sans-serif; font-size: 2.2em; text-transform: uppercase; letter-spacing: 2px; margin: 0; animation: fadeIn 1s ease-out; }
+        .welcome-subtitle { font-family: 'Poppins', sans-serif; font-size: 1em; opacity: 0.8; letter-spacing: 3px; margin-top: 5px; margin-bottom: 60px; animation: fadeIn 1.5s ease-out; }
+        .btn-start { background: white; color: var(--primary-blue); padding: 18px 40px; border-radius: 50px; border: none; font-size: 1.1em; font-weight: 800; font-family: 'Poppins', sans-serif; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: transform 0.2s; animation: slideUp 1s ease-out; display: flex; align-items: center; gap: 10px; }
         .btn-start:active { transform: scale(0.95); }
-
         .hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
 
-        /* --- HEADER DO APP --- */
+        /* --- HEADER IGUAL AO TELÃO (Branco) --- */
         .mobile-header {
-            background: var(--primary-blue);
-            color: white; 
+            background: #ffffff; /* Fundo Branco */
+            color: var(--primary-blue);
             padding: 15px 20px;
             display: flex; align-items: center; gap: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Sombra suave */
             position: sticky; top: 0; z-index: 100;
         }
-        .header-logo { height: 45px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-        .header-text { line-height: 1.1; }
-        .header-title { font-family: 'Oswald', sans-serif; font-size: 1.1em; text-transform: uppercase; display: block; color: #ffffff; font-weight: 500; }
-        .header-subtitle { font-family: 'Poppins', sans-serif; font-size: 0.75em; color: rgba(255, 255, 255, 0.8); letter-spacing: 2px; display: block; }
+        
+        .header-logo { height: 50px; width: auto; } /* Logo colorida normal */
+        
+        .header-text { line-height: 1.1; display: flex; flex-direction: column; justify-content: center; }
+        
+        .header-title { 
+            font-family: 'Oswald', sans-serif; 
+            font-size: 1.2em; 
+            text-transform: uppercase; 
+            color: var(--primary-blue); /* Azul */
+            font-weight: 500;
+        }
+        
+        .header-subtitle { 
+            font-family: 'Poppins', sans-serif; 
+            font-size: 0.75em; 
+            color: #666; /* Cinza */
+            letter-spacing: 2px; 
+            font-weight: 600;
+        }
 
         /* --- CONTAINER PRINCIPAL --- */
         #app { flex-grow: 1; display: flex; flex-direction: column; }
         .content-area { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; max-width: 500px; margin: 0 auto; width: 100%; }
 
         /* --- CARDS E INPUTS --- */
-        .card-modern {
-            background: white; border-radius: 24px; padding: 30px 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center;
-            border: 1px solid rgba(0,0,0,0.05); animation: slideUp 0.5s ease;
-        }
-
-        .cred-input {
-            width: 100%; padding: 18px; margin: 25px 0;
-            border: 2px solid #e1e8ed; border-radius: 16px;
-            font-size: 1.5em; text-align: center;
-            text-transform: uppercase; font-weight: 700; color: var(--primary-blue);
-            font-family: 'Source Code Pro', monospace; transition: 0.3s;
-        }
+        .card-modern { background: white; border-radius: 24px; padding: 30px 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; border: 1px solid rgba(0,0,0,0.05); animation: slideUp 0.5s ease; }
+        .cred-input { width: 100%; padding: 18px; margin: 25px 0; border: 2px solid #e1e8ed; border-radius: 16px; font-size: 1.5em; text-align: center; text-transform: uppercase; font-weight: 700; color: var(--primary-blue); font-family: 'Source Code Pro', monospace; transition: 0.3s; }
         .cred-input:focus { border-color: var(--primary-blue); outline: none; box-shadow: 0 0 0 4px rgba(0, 45, 98, 0.1); }
 
         /* --- BOTÕES --- */
-        .btn-main {
-            width: 100%; padding: 18px; border-radius: 16px; border: none;
-            font-size: 1.1em; font-weight: 700; font-family: 'Poppins', sans-serif;
-            color: white; cursor: pointer; transition: transform 0.1s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+        .btn-main { width: 100%; padding: 18px; border-radius: 16px; border: none; font-size: 1.1em; font-weight: 700; font-family: 'Poppins', sans-serif; color: white; cursor: pointer; transition: transform 0.1s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .btn-main:active { transform: scale(0.98); }
         .btn-login { background: var(--primary-blue); }
         .btn-favor { background: linear-gradient(135deg, #2ecc71, #27ae60); margin-bottom: 12px; }
         .btn-contra { background: linear-gradient(135deg, #e74c3c, #c0392b); margin-bottom: 12px; }
         .btn-abs   { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
 
-        /* --- ELEMENTOS DE UI --- */
+        /* --- UI ELEMENTS --- */
         .user-badge { background: #eef2f7; color: var(--primary-blue); padding: 8px 20px; border-radius: 30px; font-weight: 700; font-size: 0.9em; display: inline-block; margin-bottom: 20px; }
         .status-badge { padding: 6px 15px; border-radius: 20px; font-size: 0.75em; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 15px; }
         .status-aberta { background: #d4edda; color: #155724; }
@@ -175,10 +145,6 @@
 
         <header class="mobile-header">
             <img src="/static/logo-pe.svg" alt="Logo" class="header-logo">
-            <div class="header-text">
-                <span class="header-title">Escoteiros do Brasil</span>
-                <span class="header-subtitle">PERNAMBUCO</span>
-            </div>
         </header>
 
         <div class="content-area">
@@ -269,13 +235,13 @@
             delimiters: ['${', '}'],
             data() { 
                 return { 
-                    mostrarWelcome: true, // Começa mostrando a tela de boas-vindas
+                    mostrarWelcome: true, 
                     credencial: '', user: null, dados: null, view: 'votar', historico: [] 
                 } 
             },
             methods: {
                 iniciarApp() {
-                    this.mostrarWelcome = false; // Esconde a tela e mostra o login
+                    this.mostrarWelcome = false;
                 },
                 async login() { 
                     if(!this.credencial) return;
