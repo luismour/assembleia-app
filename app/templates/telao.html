@@ -21,19 +21,21 @@
         
         .card-telao { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); width: 100%; max-width: 1600px; height: 80vh; border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; padding: 60px; box-sizing: border-box; align-items: center; border: 1px solid white; margin: auto; }
         
-        /* STATUS */
         .status-badge { font-size: 1.2em; padding: 8px 25px; border-radius: 50px; text-transform: uppercase; font-weight: 800; display: inline-block; margin-bottom: 30px; }
         .aberta { background: #d4edda; color: #155724; } 
         .encerrada { background: #f8d7da; color: #721c24; }
-        .aguardando { background: #fff3cd; color: #856404; border: 2px solid #ffeeba; } /* NOVO */
+        .aguardando { background: #fff3cd; color: #856404; border: 2px solid #ffeeba; }
 
         .total-votos { font-size: 8em; font-weight: 800; color: #2c3e50; font-family: 'Poppins'; line-height: 1; letter-spacing: -2px; }
         
-        /* Legenda */
         .custom-legend { display: flex; gap: 40px; margin-top: 40px; font-size: 1.8em; font-weight: 600; }
         .legend-item { display: flex; align-items: center; gap: 15px; }
         .dot { width: 25px; height: 25px; border-radius: 50%; }
         
+        /* RESULTADO FINAL */
+        .resultado-aprovada { font-family: 'Oswald'; font-size: 5em; color: #2ecc71; text-transform: uppercase; border: 5px solid #2ecc71; padding: 10px 40px; border-radius: 20px; transform: rotate(-5deg); display: inline-block; }
+        .resultado-reprovada { font-family: 'Oswald'; font-size: 5em; color: #e74c3c; text-transform: uppercase; border: 5px solid #e74c3c; padding: 10px 40px; border-radius: 20px; transform: rotate(-5deg); display: inline-block; }
+
         @keyframes blinkLive { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
@@ -42,6 +44,10 @@
         <header class="header-telao">
             <div style="display:flex; align-items:center; gap:25px;">
                 <img src="/static/logo-pe.svg" class="logo-pe">
+                <div style="display:flex; flex-direction:column; line-height:1.1;">
+                    <span style="font-family:'Oswald'; font-size:1.6em; text-transform:uppercase; color:var(--primary-blue);">Escoteiros do Brasil</span>
+                    <span style="font-family:'Poppins'; font-size:0.9em; font-weight:600; letter-spacing:3px; color:#666;">PERNAMBUCO</span>
+                </div>
             </div>
             <div class="live-indicator"><div class="live-dot"></div><span style="font-family:'Poppins'; font-weight:700; color:#c0392b;">AO VIVO</span></div>
         </header>
@@ -55,17 +61,27 @@
                 <div>
                     <span :class="['status-badge', pautaAtiva.status.toLowerCase()]">${ pautaAtiva.status }</span>
                     <h1 style="font-family:'Poppins'; font-size:3.5em; font-weight:700; color:var(--primary-blue); margin:0; line-height:1.1;">${ pautaAtiva.titulo }</h1>
+                    
                     <div style="margin-top:40px;">
                         <div class="total-votos">${ pautaAtiva.total_votos }</div>
                         <div style="font-size:1.2em; text-transform:uppercase; color:#7f8c8d; font-weight:600; letter-spacing:2px; margin-top:10px;">Votos Registrados</div>
                     </div>
+
                     <div class="custom-legend">
                         <div class="legend-item"><span class="dot" style="background:#27ae60"></span> ${ pautaAtiva.resultados.favor }</div>
                         <div class="legend-item"><span class="dot" style="background:#c0392b"></span> ${ pautaAtiva.resultados.contra }</div>
                         <div class="legend-item"><span class="dot" style="background:#95a5a6"></span> ${ pautaAtiva.resultados.abstencao }</div>
                     </div>
                 </div>
-                <div style="height:100%; display:flex; justify-content:center; align-items:center;"><canvas id="graficoTelao"></canvas></div>
+
+                <div style="height:100%; display:flex; justify-content:center; align-items:center; position: relative;">
+                    <div v-if="pautaAtiva.status === 'ENCERRADA'" style="position: absolute; z-index: 10;">
+                        <div v-if="pautaAtiva.resultado_final === 'APROVADA'" class="resultado-aprovada">APROVADA</div>
+                        <div v-else-if="pautaAtiva.resultado_final === 'REPROVADA'" class="resultado-reprovada">REPROVADA</div>
+                    </div>
+                    
+                    <canvas id="graficoTelao" :style="{opacity: pautaAtiva.status === 'ENCERRADA' ? '0.3' : '1'}"></canvas>
+                </div>
             </div>
 
             <div v-else style="text-align:center; opacity:0.6;">

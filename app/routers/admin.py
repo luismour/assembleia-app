@@ -5,6 +5,7 @@ from typing import Optional, List
 from app.routers.delegado import db
 import io
 from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
 
 router = APIRouter(prefix="/api")
 
@@ -79,7 +80,6 @@ def get_dados_admin(x_admin_token: str = Header(None)):
     verificar_admin(x_admin_token)
     if "grupos_meta" not in db: db["grupos_meta"] = {}
     total_delegados = sum(db["grupos_meta"].values())
-    
     total_votos_possiveis = total_delegados 
 
     resultado = []
@@ -93,13 +93,24 @@ def get_dados_admin(x_admin_token: str = Header(None)):
         
         total_realizado = sum(len(v) for v in p.votos.values())
 
+        # Lógica de Resultado
+        resultado_texto = "EM ANDAMENTO"
+        if p.status == "ENCERRADA":
+            if contagem["favor"] > contagem["contra"]:
+                resultado_texto = "APROVADA"
+            elif contagem["contra"] >= contagem["favor"] and total_realizado > 0:
+                resultado_texto = "REPROVADA"
+            else:
+                resultado_texto = "SEM VOTOS"
+
         resultado.append({
             "id": p.id,
             "titulo": p.titulo,
             "status": p.status,
             "total_votos": total_realizado,
             "esperados": total_votos_possiveis,
-            "resultados": contagem
+            "resultados": contagem,
+            "resultado_final": resultado_texto # Campo novo
         })
     return resultado
 
@@ -134,8 +145,13 @@ def exportar_relatorio(x_admin_token: str = Header(None), token: str = Query(Non
     
     ws_resumo = wb.active
     ws_resumo.title = "Resumo Geral"
-    ws_resumo.append(["ID", "Título da Pauta", "Status", "Total Votos", "Favor", "Contra", "Abstenção"])
+    ws_resumo.append(["ID", "Título da Pauta", "Status", "Resultado", "Total Votos", "Favor", "Contra", "Abstenção"])
     
+    # Estilizando o cabeçalho
+    for cell in ws_resumo[1]:
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(start_color="002d62", end_color="002d62", fill_type="solid")
+
     for p in db["pautas"]:
         favor = 0
         contra = 0
@@ -149,7 +165,14 @@ def exportar_relatorio(x_admin_token: str = Header(None), token: str = Query(Non
                 elif v == "contra": contra += 1
                 elif v == "abstencao": abstencao += 1
         
-        ws_resumo.append([p.id, p.titulo, p.status, total, favor, contra, abstencao])
+        # Logica Resultado
+        resultado_txt = "-"
+        if p.status == "ENCERRADA":
+            if favor > contra: resultado_txt = "APROVADA"
+            elif contra >= favor and total > 0: resultado_txt = "REPROVADA"
+            else: resultado_txt = "SEM VOTOS"
+
+        ws_resumo.append([p.id, p.titulo, p.status, resultado_txt, total, favor, contra, abstencao])
 
     ws_detalhado = wb.create_sheet(title="Votos Detalhados")
     ws_detalhado.append(["Pauta", "Credencial", "Voto"])
