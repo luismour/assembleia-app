@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telão - Assembleia PE</title>
+    
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@400;600;800&family=Oswald:wght@500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-blue: #002d62; /* Azul Escoteiro */
+            --header-bg: #ffffff;    /* Fundo BRANCO para destacar a logo */
+            --header-text: #002d62;  /* Texto AZUL para contraste */
+            --bg-gradient: linear-gradient(135deg, #f0f2f5 0%, #dfe4ea 100%);
+        }
+
+        body, html { height: 100%; margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg-gradient); overflow: hidden; }
+        #app { display: flex; flex-direction: column; height: 100vh; }
+
+        /* HEADER CLEAN (BRANCO) */
+        .header-telao {
+            background: var(--header-bg);
+            color: var(--header-text); 
+            height: 100px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 50px;
+            /* Sombra suave para separar do fundo */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            position: relative; z-index: 10;
+        }
+
+        .brand-area { display: flex; align-items: center; gap: 25px; height: 100%; }
+
+        /* LOGO */
+        .logo-pe {
+            height: 70px; /* Tamanho equilibrado */
+            width: auto;
+            /* Se a logo for muito clara, descomente a linha abaixo para dar contraste, mas no fundo branco não deve precisar */
+            /* filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); */
+        }
+
+        .brand-text { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; }
+        
+        /* Tipografia do Header */
+        .brand-title { 
+            font-family: 'Oswald', sans-serif; 
+            font-size: 1.6em; 
+            text-transform: uppercase; 
+            color: var(--primary-blue); /* Azul */
+        }
+        .brand-subtitle { 
+            font-family: 'Poppins', sans-serif; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            letter-spacing: 3px; 
+            color: #666; /* Cinza para hierarquia */
+        }
+
+        /* Indicador Ao Vivo (Adaptado para fundo branco) */
+        .live-indicator { 
+            display: flex; align-items: center; gap: 10px; 
+            background: #f8f9fa; /* Fundo cinza bem claro */
+            padding: 8px 20px; 
+            border-radius: 30px; 
+            border: 1px solid #e9ecef;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+        }
+        .live-text { 
+            font-family: 'Poppins', sans-serif; 
+            font-weight: 700; 
+            font-size: 0.9em; 
+            letter-spacing: 1px; 
+            color: #c0392b; /* Texto Vermelho Escuro */
+        }
+        .live-dot { 
+            width: 12px; height: 12px; 
+            background-color: #e74c3c; /* Vermelho Vivo */
+            border-radius: 50%; 
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.5); 
+            animation: blinkLive 1.5s infinite; 
+        }
+
+        /* Resto do Layout (Mantido igual) */
+        .main-content { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 40px; }
+        .card-telao {
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            width: 100%; max-width: 1600px; height: 80vh;
+            border-radius: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px;
+            padding: 60px; box-sizing: border-box; align-items: center; border: 1px solid white;
+        }
+
+        h1 { font-family: 'Poppins', sans-serif; font-size: 3.5em; font-weight: 700; margin: 0; color: var(--primary-blue); line-height: 1.1; }
+        .status-badge { font-size: 1.2em; padding: 8px 25px; border-radius: 50px; text-transform: uppercase; font-weight: 800; letter-spacing: 2px; display: inline-block; margin-bottom: 30px; }
+        .aberta { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+        .encerrada { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
+        
+        .total-votos { font-size: 8em; font-weight: 800; color: #2c3e50; font-family: 'Poppins'; line-height: 1; letter-spacing: -2px; }
+        .label-total { font-size: 1.2em; text-transform: uppercase; color: #7f8c8d; font-weight: 600; letter-spacing: 2px; margin-top: 10px;}
+        .chart-side { height: 100%; position: relative; display: flex; justify-content: center; align-items: center; }
+        .waiting-screen { text-align: center; width: 100%; opacity: 0.6; }
+        .login-overlay { text-align: center; }
+        input { padding: 15px; font-size: 1.5em; text-align: center; border-radius: 10px; border: 2px solid #ccc; outline: none; }
+        button { padding: 15px 40px; font-size: 1.2em; background: var(--primary-blue); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 20px;}
+        @keyframes blinkLive { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        
+        .custom-legend { display: flex; gap: 40px; margin-top: 40px; font-size: 1.8em; font-weight: 600; }
+        .legend-item { display: flex; align-items: center; gap: 15px; }
+        .dot { width: 25px; height: 25px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        
+        <header class="header-telao">
+            <div class="brand-area">
+                <img src="/static/logo-pe.svg" alt="Escoteiros do Brasil" class="logo-pe">
+            </div>
+            
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                <span class="live-text">AO VIVO</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div v-if="!token" class="login-overlay">
+                <h2 style="color: var(--primary-blue);">Conexão do Telão</h2>
+                <input v-model="senhaInput" type="password" placeholder="Senha da Mesa" @keyup.enter="logar">
+                <br><button @click="logar">Conectar</button>
+            </div>
+
+            <div v-else-if="pautaAtiva" class="card-telao">
+                <div class="info-side">
+                    <span :class="['status-badge', pautaAtiva.status.toLowerCase()]">${ pautaAtiva.status }</span>
+                    <h1>${ pautaAtiva.titulo }</h1>
+                    
+                    <div class="total-container">
+                        <div class="total-votos">${ pautaAtiva.total_votos }</div>
+                        <div class="label-total">Votos Registrados</div>
+                    </div>
+                    
+                    <div class="custom-legend">
+                        <div class="legend-item"><span class="dot" style="background:#27ae60"></span> ${ pautaAtiva.resultados.favor }</div>
+                        <div class="legend-item"><span class="dot" style="background:#c0392b"></span> ${ pautaAtiva.resultados.contra }</div>
+                    </div>
+                </div>
+
+                <div class="chart-side">
+                    <canvas id="graficoTelao"></canvas>
+                </div>
+            </div>
+
+            <div v-else class="waiting-screen">
+                <div style="font-size: 6em; margin-bottom: 20px; color: var(--primary-blue); opacity: 0.5;">⚜️</div>
+                <h2 style="font-size: 3em; font-family: 'Oswald'; margin: 0; color: var(--primary-blue);">ASSEMBLEIA REGIONAL</h2>
+                <p style="font-size: 1.5em; letter-spacing: 1px; color: #555;">Aguardando início da votação...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+        let chartInstance = null;
+
+        createApp({
+            delimiters: ['${', '}'],
+            data() { return { token: localStorage.getItem('admin_token') || null, senhaInput: '', pautas: [], pautaAtiva: null } },
+            methods: {
+                async logar() {
+                    try {
+                        const res = await axios.post('/api/admin/login', { senha: this.senhaInput });
+                        this.token = res.data.token; localStorage.setItem('admin_token', this.token);
+                        this.configurarAxios(); this.fetchDados();
+                    } catch (e) { alert('Senha inválida'); }
+                },
+                configurarAxios() { if (this.token) axios.defaults.headers.common['x-admin-token'] = this.token; },
+                async fetchDados() {
+                    if (!this.token) return;
+                    try {
+                        const res = await axios.get('/api/dados-admin');
+                        this.pautas = res.data;
+                        const aberta = this.pautas.find(p => p.status === 'ABERTA');
+                        this.pautaAtiva = aberta ? aberta : (this.pautas.length > 0 ? this.pautas[0] : null);
+                        this.updateChart();
+                    } catch (e) { if(e.response && e.response.status === 401) this.token = null; }
+                },
+                updateChart() {
+                    if (!this.pautaAtiva) return;
+                    this.$nextTick(() => {
+                        const ctx = document.getElementById('graficoTelao');
+                        if (!ctx) return;
+                        const dadosVotos = [this.pautaAtiva.resultados.favor, this.pautaAtiva.resultados.contra];
+                        
+                        if (chartInstance) {
+                            chartInstance.data.datasets[0].data = dadosVotos;
+                            chartInstance.update();
+                        } else {
+                            Chart.defaults.font.family = "'Poppins', sans-serif";
+                            chartInstance = new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Favor', 'Contra'],
+                                    datasets: [{ 
+                                        data: dadosVotos, 
+                                        backgroundColor: ['#27ae60', '#c0392b'],
+                                        borderWidth: 0, hoverOffset: 20 
+                                    }]
+                                },
+                                options: { 
+                                    responsive: true, maintainAspectRatio: false, 
+                                    animation: { duration: 1000, easing: 'easeOutQuart' },
+                                    plugins: { legend: { display: false } },
+                                    cutout: '60%'
+                                }
+                            });
+                        }
+                    });
+                }
+            },
+            mounted() {
+                this.configurarAxios();
+                if(this.token) this.fetchDados();
+                setInterval(() => { if(this.token) this.fetchDados(); }, 2000);
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>
