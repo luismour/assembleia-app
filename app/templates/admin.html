@@ -17,34 +17,60 @@
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-dark); margin: 0; padding-bottom: 40px; }
         
-        .header-pe { background: linear-gradient(135deg, var(--primary-color), var(--scout-purple)); color: white; padding: 20px; text-align: center; margin-bottom: 30px; }
+        .header-pe { background: linear-gradient(135deg, var(--primary-color), var(--scout-purple)); color: white; padding: 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .container { max-width: 1200px; margin: auto; padding: 0 20px; }
         .card { background: white; padding: 25px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-        .tabs { display: flex; gap: 10px; background: #e0e7ec; padding: 5px; border-radius: 12px; }
-        .tab-btn { padding: 10px 20px; border: none; background: transparent; cursor: pointer; border-radius: 10px; font-weight: 600; }
-        .tab-btn.active { background: white; color: var(--primary-color); }
-        .controls-right { display: flex; gap: 10px; }
-        .btn-telao { background: var(--scout-purple); color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; }
         
-        .form-credenciamento { display: grid; grid-template-columns: 1fr 140px 160px; gap: 15px; align-items: end; background: #fff; padding: 30px; border-radius: 16px; border: 1px solid #eef2f6; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 30px; }
-        .modern-input { padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; box-sizing: border-box; font-weight: 600; }
-        .btn-modern-add { background: var(--accent-green); color: white; height: 52px; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; width: 100%; }
+        /* ABAS */
+        .tabs { display: flex; gap: 10px; background: #e0e7ec; padding: 5px; border-radius: 12px; }
+        .tab-btn { padding: 10px 20px; border: none; background: transparent; cursor: pointer; border-radius: 10px; font-weight: 600; color: #555; transition: 0.3s; }
+        .tab-btn:hover { background: rgba(255,255,255,0.5); }
+        .tab-btn.active { background: white; color: var(--primary-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* --- NOVOS BOTÕES DE CONTROLE --- */
+        .controls-right { display: flex; gap: 15px; align-items: center; }
 
-        .btn-add { background: var(--accent-green); padding: 12px 20px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;}
-        .btn-open { background: var(--accent-blue); padding: 12px 20px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;}
-        .btn-close { background: var(--accent-red); padding: 12px 20px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;}
-        .btn-del { background: var(--accent-red); padding: 5px 10px; border-radius:6px; color:white; border:none; font-weight:bold; cursor:pointer;}
+        .btn-action {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 20px;
+            border: none; border-radius: 10px;
+            font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.9em;
+            color: white; cursor: pointer; text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            line-height: 1;
+        }
+
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); filter: brightness(1.1); }
+        .btn-action:active { transform: translateY(0); }
+
+        /* Cores Específicas */
+        .btn-excel { background: linear-gradient(135deg, #219150 0%, #2ecc71 100%); }
+        .btn-telao { background: linear-gradient(135deg, #6a1b9a 0%, #8e44ad 100%); }
+        .btn-sair  { background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%); }
+
+        /* --- FORMULÁRIO CREDENCIAMENTO --- */
+        .form-credenciamento { display: grid; grid-template-columns: 1fr 140px 160px; gap: 15px; align-items: end; background: #fff; padding: 30px; border-radius: 16px; border: 1px solid #eef2f6; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 30px; }
+        .modern-input { padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; box-sizing: border-box; font-weight: 600; font-family: 'Inter'; }
+        .btn-modern-add { background: var(--accent-green); color: white; height: 52px; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; width: 100%; font-size: 1em; display: flex; justify-content: center; align-items: center; gap: 5px; transition: 0.2s; }
+        .btn-modern-add:hover { background: #27ae60; }
+
+        /* BOTÕES GERAIS */
+        .btn-add { background: var(--accent-green); padding: 10px 20px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;}
+        .btn-open { background: var(--accent-blue); padding: 8px 16px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer; font-size: 0.85em;}
+        .btn-close { background: var(--accent-red); padding: 8px 16px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer; font-size: 0.85em;}
+        .btn-del { background: #fee2e2; color: #dc2626; padding: 6px 12px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; transition: 0.2s; }
+        .btn-del:hover { background: #fecaca; }
         .btn-login { background: var(--primary-color); width: 100%; padding: 15px; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;}
 
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
-        
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75em; font-weight: 800; letter-spacing: 0.5px; }
         .aberta { background: #d4edda; color: #155724; } 
         .encerrada { background: #f8d7da; color: #721c24; }
         .aguardando { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         
         .grid-layout { display: grid; grid-template-columns: 1fr 450px; gap: 25px; }
         .chart-container { position: relative; height: 350px; display: flex; justify-content: center; margin: 20px 0; }
-        .cred-chip { background: #eef2f7; color: var(--primary-color); padding: 5px 10px; border-radius: 6px; font-weight: 700; margin-right: 5px; display: inline-block; margin-bottom: 5px; }
+        .cred-chip { background: #eef2f7; color: var(--primary-color); padding: 5px 10px; border-radius: 6px; font-weight: 700; margin-right: 5px; display: inline-block; margin-bottom: 5px; font-size: 0.9em; }
         .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         .login-box { width: 100%; max-width: 400px; text-align: center; padding: 40px; }
     </style>
@@ -65,44 +91,58 @@
             </header>
             
             <div class="container">
-                <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom:25px;">
                     <div class="tabs">
                         <button class="tab-btn" :class="{active: abaAtual === 'votacao'}" @click="abaAtual = 'votacao'">📊 Votação</button>
                         <button class="tab-btn" :class="{active: abaAtual === 'grupos'}" @click="abaAtual = 'grupos'">📝 Credenciamento</button>
                     </div>
+                    
                     <div class="controls-right">
-                        <button @click="baixarExcel" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:5px;">📥 Excel</button>
-                        <a href="/telao" target="_blank" class="btn-telao">🖥️ TELÃO</a>
-                        <button @click="logout" style="background:none; border:none; color:red; cursor:pointer; font-weight:bold;">Sair</button>
+                        <button @click="baixarExcel" class="btn-action btn-excel">
+                            <span>📊</span> Excel
+                        </button>
+                        
+                        <a href="/telao" target="_blank" class="btn-action btn-telao">
+                            <span>🖥️</span> Telão
+                        </a>
+                        
+                        <button @click="logout" class="btn-action btn-sair">
+                            <span>🚪</span> Sair
+                        </button>
                     </div>
                 </div>
 
                 <div v-show="abaAtual === 'votacao'" class="grid-layout">
                     <div>
-                        <div class="card" style="background: #f8fafd; border-color: #3498db;">
+                        <div class="card" style="background: #f8fafd; border: 1px solid #e1e8ed;">
                             <h3 style="margin-top:0; color: var(--primary-color);">Nova Pauta</h3>
                             <div style="display:flex; gap:10px;">
-                                <input v-model="novaPautaTexto" class="modern-input" placeholder="Título..." @keyup.enter="criarPauta">
+                                <input v-model="novaPautaTexto" class="modern-input" placeholder="Título da pauta..." @keyup.enter="criarPauta">
                                 <button @click="criarPauta" class="btn-add">CRIAR</button>
                             </div>
                         </div>
 
                         <div class="card">
-                            <h3>Histórico</h3>
-                            <div v-for="pauta in pautas" :key="pauta.id" class="pauta-item">
+                            <h3 style="color: #444;">Histórico</h3>
+                            <div v-if="pautas.length === 0" style="color:#999; font-style:italic;">Nenhuma pauta criada.</div>
+                            
+                            <div v-for="pauta in pautas" :key="pauta.id" style="border-bottom: 1px solid #eee; padding: 15px 0;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                    <div><span :class="['badge', pauta.status.toLowerCase()]">${ pauta.status }</span> <h3 style="margin:5px 0 0 0;">${ pauta.titulo }</h3></div>
                                     <div>
+                                        <span :class="['badge', pauta.status.toLowerCase()]">${ pauta.status }</span> 
+                                        <h3 style="margin:5px 0 0 0; font-size: 1.1em;">${ pauta.titulo }</h3>
+                                    </div>
+                                    <div style="display: flex; gap: 5px;">
                                         <button v-if="pauta.status === 'AGUARDANDO' || pauta.status === 'ENCERRADA'" @click="mudarStatus(pauta.id, 'ABERTA')" class="btn-open">ABRIR</button>
                                         <button v-if="pauta.status === 'ABERTA'" @click="mudarStatus(pauta.id, 'ENCERRADA')" class="btn-close">ENCERRAR</button>
                                     </div>
                                 </div>
-                                <div style="font-size:0.9em; color:#666; background:#f9f9f9; padding:10px; border-radius:8px;">
-                                    <span>Votos: <strong>${ pauta.total_votos }</strong> / ${ pauta.esperados }</span>
-                                    <span v-if="pauta.status === 'ENCERRADA'" style="float:right;">
-                                        <span style="color:#2ecc71">Favor: ${ pauta.resultados.favor }</span> | 
-                                        <span style="color:#e74c3c">Contra: ${ pauta.resultados.contra }</span> |
-                                        <span style="color:#95a5a6">Abs: ${ pauta.resultados.abstencao }</span>
+                                <div style="font-size:0.9em; color:#666; background:#f9f9f9; padding:10px; border-radius:8px; display: flex; justify-content: space-between;">
+                                    <span>Total Votos: <strong>${ pauta.total_votos }</strong> / ${ pauta.esperados }</span>
+                                    <span v-if="pauta.status === 'ENCERRADA'">
+                                        <span style="color:#2ecc71; font-weight:600;">Favor: ${ pauta.resultados.favor }</span> | 
+                                        <span style="color:#e74c3c; font-weight:600;">Contra: ${ pauta.resultados.contra }</span> |
+                                        <span style="color:#95a5a6; font-weight:600;">Abs: ${ pauta.resultados.abstencao }</span>
                                     </span>
                                 </div>
                             </div>
@@ -111,36 +151,44 @@
 
                     <div>
                         <div class="card" style="text-align: center; border-top: 4px solid var(--primary-color);">
-                            <h3 style="color: var(--primary-color);">Monitoramento</h3>
+                            <h3 style="color: var(--primary-color); margin-bottom: 5px;">Monitoramento</h3>
                             <div v-if="pautaAtiva">
-                                <h4>${ pautaAtiva.titulo }</h4>
+                                <h4 style="margin: 5px 0 15px 0; color: #555;">${ pautaAtiva.titulo }</h4>
                                 <span :class="['badge', pautaAtiva.status.toLowerCase()]">${ pautaAtiva.status }</span>
                                 <div class="chart-container"><canvas id="graficoVotos"></canvas></div>
-                                <h2 style="font-size:3em; color:var(--primary-color);">${ pautaAtiva.total_votos }</h2>
+                                <h2 style="font-size:3em; color:var(--primary-color); margin: 0;">${ pautaAtiva.total_votos }</h2>
                             </div>
-                            <div v-else style="padding:40px 0; color:#aaa;"><h3>📊</h3><p>Aguardando...</p></div>
+                            <div v-else style="padding:60px 0; color:#ccc;">
+                                <div style="font-size: 3em; margin-bottom: 10px;">📊</div>
+                                <p>Nenhuma votação ativa</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div v-show="abaAtual === 'grupos'" class="card">
-                    <h3>Credenciamento</h3>
+                    <h3 style="color: var(--primary-color);">Credenciamento</h3>
                     <div class="form-credenciamento">
                         <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label style="font-size:0.8em; font-weight:bold; color:#666;">NUMERAL</label>
+                            <label style="font-size:0.8em; font-weight:bold; color:#666;">NUMERAL DO GRUPO</label>
                             <input v-model="novoGrupoInput" class="modern-input" placeholder="Ex: 107">
                         </div>
                         <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label style="font-size:0.8em; font-weight:bold; color:#666;">DELEGADOS</label>
+                            <label style="font-size:0.8em; font-weight:bold; color:#666;">QTD. DELEGADOS</label>
                             <input v-model="novoGrupoQtd" type="number" class="modern-input" style="text-align:center;">
                         </div>
                         <button @click="cadastrarGrupo" class="btn-modern-add">CADASTRAR +</button>
                     </div>
 
-                    <h3>Grupos (${ grupos.length })</h3>
-                    <div v-for="g in grupos" :key="g.numero" style="border-bottom:1px solid #eee; padding:10px 0; display:flex; justify-content:space-between; align-items:center;">
-                        <div><strong>GE ${ g.numero }</strong> <br> <span v-for="i in g.quantidade" class="cred-chip">${ g.numero }-${ i }</span></div>
-                        <button @click="removerGrupo(g.numero)" class="btn-del">X</button>
+                    <h3>Grupos Cadastrados (${ grupos.length })</h3>
+                    <div v-for="g in grupos" :key="g.numero" style="border-bottom:1px solid #eee; padding:15px 0; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong style="font-size: 1.1em; color: var(--primary-color);">GE ${ g.numero }/PE</strong> 
+                            <div style="margin-top: 5px;">
+                                <span v-for="i in g.quantidade" class="cred-chip">${ g.numero }-${ i }</span>
+                            </div>
+                        </div>
+                        <button @click="removerGrupo(g.numero)" class="btn-del">Remover</button>
                     </div>
                 </div>
             </div>
@@ -183,7 +231,7 @@
                 },
                 async fetchGrupos() { const res = await axios.get('/api/grupos'); this.grupos = res.data; },
                 async cadastrarGrupo() { if(!this.novoGrupoInput) return; await axios.post('/api/grupos', { numero: this.novoGrupoInput, quantidade: this.novoGrupoQtd }); this.novoGrupoInput=''; this.novoGrupoQtd=2; this.fetchGrupos(); this.fetchDados(); },
-                async removerGrupo(n) { if(confirm('Remover?')) { await axios.delete('/api/grupos/'+n); this.fetchGrupos(); this.fetchDados(); } },
+                async removerGrupo(n) { if(confirm('Remover grupo ' + n + '?')) { await axios.delete('/api/grupos/'+n); this.fetchGrupos(); this.fetchDados(); } },
                 baixarExcel() { if (!this.token) return; window.location.href = `/api/exportar?token=${this.token}`; }
             },
             mounted() { this.init(); setInterval(() => { if(this.token && this.abaAtual === 'votacao') this.fetchDados(); }, 2000); }
