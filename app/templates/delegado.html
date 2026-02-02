@@ -3,142 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Votação - Escoteiros PE</title>
+    <title>Votação</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root {
-            --primary-color: #003366;
-            --scout-purple: #6a1b9a;
-            --accent-green: #2ecc71;
-            --accent-red: #e74c3c;
-            --accent-grey: #95a5a6;
-            --bg-light: #f0f2f5;
-        }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-light); 
-            margin: 0; padding: 0; 
-            color: #333;
-            min-height: 100vh;
-        }
-
-        /* CABEÇALHO MOBILE */
-        .mobile-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--scout-purple) 100%);
-            color: white; padding: 20px 15px; text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .mobile-header h1 { margin: 0; font-size: 1.2em; font-family: 'Poppins'; font-weight: 700; }
-        .mobile-header p { margin: 2px 0 0; font-size: 0.8em; opacity: 0.9; }
-
-        .container { padding: 20px; }
-
-        .card { 
-            background: white; 
-            max-width: 450px; margin: 10px auto; padding: 30px 25px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-            text-align: center;
-        }
+        :root { --primary-color: #003366; --scout-purple: #6a1b9a; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .card { background: white; max-width: 450px; margin: 20px auto; padding: 30px 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; }
         
-        h2, h3, h4 { font-family: 'Poppins', sans-serif; }
-
-        /* BOTÕES DE VOTO GRANDES */
-        .btn-vote { 
-            display: flex; align-items: center; justify-content: center; gap: 15px;
-            width: 100%; padding: 20px; margin: 15px 0; border: none; border-radius: 16px; 
-            font-size: 1.3em; font-weight: 700; color: white; cursor: pointer; 
-            transition: transform 0.1s; font-family: 'Poppins';
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-        .btn-vote:active { transform: scale(0.97); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .btn-vote i { font-style: normal; font-size: 1.5em; }
-        
+        /* Botões */
+        .btn-vote { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; padding: 20px; margin: 15px 0; border: none; border-radius: 16px; font-size: 1.3em; font-weight: 700; color: white; cursor: pointer; transition: transform 0.1s; font-family: 'Poppins'; box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .btn-vote:active { transform: scale(0.97); }
         .btn-favor { background: linear-gradient(to right, #2ecc71, #27ae60); }
         .btn-contra { background: linear-gradient(to right, #e74c3c, #c0392b); }
-        .btn-abs { background: linear-gradient(to right, #95a5a6, #7f8c8d); }
-        
-        /* LOGIN */
-        .credencial-input { 
-            padding: 15px; width: 100%; box-sizing: border-box; margin: 25px 0; 
-            border: 3px solid #e0e0e0; border-radius: 12px; font-size: 1.8em; 
-            text-align: center; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; font-family: 'Source Code Pro', monospace;
-            transition: 0.3s; color: var(--primary-color);
-        }
-        .credencial-input:focus { border-color: var(--primary-color); outline: none; background: #f8fbff;}
-        .btn-login { background: var(--primary-color); width: 100%; padding: 18px; font-size: 1.2em; border-radius: 12px; color:white; border:none; font-weight:bold; cursor:pointer;}
+        .btn-abs { background: linear-gradient(to right, #95a5a6, #7f8c8d); } /* VOLTOU */
 
-        .delegado-badge { background: #eef2f7; color: var(--primary-color); padding: 10px 20px; border-radius: 30px; display: inline-block; font-weight: 600; margin-bottom: 20px;}
-        
-        .status-badge { display: inline-block; padding: 8px 16px; border-radius: 30px; font-size: 0.8em; font-weight: 700; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
-        .status-aberta { background: #d4edda; color: #155724; }
-        .status-encerrada { background: #f8d7da; color: #721c24; }
-
-        /* Confirmação Animada */
-        .voto-confirmado {
-            background: #e8f8f5; padding: 40px 20px; border-radius: 16px; color: #27ae60;
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        .cred-input { padding: 15px; width: 100%; box-sizing: border-box; margin: 20px 0; border: 3px solid #e0e0e0; border-radius: 12px; font-size: 1.8em; text-align: center; text-transform: uppercase; font-weight: 700; color: var(--primary-color); }
+        .btn-login { background: var(--primary-color); width: 100%; padding: 18px; font-size: 1.2em; border-radius: 12px; color:white; border:none; font-weight:bold; }
     </style>
 </head>
 <body>
     <div id="app">
-        <div class="mobile-header">
-            <h1>Assembleia Regional Escoteira</h1>
-            <p>Pernambuco</p>
+        <div v-if="!user" class="card">
+            <h2 style="color:var(--primary-color);">Credenciamento</h2>
+            <input v-model="credencial" placeholder="Ex: 107-1" class="cred-input" @keyup.enter="login">
+            <button @click="login" class="btn-login">ACESSAR</button>
         </div>
 
-        <div class="container">
-            <div v-if="!user" class="card" style="margin-top: 30px;">
-                <h2 style="color: var(--primary-color); margin-top:0;">Credenciamento</h2>
-                <p style="color: #666; margin-bottom: 5px;">Digite o código do seu cartão de voto.</p>
+        <div v-else class="card">
+            <div style="background:#eef2f7; color:var(--primary-color); padding:10px 20px; border-radius:30px; display:inline-block; font-weight:600; margin-bottom:20px;">${ user.nome }</div>
+
+            <div v-if="dados && dados.pauta">
+                <span style="background:#34495e; color:white; padding:5px 15px; border-radius:20px; font-size:0.8em; font-weight:bold;">${ dados.pauta.status }</span>
+                <h2 style="margin:15px 0; font-family:'Poppins';">${ dados.pauta.titulo }</h2>
                 
-                <input v-model="credencialInput" placeholder="107-1" class="credencial-input" @keyup.enter="login" maxlength="8">
-                <button @click="login" class="btn-login">ACESSAR VOTAÇÃO</button>
-            </div>
-
-            <div v-else class="card">
-                <div class="delegado-badge">${ user.nome }</div>
-
-                <div v-if="dados && dados.pauta" style="margin-top: 20px;">
-                    <span :class="['status-badge', 'status-' + dados.pauta.status.toLowerCase()]">${ dados.pauta.status }</span>
-                    <h2 style="margin: 10px 0 30px 0; font-size: 1.5em; line-height: 1.3;">${ dados.pauta.titulo }</h2>
-                    
-                    <div v-if="dados.pauta.status === 'ABERTA'">
-                        <div v-if="!dados.ja_votou">
-                            <button @click="votar('favor')" class="btn-vote btn-favor"><i>👍</i> A FAVOR</button>
-                            <button @click="votar('contra')" class="btn-vote btn-contra"><i>👎</i> CONTRA</button>
-                            <button @click="votar('abstencao')" class="btn-vote btn-abs"><i>✋</i> ABSTENÇÃO</button>
-                        </div>
-                        
-                        <div v-else class="voto-confirmado">
-                            <div style="font-size: 4em; margin-bottom: 10px;">✅</div>
-                            <h3 style="margin:0;">Voto Registrado!</h3>
-                            <p>Aguarde o resultado no telão.</p>
-                        </div>
-                    </div>
-
-                    <div v-else-if="dados.pauta.status === 'ENCERRADA'">
-                        <h3 style="color: var(--accent-red);">Votação Encerrada</h3>
-                        <p style="color: #666; margin-bottom: 30px;">Atenção ao telão da mesa diretora para o resultado.</p>
-                        <div style="background: #f0f2f5; padding: 15px; border-radius: 10px; font-size: 0.9em; color: #666;">
-                            Status do seu voto: <strong>${ dados.ja_votou ? 'COMPUTADO' : 'NÃO VOTO' }</strong>
-                        </div>
+                <div v-if="dados.pauta.status === 'ABERTA'">
+                    <div v-if="!dados.ja_votou">
+                        <button @click="votar('favor')" class="btn-vote btn-favor">👍 A FAVOR</button>
+                        <button @click="votar('contra')" class="btn-vote btn-contra">👎 CONTRA</button>
+                        <button @click="votar('abstencao')" class="btn-vote btn-abs">✋ ABSTENÇÃO</button> </div>
+                    <div v-else style="background:#e8f8f5; padding:40px 20px; border-radius:16px; color:#27ae60;">
+                        <div style="font-size:4em;">✅</div><h3>Voto Registrado!</h3>
                     </div>
                 </div>
-
-                <div v-else style="padding: 40px 0;">
-                    <div style="font-size: 4em; opacity: 0.3; margin-bottom: 20px;">⏳</div>
-                    <h3>Aguardando Mesa</h3>
-                    <p style="color:#777;">Nenhuma votação ativa no momento.</p>
-                </div>
-                
-                <button @click="sair" style="background:none; border:none; color: #999; margin-top:30px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; padding: 15px;">Sair / Trocar Delegado</button>
+                <div v-else><h3 style="color:#e74c3c;">Encerrada</h3></div>
             </div>
+            <div v-else style="padding:40px 0; opacity:0.5;"><h3>Aguardando...</h3></div>
+            <button @click="sair" style="background:none; border:none; color:#999; margin-top:20px; text-decoration:underline;">Sair</button>
         </div>
     </div>
 
@@ -146,30 +58,13 @@
         const { createApp } = Vue
         createApp({
             delimiters: ['${', '}'],
-            data() { return { credencialInput: '', user: null, dados: null } },
+            data() { return { credencial: '', user: null, dados: null } },
             methods: {
-                async login() {
-                    if(!this.credencialInput) return;
-                    try {
-                        const code = this.credencialInput.trim().toUpperCase();
-                        const res = await axios.post('/api/login?credencial=' + code);
-                        this.user = res.data; this.startPolling();
-                    } catch (e) { alert(e.response.data.detail || 'Erro ao entrar'); }
-                },
-                async votar(opcao) {
-                    if(navigator.vibrate) navigator.vibrate(50);
-                    if(!confirm('CONFIRMA SEU VOTO? Essa ação é definitiva.')) return;
-                    try {
-                        await axios.post('/api/votar', { credencial: this.user.id, pauta_id: this.dados.pauta.id, opcao: opcao });
-                        this.fetchStatus();
-                    } catch (e) { alert(e.response.data.detail); }
-                },
-                async fetchStatus() {
-                    if(!this.user) return;
-                    try { const res = await axios.get('/api/pauta-ativa?credencial=' + this.user.id); this.dados = res.data; } catch(e) { console.error(e); }
-                },
-                sair() { this.user = null; this.dados = null; },
-                startPolling() { this.fetchStatus(); setInterval(this.fetchStatus, 2000); }
+                async login() { try { const res = await axios.post('/api/login?credencial='+this.credencial.trim().toUpperCase()); this.user = res.data; this.poll(); } catch { alert('Erro'); } },
+                async votar(op) { if(confirm('Confirma?')) { await axios.post('/api/votar', { credencial: this.user.id, pauta_id: this.dados.pauta.id, opcao: op }); this.load(); } },
+                async load() { try { const res = await axios.get('/api/pauta-ativa?credencial='+this.user.id); this.dados = res.data; } catch {} },
+                sair() { this.user = null; },
+                poll() { this.load(); setInterval(this.load, 2000); }
             }
         }).mount('#app')
     </script>
