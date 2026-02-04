@@ -17,7 +17,7 @@
             --scout-purple: #6a1b9a;
             --bg-color: #f4f7f9;
             --white: #ffffff;
-            --success: #059669;
+            --success: #10b981;
             --danger: #dc2626;
             --gray: #9ca3af;
         }
@@ -36,6 +36,7 @@
 
         #app { display: flex; flex-direction: column; min-height: 100vh; }
 
+        /* SPLASH SCREEN */
         .splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, var(--primary-blue) 0%, #1e1b4b 100%);
@@ -45,7 +46,7 @@
             color: white; text-align: center;
             transition: opacity 0.6s ease, transform 0.6s ease;
         }
-        .splash-logo { width: 200px; filter: brightness(0) invert(1); margin-bottom: 40px; animation: pulseLogo 3s infinite; }
+        .splash-logo { width: 140px; filter: brightness(0) invert(1); margin-bottom: 40px; animation: pulseLogo 3s infinite; }
         .splash-title { font-family: 'Oswald', sans-serif; font-size: 2.5em; text-transform: uppercase; letter-spacing: 2px; margin: 0; }
         .splash-btn {
             margin-top: 60px; padding: 18px 50px;
@@ -57,11 +58,12 @@
         }
         .splash-hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
 
+        /* HEADER */
         .app-header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 15px 20px;
-            display: flex; align-items: center; justify-content: center; 
+            display: flex; align-items: center; justify-content: center;
             gap: 15px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
             position: sticky; top: 0; z-index: 50;
@@ -69,23 +71,19 @@
         .header-logo { height: 40px; width: auto; }
         .header-brand { font-family: 'Oswald', sans-serif; color: var(--primary-blue); font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; }
 
+        /* LAYOUT */
         .main-container { 
             flex: 1; padding: 20px; padding-bottom: 100px;
             display: flex; flex-direction: column; justify-content: center; 
             max-width: 500px; margin: 0 auto; width: 100%; 
         }
 
+        /* EVENT HERO */
         .event-hero {
             background: linear-gradient(135deg, var(--primary-blue), var(--scout-purple));
-            color: white;
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 25px rgba(106, 27, 154, 0.2);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
+            color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(106, 27, 154, 0.2); text-align: center;
+            position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
         }
         .event-hero::before {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
@@ -95,7 +93,7 @@
         .event-label { position: relative; font-size: 0.75em; text-transform: uppercase; opacity: 0.8; font-weight: 600; letter-spacing: 1.5px; display: block; margin-bottom: 5px; }
         .event-name { position: relative; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.4em; line-height: 1.2; margin: 0; }
         
-        /* --- CARDS --- */
+        /* CARD */
         .card {
             background: white; border-radius: 24px; padding: 30px 25px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.08); text-align: center;
@@ -104,7 +102,7 @@
             position: relative; overflow: hidden;
         }
         
-        /* --- LOGIN FORM --- */
+        /* LOGIN */
         .login-icon { font-size: 4em; margin-bottom: 15px; display: block; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
         .input-wrapper { position: relative; margin: 25px 0; }
         .cred-input {
@@ -115,7 +113,21 @@
         .cred-input:focus { border-color: var(--primary-blue); background: white; outline: none; box-shadow: 0 0 0 4px rgba(0, 45, 98, 0.1); }
         .input-error { animation: shake 0.4s ease-in-out; border-color: var(--danger); }
 
-        /* --- BOTÕES --- */
+        /* USER CHIP COM GRUPO (ALTERADO) */
+        .user-chip { 
+            background: #eff6ff; color: var(--primary-blue); 
+            padding: 8px 12px 8px 16px; 
+            border-radius: 30px; font-weight: 600; font-size: 0.95em; 
+            display: inline-flex; align-items: center; gap: 10px;
+            margin-bottom: 20px; border: 1px solid #dbeafe; 
+        }
+        .group-tag {
+            background: var(--primary-blue); color: white;
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 0.85em; font-weight: 800; letter-spacing: 0.5px;
+        }
+
+        /* BUTTONS */
         .btn {
             width: 100%; padding: 20px; border: none; border-radius: 16px;
             font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.1em;
@@ -128,19 +140,18 @@
         .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); margin-bottom: 15px; }
         .btn-neutral { background: linear-gradient(135deg, #9ca3af, #6b7280); }
 
-        /* --- STATUS --- */
-        .user-chip { background: #eff6ff; color: var(--primary-blue); padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85em; display: inline-block; margin-bottom: 20px; border: 1px solid #dbeafe; }
+        /* STATUS PILLS */
         .status-pill { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 0.75em; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
         .pill-open { background: #d1fae5; color: #065f46; border: 1px solid #bbf7d0; }
 
-        /* --- STATES --- */
+        /* WAITING & SUCCESS */
         .waiting-box { padding: 40px 0; }
         .radar { width: 80px; height: 80px; background: var(--primary-blue); border-radius: 50%; margin: 0 auto 20px auto; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 0 rgba(0, 45, 98, 0.7); animation: pulse-blue 2s infinite; }
         .radar-icon { font-size: 2.5em; color: white; }
         .success-box { background: #ecfdf5; border: 2px dashed #34d399; padding: 30px; border-radius: 20px; color: #064e3b; margin-top:10px; }
         .check-icon { font-size: 4em; display: block; margin-bottom: 10px; animation: bounceIn 0.6s; }
 
-        /* --- BOTTOM NAV --- */
+        /* NAVBAR */
         .nav-bar {
             background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);
             border-top: 1px solid #e5e7eb; padding: 10px 20px; 
@@ -153,6 +164,10 @@
         .nav-btn.active { color: var(--primary-blue); }
         .nav-icon { font-size: 1.5em; }
 
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; backdrop-filter: blur(3px); animation: fadeIn 0.2s; }
+        .modal-content { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-radius: 24px 24px 0 0; padding: 25px; max-height: 80vh; overflow-y: auto; animation: slideUp 0.3s; padding-bottom: 40px; }
+
         @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -160,10 +175,6 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         @keyframes pulse-blue { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 45, 98, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(0, 45, 98, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 45, 98, 0); } }
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 50% { opacity: 1; transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); } }
-
-        /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; backdrop-filter: blur(3px); animation: fadeIn 0.2s; }
-        .modal-content { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-radius: 24px 24px 0 0; padding: 25px; max-height: 80vh; overflow-y: auto; animation: slideUp 0.3s; padding-bottom: 40px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -204,7 +215,11 @@
                 </div>
 
                 <div class="card">
-                    <div class="user-chip">👤 ${ user.nome }</div>
+                    
+                    <div class="user-chip">
+                        👤 ${ user.nome } 
+                        <span class="group-tag">GE ${ user.grupo }º</span>
+                    </div>
 
                     <div v-if="!dados || !dados.pauta">
                          <div class="waiting-box">
@@ -296,10 +311,8 @@
                 async votar(op) { 
                     if (navigator.vibrate) navigator.vibrate(50);
                     if(confirm('Confirmar seu voto: ' + op.toUpperCase() + '?')) { 
-                        try {
-                            await axios.post('/api/votar', { credencial: this.user.id, pauta_id: this.dados.pauta.id, opcao: op }); 
-                            this.celebrar(); this.load(); 
-                        } catch(e) { alert(e.response.data.detail); }
+                        try { await axios.post('/api/votar', { credencial: this.user.id, pauta_id: this.dados.pauta.id, opcao: op }); this.celebrar(); this.load(); } 
+                        catch(e) { alert(e.response.data.detail); }
                     } 
                 },
                 celebrar() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); },
