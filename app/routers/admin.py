@@ -16,14 +16,14 @@ load_dotenv()
 
 router = APIRouter(prefix="/api")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "chave-padrao-insegura-troque-no-env")
+SECRET_KEY = os.getenv("SECRET_KEY", "chave-secreta-padrao-caso-nao-ache-env")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ADMIN_DB = {
-    "admin": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6LpoGGRg1iht.y.6"
+    "admin": "$2b$12$wB.sROrmXCmvh2ei3RpqBuWCAQY6LY7xupTfKi5pV06LDZqUvAGXe"
 }
 
 class SenhaAdmin(BaseModel):
