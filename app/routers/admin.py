@@ -1,15 +1,33 @@
+import os
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Header, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 from app.routers.delegado import db
 import io
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
+load_dotenv()
+
 router = APIRouter(prefix="/api")
 
+SECRET_KEY = os.getenv("SECRET_KEY", "chave-padrao-insegura-troque-no-env")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+ADMIN_DB = {
+    "admin": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6LpoGGRg1iht.y.6"
+}
+
 class SenhaAdmin(BaseModel):
+    usuario: str = "admin"
     senha: str
 
 class PautaInput(BaseModel):
@@ -22,21 +40,51 @@ class GrupoInput(BaseModel):
     numero: str
     quantidade: int = 2
 
-def verificar_admin(x_admin_token: str = Header(None)):
-    if x_admin_token != "token-secreto-admin-123":
-        raise HTTPException(status_code=401, detail="Não autorizado")
+def verificar_senha(senha_pura, senha_hash):
+    return pwd_context.verify(senha_pura, senha_hash)
+
+def criar_token_acesso(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def verificar_admin(x_admin_token: str = Header(None), token_query: str = Query(None)):
+    token = x_admin_token or token_query
+    
+    if not token:
+        raise HTTPException(status_code=401, detail="Token não fornecido")
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        usuario: str = payload.get("sub")
+        if not usuario or usuario not in ADMIN_DB:
+            raise HTTPException(status_code=401, detail="Credenciais inválidas")
+        return usuario
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token inválido ou expirado")
 
 @router.post("/admin/login")
 def admin_login(dados: SenhaAdmin):
-    if dados.senha == "saps": return {"token": "token-secreto-admin-123"}
-    raise HTTPException(status_code=400, detail="Senha incorreta")
+    if dados.usuario not in ADMIN_DB:
+        raise HTTPException(status_code=400, detail="Usuário ou senha incorretos")
+    
+    senha_hash = ADMIN_DB[dados.usuario]
+    
+    if not verificar_senha(dados.senha, senha_hash):
+        raise HTTPException(status_code=400, detail="Usuário ou senha incorretos")
+    
+    token_jwt = criar_token_acesso(data={"sub": dados.usuario})
+    
+    return {"token": token_jwt}
 
 @router.post("/admin/logout")
-def admin_logout(): return {"message": "Saiu"}
+def admin_logout():
+    return {"message": "Saiu"}
 
 @router.get("/grupos")
-def listar_grupos(x_admin_token: str = Header(None)):
-    verificar_admin(x_admin_token)
+def listar_grupos(usuario: str = Depends(verificar_admin)):
     lista = []
     if "grupos_meta" not in db: db["grupos_meta"] = {}
     for numero, qtd in db["grupos_meta"].items():
@@ -45,8 +93,7 @@ def listar_grupos(x_admin_token: str = Header(None)):
     return lista
 
 @router.post("/grupos")
-def cadastrar_grupo(dados: GrupoInput, x_admin_token: str = Header(None)):
-    verificar_admin(x_admin_token)
+def cadastrar_grupo(dados: GrupoInput, usuario: str = Depends(verificar_admin)):
     if "grupos_meta" not in db: db["grupos_meta"] = {}
     if "usuarios" not in db: db["usuarios"] = {}
     if "lista_grupos" not in db: db["lista_grupos"] = []
@@ -66,8 +113,7 @@ def cadastrar_grupo(dados: GrupoInput, x_admin_token: str = Header(None)):
     return {"msg": "Grupo cadastrado."}
 
 @router.delete("/grupos/{numero}")
-def remover_grupo(numero: str, x_admin_token: str = Header(None)):
-    verificar_admin(x_admin_token)
+def remover_grupo(numero: str, usuario: str = Depends(verificar_admin)):
     if "grupos_meta" not in db: db["grupos_meta"] = {}
     db["grupos_meta"].pop(numero, 0)
     if numero in db["lista_grupos"]: db["lista_grupos"].remove(numero)
@@ -76,8 +122,7 @@ def remover_grupo(numero: str, x_admin_token: str = Header(None)):
     return {"msg": "Grupo removido"}
 
 @router.get("/dados-admin")
-def get_dados_admin(x_admin_token: str = Header(None)):
-    verificar_admin(x_admin_token)
+def get_dados_admin(usuario: str = Depends(verificar_admin)):
     if "grupos_meta" not in db: db["grupos_meta"] = {}
     total_delegados = sum(db["grupos_meta"].values())
     total_votos_possiveis = total_delegados 
@@ -93,7 +138,6 @@ def get_dados_admin(x_admin_token: str = Header(None)):
         
         total_realizado = sum(len(v) for v in p.votos.values())
 
-        # Lógica de Resultado
         resultado_texto = "EM ANDAMENTO"
         if p.status == "ENCERRADA":
             if contagem["favor"] > contagem["contra"]:
@@ -110,13 +154,12 @@ def get_dados_admin(x_admin_token: str = Header(None)):
             "total_votos": total_realizado,
             "esperados": total_votos_possiveis,
             "resultados": contagem,
-            "resultado_final": resultado_texto # Campo novo
+            "resultado_final": resultado_texto
         })
     return resultado
 
 @router.post("/pautas")
-def criar_pauta(dados: PautaInput, x_admin_token: str = Header(None)):
-    verificar_admin(x_admin_token)
+def criar_pauta(dados: PautaInput, usuario: str = Depends(verificar_admin)):
     from app.routers.delegado import Pauta
     import uuid
     nova_pauta = Pauta(id=str(uuid.uuid4()), titulo=dados.titulo)
@@ -124,8 +167,7 @@ def criar_pauta(dados: PautaInput, x_admin_token: str = Header(None)):
     return nova_pauta
 
 @router.post("/pautas/{id}/status")
-def mudar_status_pauta(id: str, dados: StatusPauta, x_admin_token: str = Header(None)):
-    verificar_admin(x_admin_token)
+def mudar_status_pauta(id: str, dados: StatusPauta, usuario: str = Depends(verificar_admin)):
     if dados.status == "ABERTA":
         for p in db["pautas"]:
             if p.status == "ABERTA": p.status = "ENCERRADA"
@@ -137,9 +179,7 @@ def mudar_status_pauta(id: str, dados: StatusPauta, x_admin_token: str = Header(
 
 @router.get("/exportar")
 def exportar_relatorio(x_admin_token: str = Header(None), token: str = Query(None)):
-    token_final = x_admin_token or token
-    if token_final != "token-secreto-admin-123":
-        raise HTTPException(status_code=401, detail="Não autorizado")
+    usuario = verificar_admin(x_admin_token, token)
     
     wb = Workbook()
     
@@ -147,7 +187,6 @@ def exportar_relatorio(x_admin_token: str = Header(None), token: str = Query(Non
     ws_resumo.title = "Resumo Geral"
     ws_resumo.append(["ID", "Título da Pauta", "Status", "Resultado", "Total Votos", "Favor", "Contra", "Abstenção"])
     
-    # Estilizando o cabeçalho
     for cell in ws_resumo[1]:
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = PatternFill(start_color="002d62", end_color="002d62", fill_type="solid")
@@ -165,7 +204,6 @@ def exportar_relatorio(x_admin_token: str = Header(None), token: str = Query(Non
                 elif v == "contra": contra += 1
                 elif v == "abstencao": abstencao += 1
         
-        # Logica Resultado
         resultado_txt = "-"
         if p.status == "ENCERRADA":
             if favor > contra: resultado_txt = "APROVADA"
