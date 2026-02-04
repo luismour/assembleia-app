@@ -46,7 +46,7 @@ def get_pauta_ativa():
 
 def get_nome_assembleia():
     aid = db["assembleia_ativa"]
-    if not aid: return "Escoteiros do Brasil"
+    if not aid: return "Aguardando Evento..."
     for a in db["assembleias"]:
         if a["id"] == aid: return a["titulo"]
     return "Evento Escoteiro"

@@ -79,7 +79,7 @@ def admin_logout(): return {"message": "Saiu"}
 @router.get("/telao-dados")
 def get_telao_publico():
     aid = db["assembleia_ativa"]
-    nome_evento = "Escoteiros do Brasil"
+    nome_evento = "Aguardando Evento..."
     if aid:
         for a in db["assembleias"]:
             if a["id"] == aid: nome_evento = a["titulo"]
