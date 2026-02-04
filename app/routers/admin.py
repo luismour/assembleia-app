@@ -25,7 +25,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ADMIN_DB = {
     # Hash da senha "saps"
-    "admin": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6LpoGGRg1iht.y.6"
+    "admin": "$2b$12$Jf0VrIbgza8gk8YoXqYlxeho3.c2Y4ZGWKXyKESDrAxaYfZkPzkAa"
 }
 
 class SenhaAdmin(BaseModel):
