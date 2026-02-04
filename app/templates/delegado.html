@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700;800&family=Oswald:wght@500&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -27,16 +27,15 @@
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-color);
-            /* Padrão de fundo sutil de pontinhos */
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
             background-size: 20px 20px;
             margin: 0; padding: 0; 
             color: #1f2937;
             min-height: 100vh;
-            display: flex; flex-direction: column;
         }
 
-        /* --- SPLASH SCREEN --- */
+        #app { display: flex; flex-direction: column; min-height: 100vh; }
+
         .splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, var(--primary-blue) 0%, #1e1b4b 100%);
@@ -58,22 +57,43 @@
         }
         .splash-hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
 
-        /* --- HEADER (Estilo Telão) --- */
         .app-header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 15px 20px;
-            display: flex; align-items: center; gap: 15px;
+            display: flex; align-items: center; justify-content: center; 
+            gap: 15px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            position: sticky; top: 0; z-index: 100;
+            position: sticky; top: 0; z-index: 50;
         }
-        .header-logo { height: 48px; width: auto; }
-        .header-info { display: flex; flex-direction: column; line-height: 1.2; }
-        .header-title { font-family: 'Oswald', sans-serif; color: var(--primary-blue); font-size: 1.1em; text-transform: uppercase; }
-        .header-sub { font-family: 'Poppins', sans-serif; font-size: 0.75em; color: #6b7280; letter-spacing: 2px; font-weight: 600; }
+        .header-logo { height: 40px; width: auto; }
+        .header-brand { font-family: 'Oswald', sans-serif; color: var(--primary-blue); font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- LAYOUT --- */
-        .main-container { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; max-width: 500px; margin: 0 auto; width: 100%; }
+        .main-container { 
+            flex: 1; padding: 20px; padding-bottom: 100px;
+            display: flex; flex-direction: column; justify-content: center; 
+            max-width: 500px; margin: 0 auto; width: 100%; 
+        }
+
+        .event-hero {
+            background: linear-gradient(135deg, var(--primary-blue), var(--scout-purple));
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(106, 27, 154, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .event-hero::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: rotateBg 10s linear infinite;
+        }
+        .event-label { position: relative; font-size: 0.75em; text-transform: uppercase; opacity: 0.8; font-weight: 600; letter-spacing: 1.5px; display: block; margin-bottom: 5px; }
+        .event-name { position: relative; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.4em; line-height: 1.2; margin: 0; }
         
         /* --- CARDS --- */
         .card {
@@ -88,79 +108,63 @@
         .login-icon { font-size: 4em; margin-bottom: 15px; display: block; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
         .input-wrapper { position: relative; margin: 25px 0; }
         .cred-input {
-            width: 100%; padding: 20px;
-            border: 2px solid #e5e7eb; border-radius: 16px;
-            font-size: 1.6em; text-align: center;
-            font-family: 'Poppins', sans-serif; font-weight: 700;
-            color: var(--primary-blue); text-transform: uppercase;
-            transition: all 0.3s ease; background: #f9fafb;
+            width: 100%; padding: 20px; border: 2px solid #e5e7eb; border-radius: 16px;
+            font-size: 1.6em; text-align: center; font-family: 'Poppins', sans-serif; font-weight: 700;
+            color: var(--primary-blue); text-transform: uppercase; transition: all 0.3s ease; background: #f9fafb;
         }
         .cred-input:focus { border-color: var(--primary-blue); background: white; outline: none; box-shadow: 0 0 0 4px rgba(0, 45, 98, 0.1); }
-        .cred-input::placeholder { color: #d1d5db; }
         .input-error { animation: shake 0.4s ease-in-out; border-color: var(--danger); }
 
         /* --- BOTÕES --- */
         .btn {
             width: 100%; padding: 20px; border: none; border-radius: 16px;
             font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.1em;
-            cursor: pointer; transition: transform 0.1s, filter 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px;
             color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
         .btn:active { transform: scale(0.96); }
         .btn-primary { background: linear-gradient(135deg, var(--primary-blue), #1e3a8a); }
-        .btn-success { background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 12px; }
-        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); margin-bottom: 12px; }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 15px; }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); margin-bottom: 15px; }
         .btn-neutral { background: linear-gradient(135deg, #9ca3af, #6b7280); }
 
         /* --- STATUS --- */
-        .user-chip { background: #eff6ff; color: var(--primary-blue); padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 0.9em; display: inline-block; margin-bottom: 25px; border: 1px solid #dbeafe; }
+        .user-chip { background: #eff6ff; color: var(--primary-blue); padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85em; display: inline-block; margin-bottom: 20px; border: 1px solid #dbeafe; }
         .status-pill { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 0.75em; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
-        .pill-open { background: #d1fae5; color: #065f46; }
+        .pill-open { background: #d1fae5; color: #065f46; border: 1px solid #bbf7d0; }
 
-        /* --- WAITING STATE --- */
+        /* --- STATES --- */
         .waiting-box { padding: 40px 0; }
-        .radar {
-            width: 80px; height: 80px; background: var(--primary-blue);
-            border-radius: 50%; margin: 0 auto 20px auto;
-            position: relative; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 0 0 rgba(0, 45, 98, 0.7);
-            animation: pulse-blue 2s infinite;
-        }
+        .radar { width: 80px; height: 80px; background: var(--primary-blue); border-radius: 50%; margin: 0 auto 20px auto; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 0 rgba(0, 45, 98, 0.7); animation: pulse-blue 2s infinite; }
         .radar-icon { font-size: 2.5em; color: white; }
-
-        /* --- SUCCESS STATE --- */
-        .success-box { background: #ecfdf5; border: 2px dashed #34d399; padding: 30px; border-radius: 20px; color: #064e3b; }
+        .success-box { background: #ecfdf5; border: 2px dashed #34d399; padding: 30px; border-radius: 20px; color: #064e3b; margin-top:10px; }
         .check-icon { font-size: 4em; display: block; margin-bottom: 10px; animation: bounceIn 0.6s; }
 
         /* --- BOTTOM NAV --- */
         .nav-bar {
-            background: white; border-top: 1px solid #f3f4f6;
-            padding: 10px 20px; display: flex; justify-content: space-around;
-            position: sticky; bottom: 0; padding-bottom: max(10px, env(safe-area-inset-bottom));
+            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);
+            border-top: 1px solid #e5e7eb; padding: 10px 20px; 
+            display: flex; justify-content: space-around;
+            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
         }
-        .nav-btn {
-            background: none; border: none; color: #9ca3af;
-            display: flex; flex-direction: column; align-items: center;
-            font-size: 0.75em; font-weight: 600; gap: 4px; padding: 8px;
-            transition: 0.3s;
-        }
+        .nav-btn { background: none; border: none; color: #9ca3af; display: flex; flex-direction: column; align-items: center; font-size: 0.75em; font-weight: 600; gap: 4px; padding: 8px 15px; transition: 0.3s; cursor: pointer; }
         .nav-btn.active { color: var(--primary-blue); }
         .nav-icon { font-size: 1.5em; }
 
-        /* --- ANIMATIONS --- */
         @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes rotateBg { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         @keyframes pulse-blue { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 45, 98, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(0, 45, 98, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 45, 98, 0); } }
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 50% { opacity: 1; transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); } }
 
-        /* MODAL HISTORICO */
+        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; backdrop-filter: blur(3px); animation: fadeIn 0.2s; }
-        .modal-content { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-radius: 24px 24px 0 0; padding: 25px; max-height: 80vh; overflow-y: auto; animation: slideUp 0.3s; }
+        .modal-content { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-radius: 24px 24px 0 0; padding: 25px; max-height: 80vh; overflow-y: auto; animation: slideUp 0.3s; padding-bottom: 40px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
     </style>
 </head>
 <body>
@@ -183,54 +187,56 @@
                 <span class="login-icon">⚜️</span>
                 <h2 style="color: var(--primary-blue); margin: 0; font-family: 'Oswald'; font-size: 1.8em;">Identificação</h2>
                 <p style="color: #6b7280; font-size: 0.9em; margin-bottom: 0;">Insira sua credencial de delegado</p>
-                
                 <div class="input-wrapper">
-                    <input v-model="credencial" 
-                           placeholder="EX: 107-1" 
-                           class="cred-input" 
-                           :class="{ 'input-error': erroLoginAnim }"
-                           @keyup.enter="login" 
-                           maxlength="8">
+                    <input v-model="credencial" placeholder="EX: 107-1" class="cred-input" :class="{ 'input-error': erroLoginAnim }" @keyup.enter="login" maxlength="8">
                 </div>
-                
-                <button @click="login" class="btn btn-primary">
-                    ACESSAR ASSEMBLEIA
-                </button>
+                <button @click="login" class="btn btn-primary">ACESSAR ASSEMBLEIA</button>
             </div>
 
-            <div v-else class="card">
-                <div class="user-chip">👤 ${ user.nome }</div>
-
-                <div v-if="!dados || !dados.pauta">
-                     <div class="waiting-box">
-                        <div class="radar"><span class="radar-icon">📡</span></div>
-                        <h3 style="color: #4b5563; font-size: 1.1em; margin: 0;">Conectando à mesa...</h3>
-                    </div>
+            <div v-else>
+                
+                <div class="event-hero">
+                    <span class="event-label">VOCÊ ESTÁ NO EVENTO:</span>
+                    <h2 class="event-name">
+                        <span v-if="dados && dados.evento">📍 ${ dados.evento }</span>
+                        <span v-else>Carregando evento...</span>
+                    </h2>
                 </div>
 
-                <div v-else-if="dados.pauta">
-                    
-                    <div v-if="dados.pauta.status === 'ABERTA'">
-                        <span class="status-pill pill-open">VOTAÇÃO ABERTA</span>
-                        <h2 style="font-family: 'Poppins'; margin: 10px 0 25px 0; line-height: 1.3;">${ dados.pauta.titulo }</h2>
+                <div class="card">
+                    <div class="user-chip">👤 ${ user.nome }</div>
 
-                        <div v-if="dados.pode_votar">
-                            <button @click="votar('favor')" class="btn btn-success">👍 A FAVOR</button>
-                            <button @click="votar('contra')" class="btn btn-danger">👎 CONTRA</button>
-                            <button @click="votar('abstencao')" class="btn btn-neutral">✋ ABSTENÇÃO</button>
-                        </div>
-
-                        <div v-else class="success-box">
-                            <span class="check-icon">✅</span>
-                            <h3 style="margin: 0; font-family: 'Poppins';">Voto Registrado!</h3>
-                            <p style="margin: 5px 0 0 0; font-size: 0.9em; opacity: 0.8;">Aguarde o resultado no telão.</p>
+                    <div v-if="!dados || !dados.pauta">
+                         <div class="waiting-box">
+                            <div class="radar"><span class="radar-icon">📡</span></div>
+                            <h3 style="color: #4b5563; font-size: 1.1em; margin: 0;">Aguardando Mesa...</h3>
                         </div>
                     </div>
 
-                    <div v-else class="waiting-box">
-                        <div class="radar"><span class="radar-icon">⚜️</span></div>
-                        <p style="color: #6b7280; font-weight: 600; margin-bottom: 5px;">AGUARDANDO ABERTURA</p>
-                        <h3 style="color: var(--primary-blue); font-size: 1.2em; margin: 0;">${ dados.pauta.titulo }</h3>
+                    <div v-else-if="dados.pauta">
+                        
+                        <div v-if="dados.pauta.status === 'ABERTA'">
+                            <span class="status-pill pill-open">VOTAÇÃO ABERTA</span>
+                            <h2 style="font-family: 'Poppins'; margin: 10px 0 25px 0; line-height: 1.3;">${ dados.pauta.titulo }</h2>
+
+                            <div v-if="dados.pode_votar">
+                                <button @click="votar('favor')" class="btn btn-success">👍 A FAVOR</button>
+                                <button @click="votar('contra')" class="btn btn-danger">👎 CONTRA</button>
+                                <button @click="votar('abstencao')" class="btn btn-neutral">✋ ABSTENÇÃO</button>
+                            </div>
+
+                            <div v-else class="success-box">
+                                <span class="check-icon">✅</span>
+                                <h3 style="margin: 0; font-family: 'Poppins';">Voto Registrado!</h3>
+                                <p style="margin: 5px 0 0 0; font-size: 0.9em; opacity: 0.8;">Aguarde o resultado no telão.</p>
+                            </div>
+                        </div>
+
+                        <div v-else class="waiting-box">
+                            <div class="radar"><span class="radar-icon">⚜️</span></div>
+                            <p style="color: #6b7280; font-weight: 600; margin-bottom: 5px;">AGUARDANDO ABERTURA</p>
+                            <h3 style="color: var(--primary-blue); font-size: 1.2em; margin: 0;">${ dados.pauta.titulo }</h3>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -278,58 +284,28 @@
         const { createApp } = Vue
         createApp({
             delimiters: ['${', '}'],
-            data() { 
-                return { 
-                    mostrarWelcome: true, 
-                    credencial: '', 
-                    user: null, 
-                    dados: null, 
-                    view: 'votar', 
-                    historico: [],
-                    erroLoginAnim: false
-                } 
-            },
+            data() { return { mostrarWelcome: true, credencial: '', user: null, dados: null, view: 'votar', historico: [], erroLoginAnim: false } },
             methods: {
                 iniciarApp() { this.mostrarWelcome = false; },
                 async login() { 
                     if(!this.credencial) return;
-                    try { 
-                        const res = await axios.post('/api/login?credencial='+this.credencial.trim().toUpperCase()); 
-                        this.user = res.data; 
-                        this.poll(); 
-                    } catch (e) { 
-                        this.triggerShake();
-                    } 
+                    try { const res = await axios.post('/api/login?credencial='+this.credencial.trim().toUpperCase()); this.user = res.data; this.poll(); } 
+                    catch (e) { this.triggerShake(); } 
                 },
-                triggerShake() {
-                    this.erroLoginAnim = true;
-                    if (navigator.vibrate) navigator.vibrate(200);
-                    setTimeout(() => this.erroLoginAnim = false, 400);
-                },
+                triggerShake() { this.erroLoginAnim = true; if (navigator.vibrate) navigator.vibrate(200); setTimeout(() => this.erroLoginAnim = false, 400); },
                 async votar(op) { 
                     if (navigator.vibrate) navigator.vibrate(50);
                     if(confirm('Confirmar seu voto: ' + op.toUpperCase() + '?')) { 
                         try {
                             await axios.post('/api/votar', { credencial: this.user.id, pauta_id: this.dados.pauta.id, opcao: op }); 
-                            this.celebrar();
-                            this.load(); 
+                            this.celebrar(); this.load(); 
                         } catch(e) { alert(e.response.data.detail); }
                     } 
                 },
-                celebrar() {
-                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                },
-                async load() { 
-                    if(!this.user) return;
-                    try { const res = await axios.get('/api/pauta-ativa?credencial='+this.user.id); this.dados = res.data; } catch {} 
-                },
-                async carregarHistorico() {
-                    this.view = 'historico';
-                    try { const res = await axios.get('/api/historico?credencial='+this.user.id); this.historico = res.data; } catch {}
-                },
-                sair() { 
-                    if(confirm('Deseja realmente sair?')) { this.user = null; this.dados = null; this.view = 'votar'; }
-                },
+                celebrar() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); },
+                async load() { if(!this.user) return; try { const res = await axios.get('/api/pauta-ativa?credencial='+this.user.id); this.dados = res.data; } catch {} },
+                async carregarHistorico() { this.view = 'historico'; try { const res = await axios.get('/api/historico?credencial='+this.user.id); this.historico = res.data; } catch {} },
+                sair() { if(confirm('Deseja realmente sair?')) { this.user = null; this.dados = null; this.view = 'votar'; } },
                 poll() { this.load(); setInterval(() => { if(this.view==='votar' && this.user) this.load(); }, 2000); }
             }
         }).mount('#app')

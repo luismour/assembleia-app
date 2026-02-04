@@ -3,141 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Assembleia PE</title>
+    <title>Mesa Diretora - PE</title>
     
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
     <style>
         :root {
-            --primary-color: #002d62; 
-            --scout-purple: #6a1b9a;
-            --accent-green: #2ecc71; 
-            --accent-red: #e74c3c; 
-            --accent-blue: #3498db;
-            --bg-light: #f4f7f9; 
-            --text-dark: #2c3e50;
-            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            /* Cores Escoteiras */
+            --primary: #002d62;       
+            --primary-light: #3b5998;
+            --accent: #0056b3;        
+            --success: #10b981;       
+            --danger: #ef4444;        
+            --warning: #f59e0b;       
+            
+            /* UI Colors */
+            --bg-body: #f4f7f9;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            
+            /* Sombras */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -5px rgba(0, 45, 98, 0.1);
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-dark); margin: 0; padding-bottom: 40px; }
+        * { box-sizing: border-box; outline: none; }
         
-        /* --- ESTILOS EXCLUSIVOS DO LOGIN --- */
-        .login-wrapper {
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body);
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-main); 
+            margin: 0; 
             min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, var(--primary-color) 0%, #4a148c 100%);
-            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
         }
 
-        .login-card {
-            background: white;
-            width: 100%; max-width: 400px;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-            text-align: center;
-            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        .login-wrapper { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: var(--bg-body);
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex; align-items: center; justify-content: center; z-index: 2000; 
         }
 
-        .login-logo { width: 200px; height: auto; margin-bottom: 20px; }
+        .login-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px);
+            padding: 50px 40px; 
+            border-radius: 24px; 
+            width: 100%; max-width: 400px; 
+            text-align: center; 
+            box-shadow: var(--shadow-lg); 
+            border: 1px solid white;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .login-icon-box {
+            width: 80px; height: 80px; background: #eff6ff; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px auto; color: var(--primary); font-size: 2.5em;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .login-title { font-family: 'Poppins'; color: var(--primary); margin: 0 0 5px 0; font-weight: 700; }
+        .login-subtitle { color: var(--text-muted); margin-bottom: 30px; font-size: 0.9em; }
+
+        .login-input-group { position: relative; margin-bottom: 15px; }
+        .login-input-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.2em; }
         
-        .login-title { 
-            font-family: 'Poppins', sans-serif; 
-            font-size: 1.5em; color: var(--primary-color); 
-            margin-bottom: 5px; font-weight: 700; 
+        .login-input { 
+            width: 100%; padding: 14px 16px 14px 45px; 
+            border: 2px solid var(--border); 
+            border-radius: 12px; font-size: 1em; transition: 0.2s; 
+            background: #f8fafc; color: var(--text-main);
         }
+        .login-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(0, 45, 98, 0.1); }
         
-        .login-subtitle { 
-            font-size: 0.9em; color: #7f8c8d; margin-bottom: 30px; 
+        .btn-login { 
+            width: 100%; background: linear-gradient(135deg, var(--primary), #1e3a8a);
+            color: white; padding: 16px; border: none; border-radius: 12px; 
+            font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 1em; margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0, 45, 98, 0.2);
         }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 45, 98, 0.3); }
 
-        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
-        
-        .input-label { 
-            font-size: 0.8em; font-weight: 600; color: #555; 
-            margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 0.5px;
-        }
-
-        .login-input {
-            width: 100%; padding: 14px 16px;
-            border: 2px solid #e1e8ed; border-radius: 12px;
-            font-size: 1em; color: #333; box-sizing: border-box;
-            transition: all 0.2s ease; font-family: 'Inter';
-        }
-        
-        .login-input:focus {
-            border-color: var(--accent-blue);
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
-        }
-
-        .btn-login-action {
-            width: 100%; padding: 16px;
-            background: var(--primary-color);
-            color: white; border: none; border-radius: 12px;
-            font-size: 1.1em; font-weight: 600; cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
-        
-        .btn-login-action:hover { background: #001f44; transform: translateY(-1px); }
-        .btn-login-action:active { transform: translateY(1px); }
-        .btn-login-action:disabled { background: #ccc; cursor: not-allowed; }
-
-        .error-msg {
-            background: #fee2e2; color: #dc2626;
-            padding: 12px; border-radius: 8px; font-size: 0.9em;
-            margin-top: 20px; border: 1px solid #fecaca;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-
-        .header-pe { background: linear-gradient(135deg, var(--primary-color), var(--scout-purple)); color: white; padding: 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
-        .card { background: white; padding: 25px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-        
-        .tabs { display: flex; gap: 10px; background: #e0e7ec; padding: 5px; border-radius: 12px; }
-        .tab-btn { padding: 10px 20px; border: none; background: transparent; cursor: pointer; border-radius: 10px; font-weight: 600; color: #555; transition: 0.3s; }
-        .tab-btn:hover { background: rgba(255,255,255,0.5); }
-        .tab-btn.active { background: white; color: var(--primary-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        
-        .controls-right { display: flex; gap: 15px; align-items: center; }
-        .btn-action { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.9em; color: white; cursor: pointer; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1); line-height: 1; }
-        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); filter: brightness(1.1); }
-        .btn-excel { background: linear-gradient(135deg, #219150 0%, #2ecc71 100%); }
-        .btn-telao { background: linear-gradient(135deg, #6a1b9a 0%, #8e44ad 100%); }
-        .btn-sair  { background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%); }
-
-        .form-credenciamento { display: grid; grid-template-columns: 1fr 140px 160px; gap: 15px; align-items: end; background: #fff; padding: 30px; border-radius: 16px; border: 1px solid #eef2f6; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 30px; }
-        .modern-input { padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%; box-sizing: border-box; font-weight: 600; font-family: 'Inter'; }
-        .btn-modern-add { background: var(--accent-green); color: white; height: 52px; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; width: 100%; font-size: 1em; display: flex; justify-content: center; align-items: center; gap: 5px; transition: 0.2s; }
-        .btn-modern-add:hover { background: #27ae60; }
-
-        .btn-add, .btn-open, .btn-close, .btn-del { border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer; }
-        .btn-add { background: var(--accent-green); padding: 10px 20px; }
-        .btn-open { background: var(--accent-blue); padding: 8px 16px; font-size: 0.85em; }
-        .btn-close { background: var(--accent-red); padding: 8px 16px; font-size: 0.85em; }
-        .btn-del { background: #fee2e2; color: #dc2626; padding: 6px 12px; transition: 0.2s; }
-        .btn-del:hover { background: #fecaca; }
-
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75em; font-weight: 800; letter-spacing: 0.5px; }
-        .aberta { background: #d4edda; color: #155724; } 
-        .encerrada { background: #f8d7da; color: #721c24; }
-        .aguardando { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .res-aprovada { background: #2ecc71; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-left: 10px; }
-        .res-reprovada { background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-left: 10px; }
-        
-        .grid-layout { display: grid; grid-template-columns: 1fr 450px; gap: 25px; }
-        .chart-container { position: relative; height: 350px; display: flex; justify-content: center; margin: 20px 0; }
-        .cred-chip { background: #eef2f7; color: var(--primary-color); padding: 5px 10px; border-radius: 6px; font-weight: 700; margin-right: 5px; display: inline-block; margin-bottom: 5px; font-size: 0.9em; }
-
-        @keyframes slideUpFade { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 18px; height: 18px; animation: spin 1s linear infinite; }
-
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .top-bar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); margin-bottom: 30px; position: sticky; top: 20px; z-index: 100; }
+        .brand { display: flex; align-items: center; gap: 15px; }
+        .brand img { height: 45px; }
+        .brand-text h1 { font-family: 'Oswald'; font-size: 1.4em; margin: 0; color: var(--primary); text-transform: uppercase; line-height: 1; }
+        .brand-text span { font-size: 0.75em; color: var(--text-muted); font-weight: 600; letter-spacing: 2px; }
+        .event-selector-wrapper { display: flex; align-items: center; gap: 12px; background: #f1f5f9; padding: 6px 8px 6px 16px; border-radius: 50px; border: 1px solid var(--border); }
+        .event-label { font-size: 0.75em; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .event-select { border: none; background: transparent; font-weight: 600; color: var(--primary); font-size: 0.95em; cursor: pointer; min-width: 200px; }
+        .btn-icon-add { background: var(--success); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2em; transition: 0.2s; }
+        .header-actions { display: flex; gap: 10px; }
+        .btn-action { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 12px; border: none; font-size: 0.9em; font-weight: 600; cursor: pointer; text-decoration: none; color: white; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-excel { background: linear-gradient(135deg, #059669, #10b981); }
+        .btn-telao { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+        .btn-logout { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; box-shadow: none; }
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; background: white; padding: 6px; border-radius: 16px; width: fit-content; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
+        .tab-btn { padding: 10px 24px; border: none; border-radius: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; background: transparent; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 380px; gap: 30px; animation: fadeIn 0.5s ease-out; }
+        .card { background: var(--surface); border-radius: 20px; padding: 30px; box-shadow: var(--shadow-md); border: 1px solid rgba(255,255,255,0.6); margin-bottom: 25px; position: relative; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+        .card-title { font-family: 'Poppins'; font-size: 1.2em; font-weight: 700; color: var(--primary); margin: 0; display: flex; align-items: center; gap: 8px; }
+        .input-group { display: flex; gap: 12px; }
+        .input-std { flex: 1; padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Inter'; font-size: 0.95em; transition: 0.2s; }
+        .input-std:focus { border-color: var(--primary); }
+        .btn-create { background: var(--primary); color: white; border: none; padding: 0 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .pauta-item { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .pauta-item:hover { border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateX(4px); }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: 800; text-transform: uppercase; }
+        .bg-aberta { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .bg-encerrada { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .btn-icon-action { width: 36px; height: 36px; border-radius: 10px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1em; transition: 0.2s; margin-left: 8px; }
+        .btn-play { background: #dbeafe; color: #1e40af; }
+        .btn-stop { background: #fee2e2; color: #991b1b; }
+        .monitor-active { text-align: center; animation: fadeIn 0.5s; }
+        .chart-box { height: 220px; position: relative; margin: 20px 0; }
+        .big-stat { font-family: 'Poppins'; font-size: 3.5em; font-weight: 800; color: var(--primary); line-height: 1; }
+        .cred-wrapper { background: #f8fafc; padding: 25px; border-radius: 16px; border: 1px dashed var(--border); margin-bottom: 30px; }
+        .name-tag { background: white; border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm); }
+        .group-card { background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 15px; overflow: hidden; }
+        .group-header { background: #f1f5f9; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--primary); }
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-window { background: white; padding: 35px; border-radius: 24px; width: 450px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } .top-bar { flex-direction: column; gap: 15px; } }
     </style>
 </head>
 <body>
@@ -145,206 +149,303 @@
         
         <div v-if="!token" class="login-wrapper">
             <div class="login-card">
-                <img src="/static/logo-pe.svg" alt="Logo" class="login-logo">
-                <h1 class="login-title">Painel Administrativo</h1>
-                <p class="login-subtitle">Assembleia Regional de Pernambuco</p>
+                <div class="login-icon-box">
+                    <i class="ph ph-shield-check"></i>
+                </div>
+                
+                <h2 class="login-title">Acesso Restrito</h2>
+                <p class="login-subtitle">Mesa Diretora Regional</p>
                 
                 <form @submit.prevent="logar">
-                    <div class="input-group">
-                        <label class="input-label">Usuário</label>
-                        <input v-model="usuarioInput" type="text" class="login-input" placeholder="admin" required>
+                    <div class="login-input-group">
+                        <i class="ph ph-user login-input-icon"></i>
+                        <input v-model="usuarioInput" class="login-input" placeholder="Usuário">
                     </div>
 
-                    <div class="input-group">
-                        <label class="input-label">Senha de Acesso</label>
-                        <input v-model="senhaInput" type="password" class="login-input" placeholder="••••••••" required>
+                    <div class="login-input-group">
+                        <i class="ph ph-lock-key login-input-icon"></i>
+                        <input v-model="senhaInput" type="password" class="login-input" placeholder="Senha">
                     </div>
 
-                    <button type="submit" class="btn-login-action" :disabled="loading">
-                        <div v-if="loading" class="spinner"></div>
-                        <span v-else>ACESSAR SISTEMA ➜</span>
+                    <button type="submit" class="btn-login">
+                        ENTRAR <i class="ph ph-arrow-right" style="margin-left: 5px;"></i>
                     </button>
                 </form>
-
-                <div v-if="erroLogin" class="error-msg">
-                    ⚠️ ${ erroLogin }
-                </div>
                 
-                <p style="margin-top: 30px; font-size: 0.8em; color: #999;">
-                    &copy; 2026 Escoteiros do Brasil - PE
-                </p>
+                <div style="margin-top: 30px;">
+                    <img src="/static/logo-pe.svg" style="height: 40px;">
+                </div>
             </div>
         </div>
-        <div v-else>
-            <header class="header-pe">
-                <div class="container"><h1>Assembleia Regional</h1><p>Pernambuco</p></div>
-            </header>
+
+        <div v-else class="app-container">
             
-            <div class="container">
-                <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom:25px;">
-                    <div class="tabs">
-                        <button class="tab-btn" :class="{active: abaAtual === 'votacao'}" @click="abaAtual = 'votacao'">📊 Votação</button>
-                        <button class="tab-btn" :class="{active: abaAtual === 'grupos'}" @click="abaAtual = 'grupos'">📝 Credenciamento</button>
-                    </div>
-                    
-                    <div class="controls-right">
-                        <button @click="baixarExcel" class="btn-action btn-excel"><span>📊</span> Excel</button>
-                        <a href="/telao" target="_blank" class="btn-action btn-telao"><span>🖥️</span> Telão</a>
-                        <button @click="logout" class="btn-action btn-sair"><span>🚪</span> Sair</button>
+            <header class="top-bar">
+                <div class="brand">
+                    <img src="/static/logo-pe.svg" alt="Logo">
+                    <div class="brand-text">
+                        <h1>Assembleia</h1>
+                        <span>PERNAMBUCO</span>
                     </div>
                 </div>
 
-                <div v-show="abaAtual === 'votacao'" class="grid-layout">
-                    <div>
-                        <div class="card" style="background: #f8fafd; border: 1px solid #e1e8ed;">
-                            <h3 style="margin-top:0; color: var(--primary-color);">Nova Pauta</h3>
-                            <div style="display:flex; gap:10px;">
-                                <input v-model="novaPautaTexto" class="modern-input" placeholder="Título da pauta..." @keyup.enter="criarPauta">
-                                <button @click="criarPauta" class="btn-add">CRIAR</button>
-                            </div>
+                <div class="event-selector-wrapper">
+                    <span class="event-label">EVENTO:</span>
+                    <select v-model="assembleiaAtiva" @change="ativarAssembleia" class="event-select">
+                        <option v-for="a in assembleias" :value="a.id">${ a.titulo }</option>
+                    </select>
+                    <button @click="showModalAsm = true" class="btn-icon-add" title="Novo Evento">
+                        <i class="ph ph-plus"></i>
+                    </button>
+                </div>
+
+                <div class="header-actions">
+                    <button @click="baixarExcel" class="btn-action btn-excel"><i class="ph ph-microsoft-excel-logo"></i> Relatório</button>
+                    <a href="/telao" target="_blank" class="btn-action btn-telao"><i class="ph ph-monitor-play"></i> Telão</a>
+                    <button @click="logout" class="btn-action btn-logout"><i class="ph ph-sign-out"></i> Sair</button>
+                </div>
+            </header>
+
+            <div class="tabs-container">
+                <button class="tab-btn" :class="{active: abaAtual === 'votacao'}" @click="abaAtual = 'votacao'">
+                    <i class="ph ph-gavel"></i> Gerenciar Votação
+                </button>
+                <button class="tab-btn" :class="{active: abaAtual === 'grupos'}" @click="abaAtual = 'grupos'">
+                    <i class="ph ph-users-three"></i> Credenciamento
+                </button>
+            </div>
+
+            <div v-show="abaAtual === 'votacao'" class="dashboard-grid">
+                
+                <div class="col-main">
+                    <div class="card" style="border-left: 5px solid var(--primary);">
+                        <div class="card-header" style="border:none; padding-bottom:0; margin-bottom:15px;">
+                            <span class="card-title"><i class="ph ph-plus-circle"></i> Nova Pauta</span>
+                        </div>
+                        <div class="input-group">
+                            <input v-model="novaPautaTexto" class="input-std" placeholder="Digite o título da pauta..." @keyup.enter="criarPauta">
+                            <button @click="criarPauta" class="btn-create">CRIAR</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="ph ph-list-dashes"></i> Pautas do Evento</span>
+                            <span style="font-size:0.85em; color:var(--text-muted); background:#f1f5f9; padding:4px 10px; border-radius:20px;">
+                                ${ pautas.length } Registradas
+                            </span>
                         </div>
 
-                        <div class="card">
-                            <h3 style="color: #444;">Histórico</h3>
-                            <div v-if="pautas.length === 0" style="color:#999; font-style:italic;">Nenhuma pauta criada.</div>
-                            
-                            <div v-for="pauta in pautas" :key="pauta.id" style="border-bottom: 1px solid #eee; padding: 15px 0;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                    <div>
-                                        <span :class="['badge', pauta.status.toLowerCase()]">${ pauta.status }</span> 
-                                        <span v-if="pauta.status === 'ENCERRADA'" :class="pauta.resultado_final === 'APROVADA' ? 'res-aprovada' : 'res-reprovada'">${ pauta.resultado_final }</span>
-                                        <h3 style="margin:5px 0 0 0; font-size: 1.1em;">${ pauta.titulo }</h3>
-                                    </div>
-                                    <div style="display: flex; gap: 5px;">
-                                        <button v-if="pauta.status === 'AGUARDANDO' || pauta.status === 'ENCERRADA'" @click="mudarStatus(pauta.id, 'ABERTA')" class="btn-open">ABRIR</button>
-                                        <button v-if="pauta.status === 'ABERTA'" @click="mudarStatus(pauta.id, 'ENCERRADA')" class="btn-close">ENCERRAR</button>
-                                    </div>
+                        <div v-if="pautas.length === 0" style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <i class="ph ph-folder-dashed" style="font-size:3em; opacity:0.3; margin-bottom:10px; display:block;"></i>
+                            Nenhuma pauta registrada.
+                        </div>
+
+                        <div v-for="pauta in pautas" :key="pauta.id" class="pauta-item">
+                            <div class="pauta-content">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                                    <span :class="['badge', 'bg-'+pauta.status.toLowerCase()]">${ pauta.status }</span>
+                                    <h4>${ pauta.titulo }</h4>
                                 </div>
-                                <div style="font-size:0.9em; color:#666; background:#f9f9f9; padding:10px; border-radius:8px; display: flex; justify-content: space-between;">
-                                    <span>Total Votos: <strong>${ pauta.total_votos }</strong> / ${ pauta.esperados }</span>
-                                    <span v-if="pauta.status === 'ENCERRADA'">
-                                        <span style="color:#2ecc71; font-weight:600;">Favor: ${ pauta.resultados.favor }</span> | 
-                                        <span style="color:#e74c3c; font-weight:600;">Contra: ${ pauta.resultados.contra }</span> |
-                                        <span style="color:#95a5a6; font-weight:600;">Abs: ${ pauta.resultados.abstencao }</span>
+                                <div class="pauta-meta">
+                                    <span><i class="ph ph-users"></i> <b>${ pauta.total_votos }</b> / ${ pauta.esperados } Votos</span>
+                                    <span v-if="pauta.status === 'ENCERRADA'" style="display:flex; align-items:center;">
+                                        • Resultado: 
+                                        <span :class="['result-tag', pauta.resultado_final === 'APROVADA' ? 'res-aprovada' : 'res-reprovada']">
+                                            ${ pauta.resultado_final }
+                                        </span>
                                     </span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="card" style="text-align: center; border-top: 4px solid var(--primary-color);">
-                            <h3 style="color: var(--primary-color); margin-bottom: 5px;">Monitoramento</h3>
-                            <div v-if="pautaAtiva">
-                                <h4 style="margin: 5px 0 15px 0; color: #555;">${ pautaAtiva.titulo }</h4>
-                                <span :class="['badge', pautaAtiva.status.toLowerCase()]">${ pautaAtiva.status }</span>
-                                <div class="chart-container"><canvas id="graficoVotos"></canvas></div>
-                                <h2 style="font-size:3em; color:var(--primary-color); margin: 0;">${ pautaAtiva.total_votos }</h2>
-                            </div>
-                            <div v-else style="padding:60px 0; color:#ccc;">
-                                <div style="font-size: 3em; margin-bottom: 10px;">📊</div>
-                                <p>Nenhuma votação ativa</p>
+                            <div style="display:flex;">
+                                <button v-if="pauta.status !== 'ABERTA'" @click="mudarStatus(pauta.id, 'ABERTA')" class="btn-icon-action btn-play" title="Abrir">
+                                    <i class="ph ph-play"></i>
+                                </button>
+                                <button v-if="pauta.status === 'ABERTA'" @click="mudarStatus(pauta.id, 'ENCERRADA')" class="btn-icon-action btn-stop" title="Encerrar">
+                                    <i class="ph ph-stop"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div v-show="abaAtual === 'grupos'" class="card">
-                    <h3 style="color: var(--primary-color);">Credenciamento</h3>
-                    <div class="form-credenciamento">
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label style="font-size:0.8em; font-weight:bold; color:#666;">NUMERAL DO GRUPO</label>
-                            <input v-model="novoGrupoInput" class="modern-input" placeholder="Ex: 107">
+                <div class="col-sidebar">
+                    <div class="card" style="text-align: center; position: sticky; top: 100px;">
+                        <span class="card-title" style="justify-content: center; margin-bottom: 20px;">
+                            <i class="ph ph-chart-pie-slice"></i> Tempo Real
+                        </span>
+                        
+                        <div v-if="pautaAtiva" class="monitor-active">
+                            <span :class="['badge', 'bg-'+pautaAtiva.status.toLowerCase()]" style="font-size: 0.9em;">● ${ pautaAtiva.status }</span>
+                            <h3 style="margin: 15px 0; font-size: 1.1em; color: var(--text-main); font-weight: 600;">${ pautaAtiva.titulo }</h3>
+                            
+                            <div class="chart-box"><canvas id="graficoVotos"></canvas></div>
+                            <div class="big-stat">${ pautaAtiva.total_votos }</div>
+                            <span class="stat-label">Votos Computados</span>
                         </div>
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label style="font-size:0.8em; font-weight:bold; color:#666;">QTD. DELEGADOS</label>
-                            <input v-model="novoGrupoQtd" type="number" class="modern-input" style="text-align:center;">
-                        </div>
-                        <button @click="cadastrarGrupo" class="btn-modern-add">CADASTRAR +</button>
-                    </div>
 
-                    <h3>Grupos Cadastrados (${ grupos.length })</h3>
-                    <div v-for="g in grupos" :key="g.numero" style="border-bottom:1px solid #eee; padding:15px 0; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <strong style="font-size: 1.1em; color: var(--primary-color);">GE ${ g.numero }/PE</strong> 
-                            <div style="margin-top: 5px;">
-                                <span v-for="i in g.quantidade" class="cred-chip">${ g.numero }-${ i }</span>
-                            </div>
+                        <div v-else style="padding: 50px 0; color: var(--text-muted); opacity: 0.6;">
+                            <i class="ph ph-chart-bar" style="font-size: 4em; margin-bottom: 10px;"></i>
+                            <p>Nenhuma votação aberta.</p>
                         </div>
-                        <button @click="removerGrupo(g.numero)" class="btn-del">Remover</button>
                     </div>
                 </div>
             </div>
+
+            <div v-show="abaAtual === 'grupos'" class="card" style="max-width: 900px; margin: 0 auto;">
+                <div class="card-header"><span class="card-title"><i class="ph ph-user-plus"></i> Novo Grupo</span></div>
+                
+                <div class="cred-wrapper">
+                    <div style="display: grid; grid-template-columns: 100px 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="font-size:0.75em; font-weight:700; color:var(--text-muted);">NÚMERO</label>
+                            <input v-model="novoGrupoInput" class="input-std" placeholder="Ex: 107" style="width:100%;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.75em; font-weight:700; color:var(--text-muted);">ADICIONAR NOME</label>
+                            <div style="display:flex; gap:10px;">
+                                <input v-model="novoNomeTemp" class="input-std" placeholder="Nome do delegado..." @keyup.enter="addNomeTemp">
+                                <button @click="addNomeTemp" class="btn-create" style="padding: 0 15px;"><i class="ph ph-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tag-container">
+                        <span v-if="nomesTemp.length === 0" style="color:var(--text-muted); font-size:0.9em;">Adicione os nomes...</span>
+                        <span v-for="(nome, idx) in nomesTemp" :key="idx" class="name-tag">
+                            ${ nome } <span @click="removeNomeTemp(idx)"><i class="ph ph-x-circle-fill"></i></span>
+                        </span>
+                    </div>
+                    <button @click="cadastrarGrupo" class="btn-create" style="width:100%; margin-top: 20px; padding: 14px;" :disabled="nomesTemp.length === 0 || !novoGrupoInput">
+                        CONFIRMAR CADASTRO (${ nomesTemp.length })
+                    </button>
+                </div>
+
+                <div v-for="g in grupos" :key="g.numero" class="group-card">
+                    <div class="group-header">
+                        <span><i class="ph ph-users-three"></i> GE ${ g.numero }/PE (${ g.quantidade })</span>
+                        <button @click="removerGrupo(g.numero)" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:600;"><i class="ph ph-trash"></i></button>
+                    </div>
+                    <div style="padding: 15px 20px;">
+                        <div v-for="del in g.delegados" class="delegate-row">
+                            <span>${ del.nome }</span>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="background:var(--primary); color:white; padding:2px 8px; border-radius:4px; font-family:monospace; font-size:0.9em;">${ del.id }</span>
+                                <i class="ph ph-x" style="cursor:pointer;" @click="removerDelegado(del.id)"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
+
+        <div v-if="showModalAsm" class="modal-backdrop" @click.self="showModalAsm = false">
+            <div class="modal-window">
+                <h3 style="margin-top:0; color:var(--primary);">Criar Novo Evento</h3>
+                <input v-model="novaAsmTitulo" class="input-std" style="width:100%; margin: 20px 0;" placeholder="Ex: Assembleia 2026">
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button @click="showModalAsm = false" style="background:transparent; border:1px solid var(--border); padding:10px 20px; border-radius:10px; cursor:pointer;">Cancelar</button>
+                    <button @click="criarAssembleia" class="btn-create">Criar e Ativar</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         const { createApp } = Vue
         let chartInstance = null;
+        
         createApp({
             delimiters: ['${', '}'],
-            data() { 
-                return { 
-                    token: localStorage.getItem('admin_token'), 
-                    usuarioInput: 'admin', 
-                    senhaInput: '',
-                    loading: false, // Estado de carregamento do botão
-                    erroLogin: '', // Mensagem de erro
-                    abaAtual: 'votacao', 
-                    pautas: [], grupos: [], novaPautaTexto: '', novoGrupoInput: '', novoGrupoQtd: 2, pautaAtiva: null 
-                } 
+            data() {
+                return {
+                    token: localStorage.getItem('admin_token'),
+                    usuarioInput: 'admin', senhaInput: '',
+                    abaAtual: 'votacao',
+                    pautas: [], grupos: [], assembleias: [],
+                    novaPautaTexto: '', 
+                    novoGrupoInput: '', novoNomeTemp: '', nomesTemp: [],
+                    pautaAtiva: null, assembleiaAtiva: null,
+                    showModalAsm: false, novaAsmTitulo: ''
+                }
             },
             methods: {
                 async logar() {
-                    this.loading = true;
-                    this.erroLogin = '';
                     try {
-                        const res = await axios.post('/api/admin/login', { 
-                            usuario: this.usuarioInput,
-                            senha: this.senhaInput 
-                        });
-                        this.token = res.data.token; 
-                        localStorage.setItem('admin_token', this.token);
-                        this.init();
-                    } catch (e) {
-                        this.erroLogin = e.response ? e.response.data.detail : 'Erro de conexão';
-                        // Feedback de erro (treme o card - opcional, requer css extra)
-                    } finally {
-                        this.loading = false;
-                    }
+                        const res = await axios.post('/api/admin/login', { usuario: this.usuarioInput, senha: this.senhaInput });
+                        this.token = res.data.token; localStorage.setItem('admin_token', this.token); this.init();
+                    } catch (e) { alert("Login inválido"); }
                 },
                 logout() { axios.post('/api/admin/logout'); this.token = null; localStorage.removeItem('admin_token'); },
-                init() { if(this.token) { axios.defaults.headers.common['x-admin-token'] = this.token; this.fetchDados(); this.fetchGrupos(); } },
-                async fetchDados() { 
-                    try { 
-                        const res = await axios.get('/api/dados-admin'); this.pautas = res.data; 
+                init() {
+                    if (this.token) {
+                        axios.defaults.headers.common['x-admin-token'] = this.token;
+                        this.fetchAssembleias(); this.fetchDados(); this.fetchGrupos();
+                    }
+                },
+                async fetchAssembleias() {
+                    const res = await axios.get('/api/assembleias');
+                    this.assembleias = res.data.lista;
+                    this.assembleiaAtiva = res.data.ativa;
+                },
+                async criarAssembleia() {
+                    if (!this.novaAsmTitulo) return;
+                    await axios.post('/api/assembleias', { titulo: this.novaAsmTitulo });
+                    this.novaAsmTitulo = ''; this.showModalAsm = false;
+                    await this.fetchAssembleias(); this.fetchDados();
+                },
+                async ativarAssembleia() {
+                    await axios.post(`/api/assembleias/${this.assembleiaAtiva}/ativar`);
+                    this.fetchDados();
+                },
+                async fetchDados() {
+                    try {
+                        const res = await axios.get('/api/dados-admin');
+                        this.pautas = res.data.pautas;
                         const aberta = this.pautas.find(p => p.status === 'ABERTA');
                         this.pautaAtiva = aberta ? aberta : (this.pautas.length > 0 ? this.pautas[0] : null);
                         this.updateChart();
                     } catch { if(this.token) this.logout(); }
                 },
-                async criarPauta() { if(!this.novaPautaTexto) return; await axios.post('/api/pautas', { titulo: this.novaPautaTexto }); this.novaPautaTexto = ''; this.fetchDados(); },
+                async criarPauta() {
+                    if (!this.novaPautaTexto) return;
+                    await axios.post('/api/pautas', { titulo: this.novaPautaTexto });
+                    this.novaPautaTexto = ''; this.fetchDados();
+                },
                 async mudarStatus(id, st) { await axios.post(`/api/pautas/${id}/status`, { status: st }); this.fetchDados(); },
+                
+                // Credenciamento
+                addNomeTemp() { if(this.novoNomeTemp.trim()) { this.nomesTemp.push(this.novoNomeTemp.trim()); this.novoNomeTemp = ''; } },
+                removeNomeTemp(idx) { this.nomesTemp.splice(idx, 1); },
+                async fetchGrupos() { const res = await axios.get('/api/grupos'); this.grupos = res.data; },
+                async cadastrarGrupo() {
+                    if (!this.novoGrupoInput || this.nomesTemp.length === 0) return;
+                    await axios.post('/api/grupos', { numero: this.novoGrupoInput, nomes: this.nomesTemp });
+                    this.novoGrupoInput = ''; this.nomesTemp = [];
+                    this.fetchGrupos(); this.fetchDados();
+                },
+                async removerGrupo(n) { if (confirm('Remover grupo ' + n + '?')) { await axios.delete('/api/grupos/' + n); this.fetchGrupos(); this.fetchDados(); } },
+                async removerDelegado(cred) { if(confirm('Remover '+cred+'?')) { await axios.delete('/api/usuarios/'+cred); this.fetchGrupos(); this.fetchDados(); } },
+                baixarExcel() { if (this.token) window.location.href = `/api/exportar?token=${this.token}`; },
+                
                 updateChart() {
                     if (!this.pautaAtiva || this.abaAtual !== 'votacao') return;
                     const ctx = document.getElementById('graficoVotos');
                     if (!ctx) return;
                     const dados = [this.pautaAtiva.resultados.favor, this.pautaAtiva.resultados.contra, this.pautaAtiva.resultados.abstencao];
+                    
                     if (chartInstance) { chartInstance.data.datasets[0].data = dados; chartInstance.update(); }
                     else {
                         chartInstance = new Chart(ctx, {
                             type: 'doughnut',
-                            data: { labels: ['Favor', 'Contra', 'Abstenção'], datasets: [{ data: dados, backgroundColor: ['#2ecc71', '#e74c3c', '#95a5a6'], borderWidth: 0 }] },
-                            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' } } }
+                            data: { labels: ['Favor', 'Contra', 'Abstenção'], datasets: [{ data: dados, backgroundColor: ['#10b981', '#ef4444', '#94a3b8'], borderWidth: 0 }] },
+                            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
                         });
                     }
-                },
-                async fetchGrupos() { const res = await axios.get('/api/grupos'); this.grupos = res.data; },
-                async cadastrarGrupo() { if(!this.novoGrupoInput) return; await axios.post('/api/grupos', { numero: this.novoGrupoInput, quantidade: this.novoGrupoQtd }); this.novoGrupoInput=''; this.novoGrupoQtd=2; this.fetchGrupos(); this.fetchDados(); },
-                async removerGrupo(n) { if(confirm('Remover grupo ' + n + '?')) { await axios.delete('/api/grupos/'+n); this.fetchGrupos(); this.fetchDados(); } },
-                baixarExcel() { if (!this.token) return; window.location.href = `/api/exportar?token=${this.token}`; }
+                }
             },
-            mounted() { this.init(); setInterval(() => { if(this.token && this.abaAtual === 'votacao') this.fetchDados(); }, 2000); }
+            mounted() { this.init(); setInterval(() => { if (this.token && this.abaAtual === 'votacao') this.fetchDados(); }, 2000); }
         }).mount('#app')
     </script>
 </body>

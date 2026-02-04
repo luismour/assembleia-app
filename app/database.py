@@ -24,12 +24,10 @@ def get_pauta_por_id(pauta_id: str):
 
 def get_pauta_ativa():
     pauta_ativa = None
-    # 1. Procura aberta
     for p in db["pautas"]:
         if p.status == "ABERTA":
             pauta_ativa = p
             break
-    # 2. Se não tem aberta, pega a última encerrada
     if not pauta_ativa and db["pautas"]:
          ultimo = db["pautas"][-1]
          if ultimo.status == "ENCERRADA":

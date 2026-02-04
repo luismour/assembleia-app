@@ -6,6 +6,8 @@ router = APIRouter(prefix="/api")
 
 # --- BANCO DE DADOS EM MEMÓRIA ---
 db = {
+    "assembleias": [],     
+    "assembleia_ativa": None, 
     "pautas": [],
     "usuarios": {},        
     "lista_grupos": [],
@@ -22,19 +24,32 @@ class VotoRequest(BaseModel):
     opcao: str 
 
 class Pauta:
-    def __init__(self, id, titulo):
+    def __init__(self, id, titulo, assembleia_id):
         self.id = id
         self.titulo = titulo
+        self.assembleia_id = assembleia_id 
         self.status = "AGUARDANDO" 
-        self.votos = {} # { "107-1": ["favor"] }
+        self.votos = {} 
 
 def get_pauta_ativa():
-    for p in db["pautas"]:
+    if not db["assembleia_ativa"]:
+        return None
+
+    pautas_da_assembleia = [p for p in db["pautas"] if p.assembleia_id == db["assembleia_ativa"]]
+    
+    for p in pautas_da_assembleia:
         if p.status == "ABERTA":
             return p
-    if db["pautas"]:
-        return db["pautas"][-1]
+    if pautas_da_assembleia:
+        return pautas_da_assembleia[-1]
     return None
+
+def get_nome_assembleia():
+    aid = db["assembleia_ativa"]
+    if not aid: return "Escoteiros do Brasil"
+    for a in db["assembleias"]:
+        if a["id"] == aid: return a["titulo"]
+    return "Evento Escoteiro"
 
 # --- ROTAS ---
 
@@ -46,8 +61,22 @@ def login_delegado(credencial: str):
 
 @router.get("/pauta-ativa")
 def get_pauta_ativa_endpoint(credencial: Optional[str] = None):
+    # Retorna também o nome do evento para o front
+    nome_evento = get_nome_assembleia()
+    
     pauta = get_pauta_ativa()
-    if not pauta: return {"pauta": None}
+    
+    # Estrutura base de resposta
+    response = {
+        "evento": nome_evento,
+        "pauta": None,
+        "meus_votos": [],
+        "pode_votar": False,
+        "resultados": {"favor": 0, "contra": 0, "abstencao": 0}
+    }
+
+    if not pauta: 
+        return response
 
     votos_usuario = []
     pode_votar = True
@@ -63,7 +92,7 @@ def get_pauta_ativa_endpoint(credencial: Optional[str] = None):
             if v in contagem:
                 contagem[v] += 1
 
-    return {
+    response.update({
         "pauta": {
             "id": pauta.id,
             "titulo": pauta.titulo,
@@ -73,7 +102,9 @@ def get_pauta_ativa_endpoint(credencial: Optional[str] = None):
         "meus_votos": votos_usuario,
         "pode_votar": pode_votar,
         "resultados": contagem
-    }
+    })
+    
+    return response
 
 @router.post("/votar")
 def registrar_voto(dados: VotoRequest):
@@ -85,11 +116,14 @@ def registrar_voto(dados: VotoRequest):
     
     if not pauta_alvo: raise HTTPException(404, "Pauta não encontrada")
     if pauta_alvo.status != "ABERTA": raise HTTPException(400, "A votação não está aberta.")
+
+    if pauta_alvo.assembleia_id != db["assembleia_ativa"]:
+        raise HTTPException(400, "Esta pauta não pertence à assembleia ativa.")
+
     if dados.credencial not in db["usuarios"]: raise HTTPException(401, "Usuário inválido")
 
     if dados.credencial not in pauta_alvo.votos:
         pauta_alvo.votos[dados.credencial] = []
-
 
     if len(pauta_alvo.votos[dados.credencial]) >= 1:
         raise HTTPException(400, "Você já votou nesta pauta.")
@@ -103,13 +137,16 @@ def get_historico(credencial: str):
         raise HTTPException(404, "Usuário não encontrado")
     
     historico = []
+    aid = db["assembleia_ativa"]
+    
     for p in reversed(db["pautas"]):
-        votos = p.votos.get(credencial, [])
-        if votos or p.status == "ENCERRADA":
-            historico.append({
-                "titulo": p.titulo,
-                "status": p.status,
-                "votos": votos
-            })
+        if p.assembleia_id == aid: 
+            votos = p.votos.get(credencial, [])
+            if votos or p.status == "ENCERRADA":
+                historico.append({
+                    "titulo": p.titulo,
+                    "status": p.status,
+                    "votos": votos
+                })
             
     return historico
