@@ -47,8 +47,15 @@ class GrupoNomesInput(BaseModel):
     nomes: List[str]
 
 # --- FUNÇÕES ---
-def get_password_hash(password): return pwd_context.hash(password)
-def verificar_senha(s, h): return pwd_context.verify(s, h)
+def get_password_hash(password): 
+    # Proteção: Se a senha for muito longa, corta para evitar erro do Bcrypt
+    if len(password) > 70: password = password[:70]
+    return pwd_context.hash(password)
+
+def verificar_senha(s, h): 
+    # Proteção: Se a senha for muito longa, corta antes de verificar
+    if len(s) > 70: s = s[:70]
+    return pwd_context.verify(s, h)
 
 def criar_token_acesso(data: dict):
     to_encode = data.copy()
@@ -62,10 +69,8 @@ def verificar_admin(x_admin_token: str = Header(None), token_query: str = Query(
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user = payload.get("sub")
         
-        # Se for o admin mestre, libera direto
         if user == "admin": return "admin"
 
-        # Verifica se admin existe no banco
         db_admin = db.query(models.Admin).filter(models.Admin.usuario == user).first()
         if not db_admin: 
             raise HTTPException(401, "Invalid")
@@ -79,35 +84,35 @@ def admin_login(dados: SenhaAdmin, db: Session = Depends(get_db)):
     usuario_input = dados.usuario.strip()
     senha_input = dados.senha.strip()
 
-    # === LOGIN DE EMERGÊNCIA (CORREÇÃO AUTOMÁTICA DE SENHA) ===
-    # Usuário: admin | Senha: nrpesaps
-    # Se você usar essa combinação, o sistema vai FORÇAR a atualização do banco
+    # === PROTEÇÃO CONTRA CRASH (ERRO 72 BYTES) ===
+    # Se a senha for gigante (ex: colou o token sem querer), cortamos ela.
+    # Isso evita o ValueError do Bcrypt que derruba o servidor.
+    if len(senha_input) > 70:
+        senha_input = senha_input[:70]
+    # ============================================
+
+    # === LOGIN DE EMERGÊNCIA (CORREÇÃO AUTOMÁTICA) ===
     if usuario_input == "admin" and senha_input == "nrpesaps":
         
-        # Busca se o admin já existe
         adm_db = db.query(models.Admin).filter(models.Admin.usuario == "admin").first()
-        
-        # Gera o hash da senha correta
-        novo_hash = pwd_context.hash("nrpesaps")
+        novo_hash = get_password_hash("nrpesaps")
 
         if not adm_db:
-            # Se não existir, cria do zero
             print("LOGIN MESTRE: Criando usuario admin...")
             db.add(models.Admin(usuario="admin", senha_hash=novo_hash))
         else:
-            # Se existir (com senha velha), ATUALIZA para a nova
             print("LOGIN MESTRE: Atualizando senha antiga no banco...")
             adm_db.senha_hash = novo_hash
         
         db.commit()
-        
-        # Retorna o token de sucesso
         return {"token": criar_token_acesso(data={"sub": "admin"})}
-    # ==========================================================
+    # =================================================
 
-    # Fluxo Normal (Para outros admins que você criar no futuro)
+    # Fluxo Normal
     adm = db.query(models.Admin).filter(models.Admin.usuario == usuario_input).first()
-    if not adm or not pwd_context.verify(senha_input, adm.senha_hash):
+    
+    # Usa a função verificar_senha protegida
+    if not adm or not verificar_senha(senha_input, adm.senha_hash):
         raise HTTPException(400, "Usuário ou senha incorretos")
     
     return {"token": criar_token_acesso(data={"sub": adm.usuario})}
@@ -123,7 +128,8 @@ def list_admins(db: Session = Depends(get_db), u: str = Depends(verificar_admin)
 def add_admin(d: NovoAdminInput, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     if db.query(models.Admin).filter(models.Admin.usuario == d.usuario).first():
         raise HTTPException(400, "Exists")
-    db.add(models.Admin(usuario=d.usuario, senha_hash=pwd_context.hash(d.senha)))
+    # Usa a função hash protegida
+    db.add(models.Admin(usuario=d.usuario, senha_hash=get_password_hash(d.senha)))
     db.commit()
     return {"msg": "Ok"}
 
@@ -193,7 +199,6 @@ def get_asms(db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
 def add_asm(d: AssembleiaInput, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     nova = models.Assembleia(id=str(uuid.uuid4()), titulo=d.titulo)
     db.add(nova)
-    # Se for a primeira, ativa
     if not db.query(models.Assembleia).filter(models.Assembleia.ativa == True).first():
         nova.ativa = True
     db.commit()
@@ -220,7 +225,6 @@ def add_grupo_massa(d: GrupoNomesInput, db: Session = Depends(get_db), u: str = 
     novos = []
     for nome in d.nomes:
         uid = f"{d.numero}-{prox}"
-        
         while True:
             t = secrets.token_hex(3).upper()
             if not db.query(models.Usuario).filter(models.Usuario.token == t).first(): break
@@ -280,7 +284,7 @@ def admin_data(db: Session = Depends(get_db), u: str = Depends(verificar_admin))
     
     total_users = db.query(models.Usuario).count()
     pautas = db.query(models.Pauta).filter(models.Pauta.assembleia_id == asm.id).all()
-    pautas.reverse() # Mais recente primeiro
+    pautas.reverse()
 
     res = []
     users_map = {u.id: u for u in db.query(models.Usuario).all()}
@@ -370,7 +374,6 @@ def set_status(id: str, d: StatusPauta, db: Session = Depends(get_db), u: str = 
     if not p: raise HTTPException(404)
     
     if d.status == "ABERTA":
-
         db.query(models.Pauta).filter(models.Pauta.assembleia_id == p.assembleia_id, models.Pauta.status == "ABERTA").update({models.Pauta.status: "ENCERRADA"})
     
     p.status = d.status
