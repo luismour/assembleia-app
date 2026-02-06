@@ -76,23 +76,39 @@ def verificar_admin(x_admin_token: str = Header(None), token_query: str = Query(
 
 @router.post("/admin/login")
 def admin_login(dados: SenhaAdmin, db: Session = Depends(get_db)):
-    # === LOGIN DE EMERGÊNCIA / FIXO ===
-    # Usuário: admin | Senha: nrpesaps
-    if dados.usuario == "admin" and dados.senha == "nrpesaps":
-        # Garante que o admin existe no banco
-        adm_db = db.query(models.Admin).filter(models.Admin.usuario == "admin").first()
-        if not adm_db:
-            hashed = pwd_context.hash("nrpesaps")
-            db.add(models.Admin(usuario="admin", senha_hash=hashed))
-            db.commit()
-        # Retorna o token mestre
-        return {"token": criar_token_acesso(data={"sub": "admin"})}
-    # ==================================
+    usuario_input = dados.usuario.strip()
+    senha_input = dados.senha.strip()
 
-    # Login Normal (para outros admins criados)
-    adm = db.query(models.Admin).filter(models.Admin.usuario == dados.usuario).first()
-    if not adm or not pwd_context.verify(dados.senha, adm.senha_hash):
-        raise HTTPException(400, "Login inválido")
+    # === LOGIN DE EMERGÊNCIA (CORREÇÃO AUTOMÁTICA DE SENHA) ===
+    # Usuário: admin | Senha: nrpesaps
+    # Se você usar essa combinação, o sistema vai FORÇAR a atualização do banco
+    if usuario_input == "admin" and senha_input == "nrpesaps":
+        
+        # Busca se o admin já existe
+        adm_db = db.query(models.Admin).filter(models.Admin.usuario == "admin").first()
+        
+        # Gera o hash da senha correta
+        novo_hash = pwd_context.hash("nrpesaps")
+
+        if not adm_db:
+            # Se não existir, cria do zero
+            print("LOGIN MESTRE: Criando usuario admin...")
+            db.add(models.Admin(usuario="admin", senha_hash=novo_hash))
+        else:
+            # Se existir (com senha velha), ATUALIZA para a nova
+            print("LOGIN MESTRE: Atualizando senha antiga no banco...")
+            adm_db.senha_hash = novo_hash
+        
+        db.commit()
+        
+        # Retorna o token de sucesso
+        return {"token": criar_token_acesso(data={"sub": "admin"})}
+    # ==========================================================
+
+    # Fluxo Normal (Para outros admins que você criar no futuro)
+    adm = db.query(models.Admin).filter(models.Admin.usuario == usuario_input).first()
+    if not adm or not pwd_context.verify(senha_input, adm.senha_hash):
+        raise HTTPException(400, "Usuário ou senha incorretos")
     
     return {"token": criar_token_acesso(data={"sub": adm.usuario})}
 
@@ -209,7 +225,7 @@ def add_grupo_massa(d: GrupoNomesInput, db: Session = Depends(get_db), u: str = 
             t = secrets.token_hex(3).upper()
             if not db.query(models.Usuario).filter(models.Usuario.token == t).first(): break
         
-        usr = models.Usuario(id=uid, nome=nome.strip(), grupo=d.numero, token=t, checkin=False, cpf="")
+        usr = models.Usuario(id=uid, nome=nome.strip(), grupo=d.numero, token=t, checkin=False, cpf="", email="")
         db.add(usr)
         novos.append(usr)
         prox += 1
@@ -354,7 +370,7 @@ def set_status(id: str, d: StatusPauta, db: Session = Depends(get_db), u: str = 
     if not p: raise HTTPException(404)
     
     if d.status == "ABERTA":
-        # Fecha outras da mesma asm
+
         db.query(models.Pauta).filter(models.Pauta.assembleia_id == p.assembleia_id, models.Pauta.status == "ABERTA").update({models.Pauta.status: "ENCERRADA"})
     
     p.status = d.status
