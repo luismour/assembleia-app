@@ -1,15 +1,43 @@
-from pydantic import BaseModel
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime
+from sqlalchemy.orm import relationship
+from .database import Base
+from datetime import datetime
 
-class PautaModel(BaseModel):
-    titulo: str
+class Admin(Base):
+    __tablename__ = "admins"
+    usuario = Column(String, primary_key=True, index=True)
+    senha_hash = Column(String)
 
-class GrupoModel(BaseModel):
-    numero: str
+class Assembleia(Base):
+    __tablename__ = "assembleias"
+    id = Column(String, primary_key=True, index=True)
+    titulo = Column(String)
+    ativa = Column(Boolean, default=False)
 
-class VotoModel(BaseModel):
-    credencial: str
-    pauta_id: str
-    opcao: str
+class Usuario(Base):
+    __tablename__ = "usuarios"
+    id = Column(String, primary_key=True, index=True) 
+    token = Column(String, unique=True, index=True)   
+    nome = Column(String)
+    grupo = Column(String)
+    cpf = Column(String)
+    email = Column(String) 
+    checkin = Column(Boolean, default=False)
+    last_seen = Column(DateTime, nullable=True)
 
-class LoginAdminModel(BaseModel):
-    senha: str
+class Pauta(Base):
+    __tablename__ = "pautas"
+    id = Column(String, primary_key=True, index=True)
+    titulo = Column(String)
+    assembleia_id = Column(String, ForeignKey("assembleias.id"))
+    status = Column(String, default="AGUARDANDO")
+    tipo = Column(String, default="SIMPLES")      
+    max_escolhas = Column(Integer, default=1)
+    candidatos_str = Column(Text, default="")     
+
+class Voto(Base):
+    __tablename__ = "votos"
+    id = Column(Integer, primary_key=True, index=True)
+    pauta_id = Column(String, ForeignKey("pautas.id"))
+    usuario_id = Column(String, ForeignKey("usuarios.id"))
+    escolha_str = Column(Text)

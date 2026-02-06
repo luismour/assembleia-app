@@ -1,35 +1,31 @@
-from uuid import uuid4
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-class Pauta:
-    def __init__(self, titulo):
-        self.id = str(uuid4())[:8]
-        self.titulo = titulo
-        self.status = "AGUARDANDO"
-        self.votos = {} # {credencial: opcao}
 
-# --- BANCO DE DADOS EM MEMÓRIA ---
-# Instanciamos aqui para ser importado globalmente
-db = {
-    "delegados": {},      # Armazena usuários: {'107-1': {...}}
-    "lista_grupos": [],   # Armazena numerais: ['107', '14']
-    "pautas": []          # Lista de objetos Pauta
-}
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
-# Funções auxiliares para não acessar o dict direto nas rotas
-def get_pauta_por_id(pauta_id: str):
-    for p in db["pautas"]:
-        if p.id == pauta_id:
-            return p
-    return None
+if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-def get_pauta_ativa():
-    pauta_ativa = None
-    for p in db["pautas"]:
-        if p.status == "ABERTA":
-            pauta_ativa = p
-            break
-    if not pauta_ativa and db["pautas"]:
-         ultimo = db["pautas"][-1]
-         if ultimo.status == "ENCERRADA":
-             pauta_ativa = ultimo
-    return pauta_ativa
+# 3. Criação do Engine (Conexão)
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    # Configuração específica para SQLite
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    )
+else:
+    # Configuração para PostgreSQL (Render)
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

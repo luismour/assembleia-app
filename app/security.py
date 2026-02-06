@@ -2,7 +2,6 @@ from fastapi import HTTPException, Header
 from uuid import uuid4
 from typing import Optional
 
-SENHA_ADMIN = "saps"
 admin_tokens = set()
 
 def verificar_admin(x_admin_token: Optional[str] = Header(None)):

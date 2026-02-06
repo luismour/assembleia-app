@@ -3,202 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telão - Assembleia</title>
+    <title>Telão</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@400;600;700;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root { 
-            --primary-blue: #002d62; 
-            --scout-purple: #6a1b9a;
-            --header-bg: #ffffff; 
-            --header-text: #002d62; 
-            --bg-gradient: linear-gradient(135deg, #f0f2f5 0%, #dfe4ea 100%); 
-        }
-        
-        body, html { height: 100%; margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg-gradient); overflow: hidden; }
+        body, html { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f0f2f5 0%, #dfe4ea 100%); overflow: hidden; }
         #app { display: flex; flex-direction: column; height: 100vh; }
         
-        .header-telao { 
-            background: var(--header-bg); color: var(--header-text); height: 90px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 10;
-        }
-        .logo-pe { height: 60px; width: auto; }
-        .live-indicator { display: flex; align-items: center; gap: 10px; background: #fee2e2; color: #b91c1c; padding: 6px 15px; border-radius: 30px; border: 1px solid #fecaca; }
-        .live-dot { width: 10px; height: 10px; background-color: #dc2626; border-radius: 50%; animation: blinkLive 1.5s infinite; }
+        .header { background: white; height: 90px; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 10; }
+        .live-badge { background: #fee2e2; color: #b91c1c; padding: 6px 15px; border-radius: 30px; font-weight: bold; display: flex; align-items: center; gap: 10px; font-family: 'Poppins'; }
         
-        .event-banner {
-            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--scout-purple) 100%);
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        .event-banner { background: linear-gradient(90deg, #002d62 0%, #6a1b9a 100%); color: white; text-align: center; padding: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 5; }
+        
+        .card { 
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); 
+            width: 90%; max-width: 1600px; height: 75vh; 
+            border-radius: 30px; box-shadow: 0 30px 80px rgba(0,0,0,0.15); 
+            display: flex; flex-direction: column; align-items: center; padding: 40px; box-sizing: border-box; margin: auto; 
             position: relative;
-            z-index: 5;
-            animation: slideDown 0.8s ease-out;
-        }
-        .event-name {
-            font-family: 'Oswald', sans-serif;
-            font-size: 2.2em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin: 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        /* CONTEÚDO PRINCIPAL */
-        .main-stage {
-            flex-grow: 1; 
-            display: flex; justify-content: center; align-items: center; 
-            padding: 40px;
         }
         
-        .card-telao { 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px); 
-            width: 100%; max-width: 1600px; height: 75vh; 
-            border-radius: 30px; 
-            box-shadow: 0 30px 80px rgba(0,0,0,0.15); 
-            display: grid; grid-template-columns: 1fr 1.2fr; gap: 50px; 
-            padding: 60px; box-sizing: border-box; align-items: center; 
-            border: 1px solid rgba(255,255,255,0.8); 
-            animation: fadeIn 1s ease;
-        }
-        
-        .status-badge { font-size: 1.2em; padding: 8px 25px; border-radius: 50px; text-transform: uppercase; font-weight: 800; display: inline-block; margin-bottom: 25px; }
+        .status-badge { font-size: 1.2em; padding: 8px 25px; border-radius: 50px; text-transform: uppercase; font-weight: 800; display: inline-block; margin-bottom: 15px; }
         .aberta { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; } 
         .encerrada { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .aguardando { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-
-        .pauta-title {
-            font-family:'Poppins', sans-serif; font-size: 3.2em; font-weight: 700; 
-            color: var(--primary-blue); margin: 0; line-height: 1.1;
+        
+        .res-badge { 
+            font-family: 'Oswald'; font-size: 4em; text-transform: uppercase; 
+            padding: 15px 40px; border-radius: 25px; transform: rotate(-5deg); 
+            display: inline-block; background: rgba(255,255,255,0.95); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 6px solid; 
+            position: absolute; z-index: 20; right: 20px; top: 20px;
         }
 
-        .total-votos { font-size: 8em; font-weight: 800; color: #334155; font-family: 'Poppins'; line-height: 1; letter-spacing: -2px; }
+        /* ESTILOS DA LISTA DE RANKING */
+        .ranking-container { width: 100%; max-width: 900px; flex: 1; overflow-y: auto; padding: 20px; margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
         
-        .custom-legend { display: flex; gap: 40px; margin-top: 40px; font-size: 1.8em; font-weight: 600; }
-        .legend-item { display: flex; align-items: center; gap: 15px; color: #475569; }
-        .dot { width: 20px; height: 20px; border-radius: 50%; }
-        
-        /* RESULTADO FINAL */
-        .resultado-badge { 
-            font-family: 'Oswald'; font-size: 5em; text-transform: uppercase; 
-            padding: 15px 50px; border-radius: 25px; transform: rotate(-5deg); 
-            display: inline-block; background: rgba(255,255,255,0.95);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-            border-width: 6px; border-style: solid;
+        .rank-item {
+            display: flex; align-items: center; padding: 20px 30px;
+            background: #fff; border-radius: 20px; border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.5s ease;
         }
-        .res-aprovada { color: #059669; border-color: #059669; }
-        .res-reprovada { color: #dc2626; border-color: #dc2626; }
+        
+        /* Destaque para os eleitos */
+        .rank-item.elected {
+            background: linear-gradient(90deg, #eff6ff 0%, #fff 100%);
+            border: 2px solid #002d62; transform: scale(1.02); z-index: 2;
+            box-shadow: 0 10px 20px rgba(0, 45, 98, 0.1);
+        }
+        .rank-item.elected .rank-pos { background: #002d62; color: white; }
+        
+        .rank-pos { 
+            font-family: 'Oswald'; font-size: 1.5em; width: 50px; height: 50px; 
+            background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            color: #64748b; margin-right: 20px; font-weight: bold;
+        }
+        .rank-name { flex: 1; font-weight: 700; font-size: 1.4em; color: #1e293b; }
+        .rank-votes { font-family: 'Poppins'; font-weight: 800; font-size: 1.8em; color: #002d62; }
 
-        /* ESTADO VAZIO */
-        .idle-state { text-align: center; opacity: 0.7; animation: pulseIdle 3s infinite; }
-
-        @keyframes blinkLive { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        @keyframes pulseIdle { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+        /* Estilos para grafico simples */
+        .chart-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
     </style>
 </head>
 <body>
     <div id="app">
-        <header class="header-telao">
+        <header class="header">
             <div style="display:flex; align-items:center; gap:20px;">
-                <img src="/static/logo-pe.svg" class="logo-pe">
-            </div>
-            <div class="live-indicator"><div class="live-dot"></div><span style="font-family:'Poppins'; font-weight:700; font-size:0.9em;">AO VIVO</span></div>
+                <img src="/static/logo-pe.svg" style="height:60px;">
+            <div class="live-badge"><div style="width:10px; height:10px; background:#dc2626; border-radius:50%; animation:blink 1.5s infinite;"></div> AO VIVO</div>
         </header>
-
-        <div class="event-banner">
-            <h2 class="event-name">${ dados.evento || 'Carregando evento...' }</h2>
-        </div>
-
-        <div class="main-stage">
-            
-            <div v-if="dados.pauta" class="card-telao">
-                <div>
+        
+        <div class="event-banner"><h2 style="margin:0; font-family:'Oswald'; text-transform:uppercase; letter-spacing:2px;">${ dados.evento || '...' }</h2></div>
+        
+        <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+            <div v-if="dados.pauta" class="card">
+                
+                <div style="text-align: center; width: 100%;">
                     <span :class="['status-badge', dados.pauta.status.toLowerCase()]">● ${ dados.pauta.status }</span>
-                    <h1 class="pauta-title">${ dados.pauta.titulo }</h1>
-                    
-                    <div style="margin-top:50px;">
-                        <div class="total-votos">${ dados.pauta.total_votos }</div>
-                        <div style="font-size:1.1em; text-transform:uppercase; color:#94a3b8; font-weight:700; letter-spacing:2px; margin-top:5px;">Votos Computados</div>
+                    <h1 style="font-family:'Poppins'; font-size:3em; font-weight:700; color:#002d62; margin:0; line-height:1.1;">${ dados.pauta.titulo }</h1>
+                    <div style="margin-top:10px; font-size:1.2em; color:#64748b; font-weight:600;">
+                        TOTAL DE VOTOS: <span style="color:#002d62; font-size:1.4em;">${ dados.pauta.total_votos }</span>
                     </div>
-
-                    <div class="custom-legend">
-                        <div class="legend-item"><span class="dot" style="background:#10b981"></span> ${ dados.pauta.resultados.favor }</div>
-                        <div class="legend-item"><span class="dot" style="background:#ef4444"></span> ${ dados.pauta.resultados.contra }</div>
-                        <div class="legend-item"><span class="dot" style="background:#94a3b8"></span> ${ dados.pauta.resultados.abstencao }</div>
+                </div>
+                
+                <div v-if="dados.pauta.tipo === 'ELEICAO'" class="ranking-container">
+                    <div v-for="(cand, idx) in ranking" :key="cand.nome" 
+                         class="rank-item" 
+                         :class="{ 'elected': idx < (dados.pauta.max_escolhas || 1) }">
+                        
+                        <div class="rank-pos">${ idx + 1 }º</div>
+                        <div class="rank-name">${ cand.nome }</div>
+                        <div class="rank-votes">${ cand.votos }</div>
                     </div>
                 </div>
 
-                <div style="height:100%; display:flex; justify-content:center; align-items:center; position: relative;">
-                    <div v-if="dados.pauta.status === 'ENCERRADA'" style="position: absolute; z-index: 20;">
-                        <div v-if="dados.pauta.resultado_final === 'APROVADA'" class="resultado-badge res-aprovada">APROVADA</div>
-                        <div v-else-if="dados.pauta.resultado_final === 'REPROVADA'" class="resultado-badge res-reprovada">REPROVADA</div>
+                <div v-else class="chart-container">
+                    <div v-if="dados.pauta.status==='ENCERRADA'" class="res-badge" 
+                         :style="{color:dados.pauta.resultado_final==='APROVADA'?'#059669':'#dc2626', borderColor:dados.pauta.resultado_final==='APROVADA'?'#059669':'#dc2626'}">
+                        ${ dados.pauta.resultado_final }
                     </div>
-                    
-                    <canvas id="graficoTelao" :style="{opacity: dados.pauta.status === 'ENCERRADA' ? '0.2' : '1', transition: 'opacity 0.5s'}"></canvas>
+                    <canvas id="chart" :style="{opacity: dados.pauta.status==='ENCERRADA'?0.3:1, maxHeight: '400px'}"></canvas>
                 </div>
+
             </div>
-
-            <div v-else class="idle-state">
-                <div style="font-size:8em; color:var(--primary-blue); margin-bottom: 20px;">⚜️</div>
-                <h2 style="font-size:3em; font-family:'Oswald'; color:var(--primary-blue); margin:0; text-transform:uppercase;">Aguardando Pauta</h2>
-                <p style="font-size:1.5em; letter-spacing:1px; color:#555;">A mesa diretora iniciará a votação em breve.</p>
+            
+            <div v-else style="text-align:center; opacity:0.6;">
+                <div style="font-size:8em; color:#002d62;">⚜️</div>
+                <h2 style="font-family:'Oswald'; font-size:3em; color:#002d62;">AGUARDANDO</h2>
             </div>
         </div>
     </div>
-
+    
+    <style>@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}</style>
+    
     <script>
-        const { createApp } = Vue
-        let chartInstance = null;
+        const { createApp } = Vue;
+        let chart = null;
         
         createApp({
             delimiters: ['${', '}'],
             data() { return { dados: { pauta: null, evento: '' } } },
+            
+            computed: {
+                // Lógica de Ordenação do Ranking
+                ranking() {
+                    if(!this.dados.pauta || !this.dados.pauta.resultados) return [];
+                    return Object.entries(this.dados.pauta.resultados)
+                        .map(([nome, votos]) => ({ nome, votos }))
+                        .sort((a, b) => b.votos - a.votos); // Maior voto primeiro
+                }
+            },
+
             methods: {
-                async fetchDados() {
-                    try {
-                        const res = await axios.get('/api/telao-dados');
-                        // Só atualiza se houver mudança real para evitar piscar
-                        if(JSON.stringify(this.dados) !== JSON.stringify(res.data)) {
-                            this.dados = res.data;
-                            this.updateChart();
-                        }
-                    } catch (e) { console.error("Erro conexao telao"); }
+                async fetch() { 
+                    try { 
+                        const r = await axios.get('/api/telao-dados'); 
+                        if(JSON.stringify(this.dados)!==JSON.stringify(r.data)){ 
+                            this.dados=r.data; 
+                            this.upChart(); 
+                        } 
+                    } catch{} 
                 },
-                updateChart() {
-                    if (!this.dados.pauta) return;
+                
+                upChart() {
+                    if(!this.dados.pauta) return;
+                    
+                    // Se for Eleição, não desenha gráfico (usa a lista HTML)
+                    if(this.dados.pauta.tipo === 'ELEICAO') {
+                        if(chart) { chart.destroy(); chart = null; }
+                        return;
+                    }
+
+                    // Se for Simples, desenha o gráfico
                     this.$nextTick(() => {
-                        const ctx = document.getElementById('graficoTelao');
-                        if (!ctx) return;
-                        const d = this.dados.pauta.resultados;
-                        const valores = [d.favor, d.contra, d.abstencao];
+                        const ctx = document.getElementById('chart'); if(!ctx) return;
                         
-                        if (chartInstance) { 
-                            chartInstance.data.datasets[0].data = valores; 
-                            chartInstance.update(); 
-                        } else {
-                            Chart.defaults.font.family = "'Poppins', sans-serif";
-                            chartInstance = new Chart(ctx, {
-                                type: 'doughnut',
-                                data: { labels: ['Favor', 'Contra', 'Abstenção'], datasets: [{ data: valores, backgroundColor: ['#10b981', '#ef4444', '#94a3b8'], borderWidth: 0 }] },
-                                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '65%', animation: { animateScale: true, animateRotate: true } }
-                            });
-                        }
+                        const labels = Object.keys(this.dados.pauta.resultados);
+                        const data = Object.values(this.dados.pauta.resultados);
+
+                        if(chart) chart.destroy();
+
+                        Chart.defaults.font.family="'Poppins'";
+                        Chart.defaults.font.size = 16;
+                        
+                        chart = new Chart(ctx, { 
+                            type: 'doughnut', 
+                            data:{ 
+                                labels: labels, 
+                                datasets:[{
+                                    data: data, 
+                                    backgroundColor: ['#10b981','#ef4444','#94a3b8'], 
+                                    borderWidth:0,
+                                    borderRadius: 8
+                                }] 
+                            }, 
+                            options:{ 
+                                responsive:true, 
+                                maintainAspectRatio:false, 
+                                cutout: '65%', 
+                                plugins:{ legend:{ display: true, position:'bottom' } }, 
+                                animation:{ animateScale:true } 
+                            } 
+                        });
                     });
                 }
             },
-            mounted() {
-                this.fetchDados();
-                setInterval(this.fetchDados, 2000);
-            }
-        }).mount('#app')
+            mounted() { setInterval(this.fetch, 2000); this.fetch(); }
+        }).mount('#app');
     </script>
 </body>
 </html>

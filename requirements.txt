@@ -1,10 +1,10 @@
 fastapi
 uvicorn
+sqlalchemy
 pydantic
-jinja2
-python-multipart
-openpyxl
-python-dotenv
-python-jose[cryptography]
+python-jose
 passlib[bcrypt]
-bcrypt==3.2.0
+openpyxl
+python-multipart
+fastapi-mail
+psycopg2-binary
