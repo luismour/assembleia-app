@@ -31,7 +31,7 @@ class LoginRequest(BaseModel):
 
 class VotoRequest(BaseModel):
     token: str
-    pauta_id: str  # <--- CORREÇÃO: Deve ser str para bater com o models.py
+    pauta_id: str  # <--- CORREÇÃO: str para compatibilidade com o banco
     opcao: Union[str, List[str]]
 
 class CadastroInput(BaseModel):
@@ -76,7 +76,16 @@ def login_delegado(dados: LoginRequest, db: Session = Depends(get_db)):
     user.last_seen = datetime.utcnow()
     db.commit()
 
-    return user
+    # --- CORREÇÃO PRINCIPAL ---
+    # Retorna um dicionário explícito para garantir que o Front-end receba 'nome' e 'grupo'
+    return {
+        "id": user.id,
+        "nome": user.nome,
+        "grupo": user.grupo,
+        "token": user.token,
+        "checkin": user.checkin,
+        "email": user.email
+    }
 
 @router.post("/heartbeat")
 def heartbeat(dados: HeartbeatInput, db: Session = Depends(get_db)):
@@ -200,7 +209,6 @@ def get_historico(credencial: str, db: Session = Depends(get_db)):
             res.append({"titulo": p.titulo, "status": p.status, "votos": v_fmt})
     return res
 
-# === AUTO-CADASTRO ATUALIZADO ===
 @router.post("/auto-cadastro")
 async def auto_cadastro(
     dados: CadastroInput, 

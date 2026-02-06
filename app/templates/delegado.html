@@ -146,7 +146,22 @@
         const { createApp } = Vue
         createApp({
             delimiters: ['${', '}'],
-            data() { return { mostrarWelcome: true, credencial: '', cpfInput: '', user: null, dados: null, view: 'votar', historico: [], erroLoginAnim: false, selecionados: [], hbInterval: null, pollInterval: null } },
+            data() { 
+                return { 
+                    mostrarWelcome: true, 
+                    credencial: '', 
+                    cpfInput: '', 
+                    user: null, 
+                    dados: null, 
+                    view: 'votar', 
+                    historico: [], 
+                    erroLoginAnim: false, 
+                    selecionados: [], 
+                    hbInterval: null, 
+                    pollInterval: null,
+                    authToken: null 
+                } 
+            },
             methods: {
                 iniciarApp() { this.mostrarWelcome = false; },
                 mascaraCPF(e) {
@@ -160,37 +175,37 @@
                 async login() { 
                     if(!this.credencial || !this.cpfInput) return;
                     try { 
-                        const res = await axios.post('/api/login', { token: this.credencial.trim().toUpperCase(), cpf: this.cpfInput }); 
+                        const res = await axios.post('/api/login', { 
+                            token: this.credencial.trim().toUpperCase(), 
+                            cpf: this.cpfInput 
+                        }); 
                         this.user = res.data; 
+                        this.authToken = this.user.token || this.credencial.trim().toUpperCase();
+
                         this.startHeartbeat();
                         this.poll(); 
                     } 
                     catch (e) { 
                         if(e.response && e.response.data && e.response.data.detail) alert(e.response.data.detail); 
-                        else alert("Erro ao acessar."); 
+                        else alert("Erro ao acessar. Verifique seus dados."); 
                         this.triggerShake(); 
                     } 
                 },
                 triggerShake() { this.erroLoginAnim = true; if (navigator.vibrate) navigator.vibrate(200); setTimeout(() => this.erroLoginAnim = false, 400); },
                 toggleCand(nome) {
                     if (this.selecionados.includes(nome)) { this.selecionados = this.selecionados.filter(x => x !== nome); } else {
-                        // FIX: Adicionada crase para interpolação correta
                         if (this.selecionados.length < this.dados.pauta.max_escolhas) { this.selecionados.push(nome); } else { if (navigator.vibrate) navigator.vibrate(200); alert(`Maximum of ${this.dados.pauta.max_escolhas} votes.`); }
                     }
                 },
                 async confirmarEleicao() { 
                     if (navigator.vibrate) navigator.vibrate(50); 
-                    // FIX: Adicionada crase para interpolação correta
                     if(confirm(`Confirm vote for: ${this.selecionados.join(', ')}?`)) { this.enviarVoto(this.selecionados); } 
                 },
                 async votar(op) { if (navigator.vibrate) navigator.vibrate(50); if(confirm('Confirm vote?')) { this.enviarVoto(op); } },
                 async enviarVoto(valorVoto) {
                     try {
-                        // FIX: Usa credencial como fallback se token do user for nulo
-                        const tokenReal = this.user.token || this.credencial;
-                        if (!tokenReal) return alert("Error: Please login again.");
-                        
-                        await axios.post('/api/votar', { token: tokenReal, pauta_id: this.dados.pauta.id, opcao: valorVoto }); 
+                        if (!this.authToken) return alert("Erro de sessão. Faça login novamente.");
+                        await axios.post('/api/votar', { token: this.authToken, pauta_id: this.dados.pauta.id, opcao: valorVoto }); 
                         this.celebrar(); this.selecionados = []; this.load(); 
                     } catch(e) { 
                         if (e.response && e.response.data) {
@@ -201,49 +216,40 @@
                 },
                 celebrar() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); },
                 async load() { 
-                    if(!this.user) return; 
+                    if(!this.authToken) return; 
                     try { 
-                        const tokenReal = this.user.token || this.credencial;
-                        const res = await axios.get('/api/pauta-ativa?credencial='+tokenReal); 
+                        const res = await axios.get('/api/pauta-ativa?credencial='+this.authToken); 
                         this.dados = res.data; 
                     } catch {} 
                 },
                 async carregarHistorico() { 
                     this.view = 'historico'; 
+                    if(!this.authToken) return;
                     try { 
-                        const tokenReal = this.user.token || this.credencial;
-                        const res = await axios.get('/api/historico?credencial='+tokenReal); 
+                        const res = await axios.get('/api/historico?credencial='+this.authToken); 
                         this.historico = res.data; 
                     } catch {} 
                 },
-                
                 async sair() { 
                     if(confirm('Deseja realmente sair?')) { 
-                        try { 
-                            const tokenReal = this.user.token || this.credencial;
-                            await axios.post('/api/logout-delegado', { token: tokenReal }); 
-                        } catch {}
-                        this.user = null; this.dados = null; this.view = 'votar'; this.credencial = ''; this.cpfInput = ''; 
+                        try { if(this.authToken) await axios.post('/api/logout-delegado', { token: this.authToken }); } catch {}
+                        this.user = null; this.dados = null; this.authToken = null; this.view = 'votar'; this.credencial = ''; this.cpfInput = ''; 
                         clearInterval(this.hbInterval); clearInterval(this.pollInterval);
                     } 
                 },
-                
                 startHeartbeat() {
+                    if (this.hbInterval) clearInterval(this.hbInterval);
                     this.hbInterval = setInterval(async () => {
-                        if(this.user) {
-                            // FIX: Correção do erro 422 - Envia a credencial digitada se o token do objeto user estiver vazio
-                            const tokenReal = this.user.token || this.credencial;
-                            if (tokenReal) {
-                                try { await axios.post('/api/heartbeat', { token: tokenReal }); } catch {}
-                            }
+                        if(this.authToken) {
+                            try { await axios.post('/api/heartbeat', { token: this.authToken }); } catch {}
                         }
                     }, 5000);
                 },
-
                 poll() { 
                     this.load(); 
+                    if (this.pollInterval) clearInterval(this.pollInterval);
                     this.pollInterval = setInterval(() => { 
-                        if(this.view==='votar' && this.user) this.load(); 
+                        if(this.view==='votar' && this.authToken) this.load(); 
                     }, 2000); 
                 }
             }
