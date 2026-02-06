@@ -59,7 +59,7 @@
         .details-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
         .vote-tag { font-weight: 700; font-size: 0.8em; text-transform: uppercase; }
         
-        /* GESTÃO ACESSOS */
+        /* GESTÃO ACESSOS & FILTROS */
         .access-management-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1200px; margin: 0 auto; }
         .stats-card { background: white; border-radius: 12px; padding: 15px 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px; margin-bottom: 25px; border: 1px solid var(--border); }
         .stats-number { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
@@ -69,6 +69,14 @@
         .table-delegados th { text-align: left; padding: 10px; border-bottom: 2px solid #eee; color: #666; font-size: 0.9em; }
         .table-delegados td { padding: 10px; border-bottom: 1px solid #eee; }
         .tag { background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85em; font-weight: 600; color: #475569; }
+
+        /* BARRA DE FILTROS */
+        .filter-bar { width: 100%; max-width: 1000px; display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .input-icon-wrapper { position: relative; flex: 1; min-width: 250px; }
+        .input-icon-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1em; }
+        .input-icon-wrapper input { width: 100%; padding: 10px 10px 10px 40px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Inter'; }
+        .filter-select { padding: 10px 15px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Inter'; background: white; cursor: pointer; color: var(--text-main); }
+        .results-count { width: 100%; max-width: 1000px; text-align: right; font-size: 0.8em; color: var(--text-muted); margin-bottom: 5px; }
 
         /* RANKING SIDEBAR */
         .ranking-list-small { max-height: 350px; overflow-y: auto; text-align: left; margin-top: 15px; padding-right: 5px; }
@@ -224,6 +232,28 @@
                     <button @click="cadastrarEmMassa" class="btn-create" style="width:100%;">GERAR TOKENS</button>
                 </div>
 
+                <div class="filter-bar">
+                    <div class="input-icon-wrapper">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" v-model="searchQuery" placeholder="Buscar Nome, Token, CPF...">
+                    </div>
+                    
+                    <select v-model="filterGroup" class="filter-select">
+                        <option value="">Todos os Grupos</option>
+                        <option v-for="g in listaGruposUnicos" :value="g">Grupo ${ g }</option>
+                    </select>
+
+                    <select v-model="filterStatus" class="filter-select">
+                        <option value="">Todos Status</option>
+                        <option value="presente">✅ Presentes</option>
+                        <option value="ausente">❌ Ausentes</option>
+                    </select>
+                </div>
+
+                <div class="results-count">
+                    Mostrando ${ delegadosFiltrados.length } de ${ delegadosLista.length } delegados
+                </div>
+
                 <div class="table-wrapper">
                     <table class="table-delegados">
                         <thead>
@@ -236,7 +266,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="d in delegadosLista" :key="d.token">
+                            <tr v-for="d in delegadosFiltrados" :key="d.token">
                                 <td><div style="font-weight: 600;">${ d.nome }</div></td>
                                 <td><span class="tag">GE ${ d.grupo }</span> <small style="color:#aaa;">${ d.id }</small></td>
                                 <td style="font-family:monospace; font-weight:bold; letter-spacing:1px; color:var(--primary);">${ d.token }</td>
@@ -252,6 +282,11 @@
                                     <button class="btn-icon-danger" @click="removerDelegado(d.token)">
                                         <i class="ph ph-trash"></i>
                                     </button>
+                                </td>
+                            </tr>
+                            <tr v-if="delegadosFiltrados.length === 0">
+                                <td colspan="5" style="text-align:center; padding: 30px; color: #999;">
+                                    Nenhum delegado encontrado com estes filtros.
                                 </td>
                             </tr>
                         </tbody>
@@ -298,7 +333,11 @@
                 novoAdminUser:'', novoAdminPass:'',
                 tipoPauta: 'SIMPLES', maxVotos: 1, novoCandidato: '', listaCandidatos: [],
                 showModalEdit: false, editData: { id: '', titulo: '', tipo: '', max_escolhas: 1 }, editCandidatos: [], editNovoCandidato: '',
-                nomesArea: '', modoImpressao: false, showModalGrupo: false
+                nomesArea: '', modoImpressao: false, showModalGrupo: false,
+                // NOVOS CAMPOS PARA FILTRO
+                searchQuery: '',
+                filterGroup: '',
+                filterStatus: ''
             }},
             computed: {
                 ranking() {
@@ -307,13 +346,48 @@
                     return Object.entries(this.pautaAtiva.resultados).map(([nome, votos]) => ({ nome, votos })).sort((a, b) => b.votos - a.votos);
                 },
                 delegadosLista() {
-                    // Achata a lista de grupos para uma lista simples de delegados para facilitar a tabela
                     let lista = [];
                     this.grupos.forEach(g => {
                         g.delegados.forEach(d => {
                             lista.push({ ...d, grupo: g.numero });
                         });
                     });
+                    return lista;
+                },
+                listaGruposUnicos() {
+                    const grps = this.delegadosLista.map(d => d.grupo);
+                    return [...new Set(grps)].sort((a,b) => {
+                        // Tenta ordenar numericamente se forem números
+                        const na = Number(a), nb = Number(b);
+                        if(!isNaN(na) && !isNaN(nb)) return na - nb;
+                        return a.localeCompare(b);
+                    });
+                },
+                delegadosFiltrados() {
+                    let lista = this.delegadosLista;
+                    
+                    // 1. Filtro Texto (Nome, Token, CPF, ID)
+                    if(this.searchQuery) {
+                        const q = this.searchQuery.toLowerCase();
+                        lista = lista.filter(d => 
+                            d.nome.toLowerCase().includes(q) || 
+                            d.token.toLowerCase().includes(q) || 
+                            (d.cpf && d.cpf.includes(q)) ||
+                            d.id.toLowerCase().includes(q)
+                        );
+                    }
+
+                    // 2. Filtro de Grupo
+                    if(this.filterGroup) {
+                        lista = lista.filter(d => d.grupo == this.filterGroup);
+                    }
+
+                    // 3. Filtro de Status
+                    if(this.filterStatus) {
+                        if(this.filterStatus === 'presente') lista = lista.filter(d => d.checkin);
+                        if(this.filterStatus === 'ausente') lista = lista.filter(d => !d.checkin);
+                    }
+
                     return lista;
                 }
             },
@@ -362,7 +436,6 @@
                 async criarAssembleia() { await axios.post('/api/assembleias', {titulo:this.novaAsmTitulo}); this.showModalAsm=false; this.novaAsmTitulo=''; this.fetchData(); },
                 async ativarAssembleia() { await axios.post(`/api/assembleias/${this.assembleiaAtiva}/ativar`); this.fetchData(); },
                 
-                // --- NOVAS FUNÇÕES PARA EDITAR/EXCLUIR EVENTO ---
                 async editarAssembleia() {
                     if (!this.assembleiaAtiva) return;
                     const asmAtual = this.assembleias.find(a => a.id === this.assembleiaAtiva);
