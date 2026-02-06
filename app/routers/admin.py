@@ -79,6 +79,22 @@ def verificar_admin(x_admin_token: str = Header(None), token_query: str = Query(
 
 # --- ROTAS ---
 
+@router.put("/assembleias/{id}")
+def edit_asm(id: str, d: AssembleiaInput, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
+    asm = db.query(models.Assembleia).filter(models.Assembleia.id == id).first()
+    if not asm:
+        raise HTTPException(404, "Evento não encontrado")
+    
+    asm.titulo = d.titulo
+    db.commit()
+    return {"msg": "ok", "titulo": asm.titulo}
+
+@router.delete("/assembleias/{id}")
+def delete_asm(id: str, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
+    asm = db.query(models.Assembleia).filter(models.Assembleia.id == id).first()
+    if not asm:
+        raise HTTPException(404, "Evento não encontrado")
+
 @router.post("/admin/login")
 def admin_login(dados: SenhaAdmin, db: Session = Depends(get_db)):
     usuario_input = dados.usuario.strip()
@@ -331,6 +347,19 @@ def exportar(x_admin_token: str = Header(None), token: str = Query(None), db: Se
     fill = PatternFill(start_color="002d62", end_color="002d62", fill_type="solid")
     ca = Alignment(horizontal='center', vertical='center')
     bd = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+
+
+    pautas = db.query(models.Pauta).filter(models.Pauta.assembleia_id == id).all()
+    
+    # 2. Para cada pauta, deletar os votos e depois a pauta
+    for p in pautas:
+        db.query(models.Voto).filter(models.Voto.pauta_id == p.id).delete()
+        db.delete(p)
+    
+    # 3. Deletar a assembleia
+    db.delete(asm)
+    db.commit()
+    return {"msg": "ok"}
 
     # ABA 1: RESUMO
     ws1 = wb.active; ws1.title = "Resumo"

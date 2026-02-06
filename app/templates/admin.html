@@ -92,9 +92,20 @@
             <header class="top-bar">
                 <div class="brand"><img src="/static/logo-pe.svg" alt="Logo"><div class="brand-text"></div></div>
                 <div class="event-selector-wrapper">
-                    <select v-model="assembleiaAtiva" @change="ativarAssembleia" style="border:none; background:transparent; font-weight:bold; color:var(--primary); outline:none; width: 100%;"><option v-for="a in assembleias" :value="a.id">${ a.titulo }</option></select>
-                    <button @click="showModalAsm = true" class="btn-create" style="width:30px; height:30px; padding:0; border-radius:50%; display:flex; align-items:center; justify-content:center;">+</button>
-                </div>
+                <select v-model="assembleiaAtiva" @change="ativarAssembleia" style="border:none; background:transparent; font-weight:bold; color:var(--primary); outline:none; width: 100%; max-width: 200px;">
+                    <option v-for="a in assembleias" :value="a.id">${ a.titulo }</option>
+                </select>      
+            <div style="display:flex; gap: 5px; border-left: 1px solid #ccc; padding-left: 10px;">
+        <button @click="editarAssembleia" title="Renomear Evento" style="border:none; background:transparent; color:var(--accent); cursor:pointer; font-size: 1.1em;">
+            <i class="ph ph-pencil-simple"></i>
+        </button>
+        <button @click="deletarAssembleia" title="Excluir Evento" style="border:none; background:transparent; color:var(--danger); cursor:pointer; font-size: 1.1em;">
+            <i class="ph ph-trash"></i>
+        </button>
+    </div>
+
+    <button @click="showModalAsm = true" class="btn-create" style="width:30px; height:30px; padding:0; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-left: 5px;">+</button>
+</div>
                 <div class="header-actions">
                     <button @click="baixarExcel" class="btn-action btn-excel"><i class="ph ph-microsoft-excel-logo"></i> <span style="display:none; @media(min-width: 1000px){display:inline;}">Relatório</span></button>
                     <a href="/telao" target="_blank" class="btn-action btn-telao"><i class="ph ph-monitor-play"></i> <span style="display:none; @media(min-width: 1000px){display:inline;}">Telão</span></a>
@@ -258,6 +269,46 @@
                 }
             },
             methods: {
+                async editarAssembleia() {
+    if (!this.assembleiaAtiva) return;
+    
+    // Encontra o objeto da assembleia atual para pegar o nome
+    const asmAtual = this.assembleias.find(a => a.id === this.assembleiaAtiva);
+    if (!asmAtual) return;
+
+    // Usa um prompt simples do navegador para evitar criar novos modais complexos
+    const novoTitulo = prompt("Novo nome para o evento:", asmAtual.titulo);
+    
+    if (novoTitulo && novoTitulo.trim() !== "") {
+        try {
+            await axios.put(`/api/assembleias/${this.assembleiaAtiva}`, { titulo: novoTitulo });
+            this.fetchData(); // Recarrega a lista
+        } catch (e) {
+            alert("Erro ao renomear evento.");
+        }
+    }
+},
+
+                async deletarAssembleia() {
+                    if (!this.assembleiaAtiva) return;
+                    
+                    const asmAtual = this.assembleias.find(a => a.id === this.assembleiaAtiva);
+                    if (confirm(`ATENÇÃO: Tem certeza que deseja excluir o evento "${asmAtual.titulo}"?\n\nIsso apagará TODAS as pautas e votos deste evento permanentemente.`)) {
+                        try {
+                            await axios.delete(`/api/assembleias/${this.assembleiaAtiva}`);
+                            this.assembleiaAtiva = null; 
+                            await this.fetchData();
+                            if (this.assembleias.length > 0) {
+                                this.assembleiaAtiva = this.assembleias[0].id;
+                                this.ativarAssembleia(); 
+                            } else {
+                                this.assembleiaAtiva = null;
+                            }
+                        } catch (e) {
+                            alert("Erro ao excluir evento.");
+                        }
+                    }
+                },
                 async logar() { try { const r = await axios.post('/api/admin/login', {usuario:this.usuarioInput, senha:this.senhaInput}); this.token=r.data.token; localStorage.setItem('admin_token',this.token); this.init(); } catch{ alert('Erro login'); } },
                 logout() { axios.post('/api/admin/logout'); this.token=null; localStorage.removeItem('admin_token'); },
                 init() { if(this.token) { axios.defaults.headers.common['x-admin-token']=this.token; this.fetchData(); setInterval(() => { if(this.abaAtual==='votacao') this.fetchData(); }, 2000); } },
