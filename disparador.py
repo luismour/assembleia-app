@@ -1,137 +1,135 @@
-import requests
+import asyncio
+import os
 import smtplib
 import ssl
-import time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.models import Usuario
+from app.database import Base
 
-# ================= CONFIGURAÇÕES =================
-# URL do seu site no Render (SEM A BARRA NO FINAL)
-SITE_URL = "https://assembleia-app.onrender.com"
+load_dotenv()
 
-# Suas credenciais de ADMIN do site
-ADMIN_USER = "admin"
-ADMIN_PASS = "nrpesaps"
+MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Suas credenciais do GMAIL (Para enviar)
-GMAIL_USER = "luis.moura@escoteiros.org.br"     
-GMAIL_PASS = "makb mfwe tuel auqq"   
-# =================================================
+print("--- CONFERÊNCIA DE CREDENCIAIS ---")
+if not MAIL_USERNAME:
+    print("❌ ERRO: MAIL_USERNAME está vazio no .env")
+else:
+    print(f"✅ Email carregado: {MAIL_USERNAME}")
 
-def pegar_lista_usuarios(token):
-    print("📥 Baixando lista de usuários...")
-    headers = {"x-admin-token": token}
-    try:
-        response = requests.get(f"{SITE_URL}/api/admin/lista-para-email", headers=headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            print(f"Erro ao baixar lista: {response.text}")
-            return []
-    except Exception as e:
-        print(f"Erro de conexão: {e}")
-        return []
+if not MAIL_PASSWORD:
+    print("❌ ERRO: MAIL_PASSWORD está vazio no .env")
+else:
 
-def enviar_email(destinatario, nome, token_acesso, id_usuario):
-    # HTML do E-mail
+    escondida = MAIL_PASSWORD[:2] + "****" + MAIL_PASSWORD[-2:] if len(MAIL_PASSWORD) > 4 else "****"
+    print(f"✅ Senha carregada: {escondida}")
+
+if not DATABASE_URL:
+    print("⚠️  AVISO: DATABASE_URL não encontrada. Usando SQLite local.")
+    DATABASE_URL = "sqlite:///./sql_app.db"
+elif "postgres" in DATABASE_URL:
+    print("✅ Banco: PostgreSQL (Render)")
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+print("-" * 40)
+
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
+db = SessionLocal()
+Base.metadata.create_all(bind=engine)
+
+ARQUIVO_MEMORIA = "emails_ja_enviados.txt"
+
+def carregar_enviados():
+    if not os.path.exists(ARQUIVO_MEMORIA): return set()
+    with open(ARQUIVO_MEMORIA, "r") as f: return set(l.strip() for l in f.readlines())
+
+def salvar_envio(email):
+    with open(ARQUIVO_MEMORIA, "a") as f: f.write(f"{email}\n")
+
+def enviar_email_direto(destinatario, nome, token, user_id):
     html = f"""
-    <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; max-width: 600px;">
-        <h2 style="color: #002d62;">Assembleia Regional - Token Oficial</h2>
+    <div style="font-family: Arial; padding: 20px; border: 1px solid #ccc;">
+        <h2 style="color: #002d62;">Assembleia Regional</h2>
         <p>Olá, <b>{nome}</b>!</p>
-        <p>Segue abaixo seu token definitivo para a votação:</p>
-        
-        <div style="background-color: #f0f9ff; padding: 20px; text-align: center; margin: 20px 0; border: 2px dashed #002d62;">
-            <h1 style="margin: 0; color: #002d62; letter-spacing: 5px; font-size: 2.5em;">{token_acesso}</h1>
-            <p style="margin: 5px 0 0 0;">ID: <b>{id_usuario}</b></p>
+        <div style="background: #f0f9ff; padding: 15px; text-align: center; border: 2px dashed #002d62; margin: 20px 0;">
+            <h1 style="margin:0; color:#002d62; letter-spacing:3px;">{token}</h1>
+            <p>ID: <b>{user_id}</b></p>
         </div>
-        
-        <p style="color: #be123c; font-size: 0.9em;">
-            ⚠️ Apresente este código na mesa de credenciamento.
-        </p>
+        <p>Apresente este código no credenciamento.</p>
     </div>
     """
-
+    
     msg = MIMEMultipart()
-    msg['From'] = f"Escoteiros PE <{GMAIL_USER}>"
+    msg['From'] = f"Escoteiros PE <{MAIL_USERNAME}>"
     msg['To'] = destinatario
-    msg['Subject'] = "Seu Token de Votação - Assembleia PE"
+    msg['Subject'] = "Codigo de Votacao - Assembleia PE"
     msg.attach(MIMEText(html, 'html'))
 
-    # Contexto SSL (Mais seguro rodando local)
     context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
 
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as server:
+        server.ehlo()
+        server.starttls(context=context)
+        server.ehlo()
+        server.login(MAIL_USERNAME, MAIL_PASSWORD) 
+        server.sendmail(MAIL_USERNAME, destinatario, msg.as_string())
+
+async def disparar():
+    if not MAIL_USERNAME or not MAIL_PASSWORD:
+        print("⛔ PARANDO: Corrija o arquivo .env antes de continuar.")
+        return
+
+    print("\n--- INICIANDO DISPARADOR ---")
     try:
-        # Tenta porta 465 (SSL) primeiro, que é melhor para PC local
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(GMAIL_USER, GMAIL_PASS)
-            server.sendmail(GMAIL_USER, destinatario, msg.as_string())
-        return True
+        usuarios = db.query(Usuario).all()
     except Exception as e:
-        print(f"❌ Erro ao enviar para {destinatario}: {e}")
-        return False
-
-def main():
-    print("=== DISPARADOR DE EMAILS - ASSEMBLEIA ===")
-    
-    # 1. Login no Site
-    print("🔑 Autenticando no painel admin...")
-    try:
-        resp = requests.post(f"{SITE_URL}/api/admin/login", json={"usuario": ADMIN_USER, "senha": ADMIN_PASS})
-        if resp.status_code != 200:
-            print("❌ Falha no login! Verifique senha do admin.")
-            return
-        token_site = resp.json()["token"]
-    except Exception as e:
-        print(f"❌ Erro ao conectar no site: {e}")
+        print(f"❌ Erro ao ler banco: {e}")
         return
 
-    # 2. Pega Lista
-    lista = pegar_lista_usuarios(token_site)
-    total = len(lista)
-    print(f"📋 Encontrados {total} usuários com e-mail cadastrado.")
-    
-    if total == 0:
-        return
+    ja_enviados = carregar_enviados()
+    print(f"👥 Total no Banco: {len(usuarios)}")
+    print(f"📩 Já enviados: {len(ja_enviados)}")
+    print("-" * 30)
 
-    confirmacao = input("Deseja iniciar o envio em massa? (s/n): ")
-    if confirmacao.lower() != 's':
-        return
+    contagem = 0
 
-    # 3. Loop de Envio
-    sucessos = 0
-    erros = 0
-
-    print("\n🚀 Iniciando disparos...")
-    
-    for i, usuario in enumerate(lista, 1):
-        email = usuario['email']
-        nome = usuario['nome']
-        token = usuario['token']
-        uid = usuario['id']
-
-        if "@" not in email:
-            print(f"⚠️ [{i}/{total}] Email inválido ignorado: {email}")
+    for user in usuarios:
+        if not user.email or "@" not in user.email or "sem_email" in user.email:
             continue
 
-        print(f"📨 [{i}/{total}] Enviando para {nome} ({email})... ", end="")
-        
-        # Envia
-        ok = enviar_email(email, nome, token, uid)
-        
-        if ok:
-            print("✅ OK!")
-            sucessos += 1
-        else:
-            erros += 1
+        if user.email in ja_enviados:
+            continue
 
-        # Pausa de segurança para o Gmail não bloquear (1 segundo)
-        time.sleep(1)
+        print(f"🚀 ENVIANDO PARA: {user.nome} ({user.email})...")
+        
+        try:
+            enviar_email_direto(user.email, user.nome, user.token, user.id)
+            
+            print(f"✅ SUCESSO!")
+            salvar_envio(user.email)
+            ja_enviados.add(user.email)
+            contagem += 1
+            
+            await asyncio.sleep(2)
+            
+        except smtplib.SMTPAuthenticationError:
+            print("❌ ERRO CRÍTICO: Usuário ou Senha REJEITADOS pelo Google.")
+            print("   Verifique se sua SENHA DE APP está correta no .env")
+            break 
+        except Exception as e:
+            print(f"❌ ERRO: {e}")
 
-    print("\n" + "="*30)
-    print(f"RELATÓRIO FINAL:")
-    print(f"✅ Sucessos: {sucessos}")
-    print(f"❌ Erros: {erros}")
-    print("="*30)
+    print("-" * 30)
+    print(f"🏁 Finalizado. Enviados: {contagem}")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(disparar())
