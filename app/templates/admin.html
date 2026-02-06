@@ -59,7 +59,7 @@
         .details-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
         .vote-tag { font-weight: 700; font-size: 0.8em; text-transform: uppercase; }
         
-        /* GESTÃO ACESSOS & FILTROS */
+        /* GESTÃO ACESSOS */
         .access-management-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1200px; margin: 0 auto; }
         .stats-card { background: white; border-radius: 12px; padding: 15px 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px; margin-bottom: 25px; border: 1px solid var(--border); }
         .stats-number { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
@@ -70,7 +70,7 @@
         .table-delegados td { padding: 10px; border-bottom: 1px solid #eee; }
         .tag { background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85em; font-weight: 600; color: #475569; }
 
-        /* BARRA DE FILTROS */
+        /* FILTER BAR */
         .filter-bar { width: 100%; max-width: 1000px; display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
         .input-icon-wrapper { position: relative; flex: 1; min-width: 250px; }
         .input-icon-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1em; }
@@ -94,6 +94,42 @@
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideDown { from { opacity: 0; height: 0; } to { opacity: 1; height: auto; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- ESTILOS DE IMPRESSÃO (CRACHÁS) --- */
+        .print-area { display: none; } /* Escondido normalmente */
+        
+        @media print {
+            body * { visibility: hidden; } /* Esconde tudo */
+            .print-area, .print-area * { visibility: visible; } /* Mostra só área de impressão */
+            .print-area {
+                display: block; position: absolute; top: 0; left: 0; width: 100%;
+                background: white; padding: 0; margin: 0;
+            }
+            .badges-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr); /* 2 crachás por linha */
+                gap: 20px;
+                padding: 20px;
+            }
+            .badge-card {
+                border: 2px solid #002d62;
+                border-radius: 15px;
+                padding: 20px;
+                text-align: center;
+                break-inside: avoid; /* Evita cortar o crachá entre páginas */
+                page-break-inside: avoid;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 300px; /* Altura fixa para padrão */
+            }
+            .badge-logo { height: 60px; margin-bottom: 15px; }
+            .badge-event { font-family: 'Oswald', sans-serif; font-size: 1.2em; color: #002d62; text-transform: uppercase; margin-bottom: 10px; }
+            .badge-name { font-size: 1.8em; font-weight: 800; line-height: 1.1; margin: 10px 0; color: black; }
+            .badge-group { font-size: 1.2em; color: #555; font-weight: 600; background: #eee; padding: 5px 15px; border-radius: 20px; margin: 10px 0; }
+            .badge-token { font-family: monospace; font-size: 1.5em; letter-spacing: 2px; border: 1px dashed #ccc; padding: 5px 10px; margin-top: auto; }
+        }
     </style>
 </head>
 <body>
@@ -203,6 +239,9 @@
                 <div class="header-section" style="width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="color: var(--primary);">Gestão de Acessos</h2>
                     <div class="actions" style="display:flex; gap:10px;">
+                        <button @click="imprimirCredenciais" class="btn-create" style="width: auto; background: #4b5563;">
+                            <i class="ph ph-printer"></i> Imprimir Etiquetas
+                        </button>
                         <button @click="showModalGrupo = !showModalGrupo" class="btn-create" style="width: auto;">+ Grupo em Massa</button>
                     </div>
                 </div>
@@ -301,6 +340,18 @@
             </div>
         </div>
 
+        <div class="print-area">
+            <div class="badges-grid">
+                <div v-for="d in delegadosFiltrados" :key="d.token" class="badge-card">
+                    <img src="/static/logo-pe.svg" class="badge-logo" alt="Logo">
+                    <div class="badge-event">${ nomeEventoAtual }</div>
+                    <div class="badge-name">${ d.nome }</div>
+                    <div class="badge-group">GRUPO ESCOTEIRO ${ d.grupo }</div>
+                    <div class="badge-token">${ d.token }</div>
+                </div>
+            </div>
+        </div>
+
         <div v-if="showModalAsm" class="modal-backdrop" @click.self="showModalAsm = false">
             <div class="modal-window"><h3 style="margin-top:0; color:var(--primary);">Criar Novo Evento</h3><input v-model="novaAsmTitulo" class="input-std" style="width:100%; margin:20px 0;" placeholder="Título do Evento..."><div style="display:flex; justify-content:flex-end; gap:10px;"><button @click="showModalAsm = false" style="background:#eee; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">Cancelar</button><button @click="criarAssembleia" class="btn-create" style="height: auto; padding: 10px 20px;">Criar</button></div></div>
         </div>
@@ -334,10 +385,7 @@
                 tipoPauta: 'SIMPLES', maxVotos: 1, novoCandidato: '', listaCandidatos: [],
                 showModalEdit: false, editData: { id: '', titulo: '', tipo: '', max_escolhas: 1 }, editCandidatos: [], editNovoCandidato: '',
                 nomesArea: '', modoImpressao: false, showModalGrupo: false,
-                // NOVOS CAMPOS PARA FILTRO
-                searchQuery: '',
-                filterGroup: '',
-                filterStatus: ''
+                searchQuery: '', filterGroup: '', filterStatus: ''
             }},
             computed: {
                 ranking() {
@@ -357,7 +405,6 @@
                 listaGruposUnicos() {
                     const grps = this.delegadosLista.map(d => d.grupo);
                     return [...new Set(grps)].sort((a,b) => {
-                        // Tenta ordenar numericamente se forem números
                         const na = Number(a), nb = Number(b);
                         if(!isNaN(na) && !isNaN(nb)) return na - nb;
                         return a.localeCompare(b);
@@ -365,8 +412,6 @@
                 },
                 delegadosFiltrados() {
                     let lista = this.delegadosLista;
-                    
-                    // 1. Filtro Texto (Nome, Token, CPF, ID)
                     if(this.searchQuery) {
                         const q = this.searchQuery.toLowerCase();
                         lista = lista.filter(d => 
@@ -376,19 +421,18 @@
                             d.id.toLowerCase().includes(q)
                         );
                     }
-
-                    // 2. Filtro de Grupo
                     if(this.filterGroup) {
                         lista = lista.filter(d => d.grupo == this.filterGroup);
                     }
-
-                    // 3. Filtro de Status
                     if(this.filterStatus) {
                         if(this.filterStatus === 'presente') lista = lista.filter(d => d.checkin);
                         if(this.filterStatus === 'ausente') lista = lista.filter(d => !d.checkin);
                     }
-
                     return lista;
+                },
+                nomeEventoAtual() {
+                    const asm = this.assembleias.find(a => a.id === this.assembleiaAtiva);
+                    return asm ? asm.titulo : "EVENTO";
                 }
             },
             methods: {
@@ -435,37 +479,31 @@
                 async removerAdmin(u) { if(confirm('Del?')) await axios.delete('/api/admins/'+u); this.fetchData(); },
                 async criarAssembleia() { await axios.post('/api/assembleias', {titulo:this.novaAsmTitulo}); this.showModalAsm=false; this.novaAsmTitulo=''; this.fetchData(); },
                 async ativarAssembleia() { await axios.post(`/api/assembleias/${this.assembleiaAtiva}/ativar`); this.fetchData(); },
-                
                 async editarAssembleia() {
                     if (!this.assembleiaAtiva) return;
                     const asmAtual = this.assembleias.find(a => a.id === this.assembleiaAtiva);
                     const novoTitulo = prompt("Novo nome para o evento:", asmAtual ? asmAtual.titulo : "");
-                    if (novoTitulo && novoTitulo.trim() !== "") {
-                        try {
-                            await axios.put(`/api/assembleias/${this.assembleiaAtiva}`, { titulo: novoTitulo });
-                            this.fetchData();
-                        } catch (e) { alert("Erro ao renomear evento."); }
-                    }
+                    if (novoTitulo && novoTitulo.trim() !== "") { try { await axios.put(`/api/assembleias/${this.assembleiaAtiva}`, { titulo: novoTitulo }); this.fetchData(); } catch (e) { alert("Erro ao renomear evento."); } }
                 },
                 async deletarAssembleia() {
                     if (!this.assembleiaAtiva) return;
                     const asmAtual = this.assembleias.find(a => a.id === this.assembleiaAtiva);
                     if (confirm(`ATENÇÃO: Tem certeza que deseja excluir o evento "${asmAtual.titulo}"?\n\nIsso apagará TODAS as pautas e votos deste evento permanentemente.`)) {
-                        try {
-                            await axios.delete(`/api/assembleias/${this.assembleiaAtiva}`);
-                            this.assembleiaAtiva = null; 
-                            await this.fetchData();
-                            if (this.assembleias.length > 0) {
-                                this.assembleiaAtiva = this.assembleias[0].id;
-                                this.ativarAssembleia();
-                            } else {
-                                this.assembleiaAtiva = null;
-                            }
-                        } catch (e) { alert("Erro ao excluir evento."); }
+                        try { await axios.delete(`/api/assembleias/${this.assembleiaAtiva}`); this.assembleiaAtiva = null; await this.fetchData(); if (this.assembleias.length > 0) { this.assembleiaAtiva = this.assembleias[0].id; this.ativarAssembleia(); } else { this.assembleiaAtiva = null; } } catch (e) { alert("Erro ao excluir evento."); }
                     }
                 },
-
                 baixarExcel() { if(this.token) window.location.href=`/api/exportar?token=${this.token}`; },
+                
+                // --- NOVA FUNÇÃO DE IMPRESSÃO ---
+                imprimirCredenciais() {
+                    if (this.delegadosFiltrados.length === 0) {
+                        return alert("Nenhum delegado selecionado para impressão. Verifique os filtros.");
+                    }
+                    // A mágica acontece no CSS @media print
+                    // O navegador vai esconder tudo o que não for .print-area
+                    window.print();
+                },
+
                 updateChart() {
                     if(!this.pautaAtiva) return;
                     if(this.pautaAtiva.tipo === 'ELEICAO') { if(chartInstance) { chartInstance.destroy(); chartInstance = null; } return; }
