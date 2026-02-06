@@ -4,61 +4,175 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Administrativo</title>
+    
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Oswald:wght@500&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --admin-bg: #f3f4f6; --primary: #002d62; --white: #fff; --text: #1f2937; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--admin-bg); color: var(--text); }
-        .sidebar { width: 250px; background: var(--primary); height: 100vh; position: fixed; color: white; padding: 20px; box-sizing: border-box; }
-        .sidebar h2 { margin-top: 0; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; }
-        .menu-item { display: block; padding: 12px 15px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 8px; margin-bottom: 5px; cursor: pointer; transition: 0.2s; }
-        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); color: white; }
-        .main-content { margin-left: 250px; padding: 30px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .stat-val { font-size: 2em; font-weight: bold; color: var(--primary); }
-        .stat-label { color: #6b7280; font-size: 0.9em; font-weight: 600; text-transform: uppercase; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e5e7eb; }
-        th { color: #6b7280; font-size: 0.85em; text-transform: uppercase; }
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
+        :root { 
+            --admin-bg: #f4f7f9; 
+            --primary: #002d62; 
+            --white: #fff; 
+            --text: #1f2937; 
+            --danger: #dc2626;
+            --success: #10b981;
+        }
+        
+        body { 
+            margin: 0; 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--admin-bg); 
+            /* RESTAURADO: Fundo Pontilhado */
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px); 
+            background-size: 20px 20px; 
+            color: var(--text); 
+            min-height: 100vh;
+        }
+        
+        /* --- TELA DE LOGIN --- */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #1e1b4b 100%);
+            display: flex; align-items: center; justify-content: center; z-index: 9999;
+        }
+        .login-card {
+            background: white; padding: 40px; border-radius: 24px;
+            width: 100%; max-width: 350px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .login-logo { width: 100px; margin-bottom: 20px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+        
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-label { display: block; font-size: 0.8em; font-weight: 700; color: #64748b; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .login-input {
+            width: 100%; padding: 15px;
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            font-size: 1em; box-sizing: border-box; outline: none; transition: 0.3s;
+            font-family: 'Inter', sans-serif; background: #f8fafc;
+        }
+        .login-input:focus { border-color: var(--primary); background: white; }
+        
+        .input-readonly { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
+
+        .login-btn {
+            width: 100%; padding: 18px; background: linear-gradient(135deg, var(--primary), #1e3a8a);
+            color: white; border: none; border-radius: 16px;
+            font-weight: 700; cursor: pointer; font-size: 1.1em;
+            transition: 0.2s; margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(0, 45, 98, 0.3);
+        }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 45, 98, 0.4); }
+
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 260px; background: var(--primary); height: 100vh; position: fixed; 
+            color: white; padding: 25px; box-sizing: border-box; 
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 50;
+        }
+        .sidebar h2 { 
+            margin-top: 0; margin-bottom: 40px; 
+            border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 20px; 
+            font-family: 'Oswald', sans-serif; letter-spacing: 1px; font-size: 1.5em;
+        }
+        .menu-item { 
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 15px; color: rgba(255,255,255,0.7); 
+            text-decoration: none; border-radius: 12px; margin-bottom: 8px; 
+            cursor: pointer; transition: 0.3s; font-weight: 600; font-size: 0.95em; 
+        }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.15); color: white; transform: translateX(5px); }
+        .menu-item.danger { color: #fca5a5; margin-top: 50px; }
+        .menu-item.danger:hover { background: rgba(220, 38, 38, 0.2); }
+
+        /* --- CONTEÚDO PRINCIPAL --- */
+        .main-content { margin-left: 260px; padding: 40px; max-width: 1200px; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; }
+        .page-title { margin: 0; font-family: 'Oswald', sans-serif; font-size: 2em; color: var(--primary); }
+        
+        .active-event-badge {
+            background: #dcfce7; color: #166534; padding: 8px 16px; 
+            border-radius: 30px; font-weight: 700; font-size: 0.9em;
+            display: flex; align-items: center; gap: 8px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .card { 
+            background: white; padding: 30px; border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 25px; 
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .card h3 { margin-top: 0; color: var(--primary); font-family: 'Oswald', sans-serif; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; }
+        
+        /* DASHBOARD STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; }
+        .stat-card { background: white; padding: 25px; border-radius: 16px; border-left: 5px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        .stat-val { font-size: 2.5em; font-weight: 800; color: var(--primary); line-height: 1; margin-bottom: 5px; font-family: 'Oswald'; }
+        .stat-label { color: #64748b; font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* TABELAS E BOTÕES */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; }
+        th { text-align: left; padding: 15px; color: #64748b; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; color: #334155; font-weight: 500; }
+        tr:last-child td { border-bottom: none; }
+        
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
         .badge-green { background: #dcfce7; color: #166534; }
         .badge-red { background: #fee2e2; color: #991b1b; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; background: var(--primary); color: white; }
-        .btn-danger { background: #dc2626; }
-        .btn-success { background: #10b981; }
-        input, select { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-box { background: white; padding: 30px; border-radius: 12px; width: 400px; max-width: 90%; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        
+        .btn { padding: 12px 24px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; background: var(--primary); color: white; transition: 0.2s; font-size: 0.95em; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-danger { background: var(--danger); }
+        .btn-success { background: var(--success); }
+        
+        input, select { padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 15px; font-family: 'Inter'; transition: 0.2s; }
+        input:focus, select:focus { border-color: var(--primary); outline: none; }
+        
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
     <div id="app">
-        <div v-if="!token" style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #e5e7eb;">
-            <div class="card" style="width: 300px; text-align: center;">
-                <h2>Login Admin</h2>
-                <input v-model="senhaInput" type="password" placeholder="Senha Mestra" @keyup.enter="login">
-                <button class="btn" style="width: 100%; margin-top: 10px;" @click="login">Entrar</button>
+        <div v-if="!token" class="login-overlay">
+            <div class="login-card">
+                <img src="/static/logo-pe.svg" class="login-logo" alt="Logo">
+                <h2 style="color: var(--primary); margin-top: 0; font-family: 'Oswald'; text-transform: uppercase;">Painel Admin</h2>
+                
+                <div class="input-group">
+                    <label class="input-label">Usuário</label>
+                    <input type="text" class="login-input input-readonly" value="admin" readonly>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Senha de Acesso</label>
+                    <input v-model="senhaInput" class="login-input" type="password" placeholder="••••••••" @keyup.enter="login">
+                </div>
+
+                <button class="login-btn" @click="login">ACESSAR SISTEMA</button>
             </div>
         </div>
 
         <div v-else>
             <div class="sidebar">
-                <h2>Painel Admin</h2>
-                <a class="menu-item" :class="{active: view==='dashboard'}" @click="view='dashboard'">Dashboard</a>
-                <a class="menu-item" :class="{active: view==='pautas'}" @click="view='pautas'">Gerenciar Pautas</a>
-                <a class="menu-item" :class="{active: view==='delegados'}" @click="view='delegados'">Delegados</a>
-                <a class="menu-item" :class="{active: view==='credenciamento'}" @click="view='credenciamento'">Check-in Manual</a>
-                <a class="menu-item" style="margin-top: 50px; color: #fca5a5;" @click="logout">Sair</a>
+                <h2>PAINEL ADMIN</h2>
+                <a class="menu-item" :class="{active: view==='dashboard'}" @click="view='dashboard'">📊 Dashboard</a>
+                <a class="menu-item" :class="{active: view==='pautas'}" @click="view='pautas'">🗳️ Gerenciar Pautas</a>
+                <a class="menu-item" :class="{active: view==='delegados'}" @click="view='delegados'">👥 Delegados</a>
+                <a class="menu-item" :class="{active: view==='credenciamento'}" @click="view='credenciamento'">📍 Check-in Manual</a>
+                <a class="menu-item danger" @click="logout">🚪 Sair</a>
             </div>
 
             <div class="main-content">
                 <div class="header">
-                    <h2>${ pageTitle }</h2>
-                    <div v-if="assembleiaAtiva" style="background: #dcfce7; color: #166534; padding: 8px 15px; border-radius: 20px; font-weight: bold;">
-                        Evento Ativo: ${ assembleiaAtiva.titulo }
+                    <h2 class="page-title">${ pageTitle }</h2>
+                    <div v-if="assembleiaAtiva" class="active-event-badge">
+                        🟢 NO AR: ${ assembleiaAtiva.titulo }
                     </div>
                 </div>
 
@@ -78,15 +192,18 @@
                         </div>
                     </div>
 
-                    <div class="card" style="margin-top: 25px;">
+                    <div class="card" style="margin-top: 30px;">
                         <h3>Controle do Evento</h3>
                         <div v-if="!assembleiaAtiva">
-                            <p>Nenhum evento iniciado.</p>
-                            <input v-model="novoEventoTitulo" placeholder="Nome do Evento (Ex: Assembleia 2024)">
-                            <button class="btn" @click="iniciarEvento">Iniciar Novo Evento</button>
+                            <p style="color: #64748b; margin-bottom: 20px;">Nenhum evento iniciado. Crie um novo para começar a votação.</p>
+                            <div style="display: flex; gap: 10px;">
+                                <input v-model="novoEventoTitulo" placeholder="Nome do Evento (Ex: Assembleia Regional 2026)" style="margin-bottom: 0;">
+                                <button class="btn" @click="iniciarEvento">INICIAR</button>
+                            </div>
                         </div>
                         <div v-else>
-                            <button class="btn btn-danger" @click="encerrarEvento">Encerrar Evento Atual</button>
+                            <p style="color: #64748b;">Evento em andamento. Todas as pautas serão vinculadas a ele.</p>
+                            <button class="btn btn-danger" @click="encerrarEvento">ENCERRAR EVENTO ATUAL</button>
                         </div>
                     </div>
                 </div>
@@ -94,40 +211,44 @@
                 <div v-if="view === 'pautas'">
                     <div class="card">
                         <h3>Nova Pauta</h3>
-                        <input v-model="novaPauta.titulo" placeholder="Título da Pauta">
+                        <label class="input-label">Título da Pauta</label>
+                        <input v-model="novaPauta.titulo" placeholder="Ex: Aprovação de Contas 2025">
+                        
+                        <label class="input-label">Tipo de Votação</label>
                         <select v-model="novaPauta.tipo">
-                            <option value="SIMPLES">Simples (Favor/Contra/Abstenção)</option>
+                            <option value="SIMPLES">Simples (Favor / Contra / Abstenção)</option>
                             <option value="ELEICAO">Eleição (Múltipla Escolha)</option>
                         </select>
                         
-                        <div v-if="novaPauta.tipo === 'ELEICAO'">
-                            <p style="font-size: 0.9em; margin-bottom: 5px;">Candidatos (separados por vírgula):</p>
-                            <input v-model="novaPauta.candidatos" placeholder="Ex: Chapa 1, Chapa 2">
-                            <p style="font-size: 0.9em; margin-bottom: 5px;">Máximo de escolhas:</p>
-                            <input type="number" v-model="novaPauta.max_escolhas" style="width: 80px;">
+                        <div v-if="novaPauta.tipo === 'ELEICAO'" style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
+                            <label class="input-label">Candidatos (separados por vírgula)</label>
+                            <input v-model="novaPauta.candidatos" placeholder="Ex: Chapa 1, Chapa 2, Fulano">
+                            
+                            <label class="input-label">Máximo de escolhas por eleitor</label>
+                            <input type="number" v-model="novaPauta.max_escolhas" style="width: 100px; margin-bottom: 0;">
                         </div>
 
-                        <button class="btn btn-success" @click="criarPauta">Criar Pauta</button>
+                        <button class="btn btn-success" @click="criarPauta" style="width: 100%;">CRIAR PAUTA</button>
                     </div>
 
-                    <div class="card" v-for="p in pautas" :key="p.id">
+                    <div class="card" v-for="p in pautas" :key="p.id" style="border-left: 5px solid var(--primary);">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div>
-                                <h3 style="margin: 0;">${ p.titulo }</h3>
-                                <span class="status-badge" :class="p.status === 'ABERTA' ? 'badge-green' : 'badge-red'">${ p.status }</span>
-                                <span style="font-size: 0.8em; color: #666; margin-left: 10px;">${ p.tipo }</span>
+                                <span class="status-badge" :class="p.status === 'ABERTA' ? 'badge-green' : (p.status === 'AGUARDANDO' ? 'badge-blue' : 'badge-red')">${ p.status }</span>
+                                <h3 style="margin: 10px 0 5px 0; border: none; padding: 0;">${ p.titulo }</h3>
+                                <span style="font-size: 0.85em; color: #64748b; font-weight: 600;">${ p.tipo }</span>
                             </div>
                             <div v-if="p.status !== 'ENCERRADA'">
-                                <button v-if="p.status === 'AGUARDANDO'" class="btn" @click="mudarStatusPauta(p.id, 'ABERTA')">Abrir Votação</button>
-                                <button v-if="p.status === 'ABERTA'" class="btn btn-danger" @click="mudarStatusPauta(p.id, 'ENCERRADA')">Encerrar Votação</button>
+                                <button v-if="p.status === 'AGUARDANDO'" class="btn" @click="mudarStatusPauta(p.id, 'ABERTA')">ABRIR VOTAÇÃO</button>
+                                <button v-if="p.status === 'ABERTA'" class="btn btn-danger" @click="mudarStatusPauta(p.id, 'ENCERRADA')">ENCERRAR</button>
                             </div>
                         </div>
 
-                        <div v-if="p.status !== 'AGUARDANDO'" style="margin-top: 15px; background: #f9fafb; padding: 15px; border-radius: 8px;">
-                            <h4 style="margin-top: 0;">Resultados Parciais (${ p.total_votos } votos)</h4>
-                            <div v-for="(votos, op) in p.resultados" :key="op" style="display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #eee; padding-bottom: 2px;">
-                                <span>${ op }</span>
-                                <strong>${ votos }</strong>
+                        <div v-if="p.status !== 'AGUARDANDO'" style="margin-top: 20px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <h4 style="margin-top: 0; color: #334155;">Resultados Parciais (${ p.total_votos } votos)</h4>
+                            <div v-for="(votos, op) in p.resultados" :key="op" style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px;">
+                                <span style="font-weight: 600;">${ op }</span>
+                                <strong style="color: var(--primary);">${ votos }</strong>
                             </div>
                         </div>
                     </div>
@@ -136,7 +257,7 @@
                 <div v-if="view === 'delegados'">
                     <div class="card">
                         <h3>Lista de Inscritos</h3>
-                        <input v-model="filtroDelegado" placeholder="Buscar por nome, grupo ou ID...">
+                        <input v-model="filtroDelegado" placeholder="🔍 Buscar por nome, grupo ou ID..." style="padding-left: 40px; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' fill=\'%2394a3b8\' viewBox=\'0 0 16 16\'><path d=\'M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z\'/></svg>'); background-repeat: no-repeat; background-position: 12px center;">
                         <table>
                             <thead>
                                 <tr>
@@ -148,18 +269,16 @@
                             </thead>
                             <tbody>
                                 <tr v-for="u in delegadosFiltrados" :key="u.id">
-                                    <td>${ u.id }</td>
+                                    <td style="font-family: monospace; font-weight: bold;">${ u.id }</td>
                                     <td>${ u.nome }</td>
-                                    
                                     <td>
-                                        <span v-if="u.grupo === '00' || u.grupo == 0" style="color: #b91c1c; font-weight: bold; font-size: 0.9em;">
+                                        <span v-if="u.grupo === '00' || u.grupo == 0" style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.85em; display: inline-flex; align-items: center; gap: 5px;">
                                             ⚜️ Direção Regional
                                         </span>
-                                        <span v-else>
+                                        <span v-else style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.85em;">
                                             GE ${ u.grupo }
                                         </span>
                                     </td>
-                                    
                                     <td>
                                         <span class="status-badge" :class="u.checkin ? 'badge-green' : 'badge-red'">
                                             ${ u.checkin ? 'PRESENTE' : 'AUSENTE' }
@@ -174,21 +293,26 @@
                 <div v-if="view === 'credenciamento'">
                     <div class="card">
                         <h3>Check-in Manual</h3>
-                        <p>Use esta tela para dar presença a quem chegou sem celular ou com problemas.</p>
+                        <p style="color: #64748b;">Utilize esta ferramenta para credenciar delegados manualmente caso necessário.</p>
                         
-                        <div style="display: flex; gap: 10px;">
-                            <input v-model="checkinBusca" placeholder="Digite o ID (ex: 12-1) ou Nome" @keyup.enter="buscarDelegadoCheckin">
-                            <button class="btn" @click="buscarDelegadoCheckin">Buscar</button>
+                        <div style="display: flex; gap: 15px;">
+                            <input v-model="checkinBusca" placeholder="Digite o ID (ex: 12-1) ou Nome" @keyup.enter="buscarDelegadoCheckin" style="margin-bottom: 0;">
+                            <button class="btn" @click="buscarDelegadoCheckin">BUSCAR</button>
                         </div>
 
-                        <div v-if="delegadoEncontrado" style="margin-top: 20px; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px;">
-                            <h3 style="margin: 0;">${ delegadoEncontrado.nome }</h3>
-                            <p>GE: ${ delegadoEncontrado.grupo } | ID: ${ delegadoEncontrado.id }</p>
+                        <div v-if="delegadoEncontrado" style="margin-top: 30px; background: #f8fafc; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center;">
+                            <h3 style="margin: 0; border: none; padding: 0; font-size: 1.5em;">${ delegadoEncontrado.nome }</h3>
+                            <p style="margin: 10px 0 20px 0; color: #64748b; font-weight: 600;">GE: ${ delegadoEncontrado.grupo } • ID: ${ delegadoEncontrado.id }</p>
                             
-                            <div v-if="delegadoEncontrado.checkin" class="status-badge badge-green" style="display: inline-block; margin-bottom: 10px;">JÁ CREDENCIADO</div>
+                            <div v-if="delegadoEncontrado.checkin">
+                                <span class="status-badge badge-green" style="font-size: 1em; padding: 10px 20px; display: inline-block; margin-bottom: 20px;">✅ JÁ CREDENCIADO</span>
+                                <br>
+                                <button class="btn btn-danger" @click="cancelarCheckin(delegadoEncontrado.id)">CANCELAR CREDENCIAMENTO</button>
+                            </div>
                             
-                            <button v-if="!delegadoEncontrado.checkin" class="btn btn-success" @click="confirmarCheckin(delegadoEncontrado.id)">✅ Confirmar Presença</button>
-                            <button v-else class="btn btn-danger" @click="cancelarCheckin(delegadoEncontrado.id)">❌ Cancelar Presença</button>
+                            <div v-else>
+                                <button class="btn btn-success" @click="confirmarCheckin(delegadoEncontrado.id)" style="font-size: 1.1em; padding: 15px 30px;">✅ CONFIRMAR PRESENÇA</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -238,11 +362,17 @@
             methods: {
                 async login() {
                     try {
-                        const res = await axios.post('/api/admin/login', { senha: this.senhaInput })
+                        // Envia o usuário 'admin' fixo junto com a senha digitada
+                        const res = await axios.post('/api/admin/login', { 
+                            usuario: 'admin', 
+                            senha: this.senhaInput 
+                        })
                         this.token = res.data.token
                         localStorage.setItem('admin_token', this.token)
                         this.loadData()
-                    } catch { alert('Senha incorreta') }
+                    } catch { 
+                        alert('Senha incorreta! Verifique o .env') 
+                    }
                 },
                 logout() {
                     this.token = null
@@ -310,8 +440,8 @@
                 },
 
                 async cancelarCheckin(id) {
-                    if(confirm('Remover presença?')) {
-                        alert('Função de cancelamento requer implementação no backend se desejada.')
+                    if(confirm('Tem certeza que deseja remover a presença?')) {
+                        alert('Função de cancelamento segura não implementada nesta versão rápida.')
                     }
                 }
             }
