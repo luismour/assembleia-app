@@ -8,3 +8,4 @@ openpyxl
 python-multipart
 fastapi-mail
 psycopg2-binary
+bcrypt==4.0.1
