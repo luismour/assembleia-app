@@ -1,32 +1,14 @@
 import os
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
+import smtplib
+import ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from pydantic import EmailStr
 
-# --- CONFIGURAÇÃO DO EMAIL ---
-# Usa strings vazias como padrão para evitar erros de importação se as variáveis não existirem
 MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
-MAIL_FROM = os.getenv("MAIL_FROM", "")
 MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
-
-# Força a porta 587 (padrão TLS) se não estiver definida no Render
 MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
-
-conf = ConnectionConfig(
-    MAIL_USERNAME = MAIL_USERNAME,
-    MAIL_PASSWORD = MAIL_PASSWORD,
-    MAIL_FROM = MAIL_FROM,
-    MAIL_PORT = MAIL_PORT,
-    MAIL_SERVER = MAIL_SERVER,
-    MAIL_STARTTLS = True,
-    MAIL_SSL_TLS = False,
-    
-    USE_CREDENTIALS = True,
-    
-    VALIDATE_CERTS = False,
-    
-    TIMEOUT = 60
-)
 
 async def enviar_token_email(destinatario: EmailStr, nome: str, token: str, user_id: str):
     html = f"""
@@ -41,21 +23,36 @@ async def enviar_token_email(destinatario: EmailStr, nome: str, token: str, user
         </div>
         
         <p style="color: #be123c; font-size: 0.9em;">
-            ⚠️ Apresente-se ao credenciamento para liberar seu voto.
+            ⚠️ Apresente-se à mesa para liberar seu voto.
         </p>
     </div>
     """
 
-    message = MessageSchema(
-        subject="Codigo de Votacao - Assembleia PE",
-        recipients=[destinatario],
-        body=html,
-        subtype=MessageType.html
-    )
+    msg = MIMEMultipart()
+    msg['From'] = f"Escoteiros PE <{MAIL_USERNAME}>"
+    msg['To'] = destinatario
+    msg['Subject'] = "Codigo de Votacao - Assembleia PE"
+    msg.attach(MIMEText(html, 'html'))
 
     try:
-        fm = FastMail(conf)
-        await fm.send_message(message)
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+
+        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=30) as server:
+            server.ehlo()
+            
+            server.starttls(context=context)
+            
+            server.ehlo()
+            
+            # Login
+            server.login(MAIL_USERNAME, MAIL_PASSWORD)
+            
+            # Envia
+            server.sendmail(MAIL_USERNAME, destinatario, msg.as_string())
+            
         print(f"EMAIL SUCESSO: Enviado para {destinatario}")
+
     except Exception as e:
-        print(f"EMAIL ERRO (IGNORADO): Falha ao enviar para {destinatario}. Motivo: {str(e)}")
+        print(f"EMAIL ERRO (IGNORADO): Falha ao enviar para {destinatario}. Erro: {e}")
