@@ -45,6 +45,9 @@
         .card { background: var(--surface); border-radius: 20px; padding: 30px; box-shadow: var(--shadow-md); border: 1px solid rgba(255,255,255,0.6); margin-bottom: 25px; }
         .input-std { flex: 1; padding: 12px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Inter'; font-size: 0.95em; width: 100%; }
         .btn-create { background: var(--primary); color: white; border: none; padding: 0 24px; border-radius: 12px; font-weight: 700; cursor: pointer; height: 42px; }
+        .btn-icon-success { background: var(--success); color: white; border: none; cursor: pointer; }
+        .btn-icon-secondary { background: #e2e8f0; color: #64748b; border: none; cursor: pointer; }
+        .btn-icon-danger { background: #fee2e2; color: var(--danger); border: none; cursor: pointer; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
 
         .pauta-item { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; transition: 0.2s; position: relative; }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: 800; text-transform: uppercase; }
@@ -55,6 +58,17 @@
         .details-table th { text-align: left; color: var(--text-muted); padding: 8px; border-bottom: 1px solid var(--border); }
         .details-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
         .vote-tag { font-weight: 700; font-size: 0.8em; text-transform: uppercase; }
+        
+        /* GESTÃO ACESSOS */
+        .access-management-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1200px; margin: 0 auto; }
+        .stats-card { background: white; border-radius: 12px; padding: 15px 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px; margin-bottom: 25px; border: 1px solid var(--border); }
+        .stats-number { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        .stats-label { font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .table-wrapper { width: 100%; display: flex; justify-content: center; }
+        .table-delegados { width: 100%; max-width: 1000px; border-collapse: collapse; }
+        .table-delegados th { text-align: left; padding: 10px; border-bottom: 2px solid #eee; color: #666; font-size: 0.9em; }
+        .table-delegados td { padding: 10px; border-bottom: 1px solid #eee; }
+        .tag { background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85em; font-weight: 600; color: #475569; }
 
         /* RANKING SIDEBAR */
         .ranking-list-small { max-height: 350px; overflow-y: auto; text-align: left; margin-top: 15px; padding-right: 5px; }
@@ -92,20 +106,13 @@
             <header class="top-bar">
                 <div class="brand"><img src="/static/logo-pe.svg" alt="Logo"><div class="brand-text"></div></div>
                 <div class="event-selector-wrapper">
-                <select v-model="assembleiaAtiva" @change="ativarAssembleia" style="border:none; background:transparent; font-weight:bold; color:var(--primary); outline:none; width: 100%; max-width: 200px;">
-                    <option v-for="a in assembleias" :value="a.id">${ a.titulo }</option>
-                </select>      
-            <div style="display:flex; gap: 5px; border-left: 1px solid #ccc; padding-left: 10px;">
-        <button @click="editarAssembleia" title="Renomear Evento" style="border:none; background:transparent; color:var(--accent); cursor:pointer; font-size: 1.1em;">
-            <i class="ph ph-pencil-simple"></i>
-        </button>
-        <button @click="deletarAssembleia" title="Excluir Evento" style="border:none; background:transparent; color:var(--danger); cursor:pointer; font-size: 1.1em;">
-            <i class="ph ph-trash"></i>
-        </button>
-    </div>
-
-    <button @click="showModalAsm = true" class="btn-create" style="width:30px; height:30px; padding:0; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-left: 5px;">+</button>
-</div>
+                    <select v-model="assembleiaAtiva" @change="ativarAssembleia" style="border:none; background:transparent; font-weight:bold; color:var(--primary); outline:none; width: 100%; max-width: 200px;"><option v-for="a in assembleias" :value="a.id">${ a.titulo }</option></select>
+                    <div style="display:flex; gap: 5px; border-left: 1px solid #ccc; padding-left: 10px;">
+                        <button @click="editarAssembleia" title="Renomear Evento" style="border:none; background:transparent; color:var(--accent); cursor:pointer; font-size: 1.1em;"><i class="ph ph-pencil-simple"></i></button>
+                        <button @click="deletarAssembleia" title="Excluir Evento" style="border:none; background:transparent; color:var(--danger); cursor:pointer; font-size: 1.1em;"><i class="ph ph-trash"></i></button>
+                    </div>
+                    <button @click="showModalAsm = true" class="btn-create" style="width:30px; height:30px; padding:0; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-left: 5px;">+</button>
+                </div>
                 <div class="header-actions">
                     <button @click="baixarExcel" class="btn-action btn-excel"><i class="ph ph-microsoft-excel-logo"></i> <span style="display:none; @media(min-width: 1000px){display:inline;}">Relatório</span></button>
                     <a href="/telao" target="_blank" class="btn-action btn-telao"><i class="ph ph-monitor-play"></i> <span style="display:none; @media(min-width: 1000px){display:inline;}">Telão</span></a>
@@ -184,12 +191,31 @@
                 </div>
             </div>
 
-            <div v-show="abaAtual === 'grupos'" class="card" style="max-width: 1000px; margin: 0 auto;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 style="margin:0; color:var(--primary);">Gestão de Acesso</h3>
-                    <button @click="modoImpressao = !modoImpressao" class="btn-action" style="background:#475569;"><i class="ph ph-printer"></i> ${ modoImpressao ? 'Voltar' : 'Imprimir Cartões' }</button>
+            <div v-if="abaAtual === 'grupos'" class="animate-fade-in access-management-container">
+                <div class="header-section" style="width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: var(--primary);">Gestão de Acessos</h2>
+                    <div class="actions" style="display:flex; gap:10px;">
+                        <button @click="showModalGrupo = !showModalGrupo" class="btn-create" style="width: auto;">+ Grupo em Massa</button>
+                    </div>
                 </div>
-                <div v-if="!modoImpressao" style="background:#f8fafc; padding:20px; border-radius:16px; margin-bottom:30px; border:1px dashed var(--border);">
+
+                <div class="stats-card">
+                    <div style="text-align: right;">
+                        <div class="stats-label">Quórum / Check-in</div>
+                        <div style="font-size: 0.8rem; color: #888;">Presentes vs Total</div>
+                    </div>
+                    <div style="height: 40px; width: 1px; background: #ddd;"></div>
+                    <div class="stats-number">
+                        ${ delegadosLista.filter(d => d.checkin).length } 
+                        <span style="font-size: 1rem; color: #999; font-weight: 400;">/ ${ delegadosLista.length }</span>
+                    </div>
+                    <div style="margin-left: 10px; color: var(--success);">
+                        <i class="ph ph-check-circle" style="font-size: 2rem;" v-if="delegadosLista.length > 0 && delegadosLista.filter(d => d.checkin).length > (delegadosLista.length / 2)"></i>
+                        <i class="ph ph-circle" style="font-size: 2rem; color: #ddd;" v-else></i>
+                    </div>
+                </div>
+
+                <div v-if="showModalGrupo" style="background:#f8fafc; padding:20px; border-radius:16px; margin-bottom:30px; border:1px dashed var(--border); width: 100%; max-width: 1000px;">
                     <h4 style="margin-top:0; color:var(--text-muted); font-size:0.9em; text-transform:uppercase;">Adicionar em Massa</h4>
                     <div style="display:grid; grid-template-columns: 100px 1fr; gap:15px; margin-bottom:15px;">
                         <div><label style="font-size:0.8em; font-weight:bold;">GRUPO Nº</label><input v-model="novoGrupoInput" class="input-std" placeholder="Ex: 107"></div>
@@ -197,26 +223,39 @@
                     </div>
                     <button @click="cadastrarEmMassa" class="btn-create" style="width:100%;">GERAR TOKENS</button>
                 </div>
-                <div v-if="!modoImpressao">
-                    <div v-for="g in grupos" :key="g.numero" style="margin-bottom:20px; background:white; border:1px solid var(--border); border-radius:12px; overflow:hidden;">
-                        <div style="background:#f1f5f9; padding:10px 20px; font-weight:bold; color:var(--primary); display:flex; justify-content:space-between; align-items:center;"><span>GE ${ g.numero } <span style="font-weight:normal; font-size:0.8em;">(${ g.quantidade } delegados)</span></span><button @click="removerGrupo(g.numero)" style="border:none; color:var(--danger); background:none; cursor:pointer;"><i class="ph ph-trash"></i> Grupo</button></div>
-                        <table style="width:100%; border-collapse:collapse; font-size:0.9em;">
-                            <thead><tr style="border-bottom:1px solid #eee; text-align:left; color:var(--text-muted);"><th style="padding:10px 20px;">Nome</th><th style="padding:10px;">ID</th><th style="padding:10px;">Token</th><th style="padding:10px; text-align:center;">Check-in</th><th style="padding:10px;">Ação</th></tr></thead>
-                            <tbody><tr v-for="d in g.delegados" :key="d.token" style="border-bottom:1px solid #f9f9f9;"><td style="padding:10px 20px; font-weight:600;">${ d.nome }</td><td style="padding:10px; color:#64748b;">${ d.id }</td><td style="padding:10px; font-family:monospace; font-size:1.1em; color:var(--primary); letter-spacing:1px; font-weight:bold;">${ d.token }</td><td style="padding:10px; text-align:center;"><button @click="toggleCheckin(d.token)" :style="{background: d.checkin ? 'var(--success)' : '#e2e8f0', color: d.checkin ? 'white' : '#64748b', border:'none', padding:'6px 12px', borderRadius:'20px', fontWeight:'bold', cursor:'pointer', minWidth:'100px'}">${ d.checkin ? 'PRESENTE' : 'AUSENTE' }</button></td><td style="padding:10px;"><i class="ph ph-trash" @click="removerDelegado(d.token)" style="cursor:pointer; color:var(--danger);"></i></td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div v-if="modoImpressao">
-                    <div style="text-align:center; margin-bottom:20px; color:var(--text-muted);"><p>Imprima esta página (Ctrl+P).</p></div>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px;">
-                        <template v-for="g in grupos">
-                            <div v-for="d in g.delegados" :key="d.token" style="border:1px solid #000; padding:15px; text-align:center; page-break-inside:avoid; border-radius:8px;">
-                                <img src="/static/logo-pe.svg" style="height:30px; margin-bottom:10px;">
-                                <h3 style="margin:0; font-size:1.1em; text-transform:uppercase;">${ d.nome }</h3><p style="margin:5px 0;">GE ${ g.numero } - ID: ${ d.id }</p>
-                                <div style="margin:15px 0; border:2px dashed #000; padding:10px;"><span style="display:block; font-size:0.7em; text-transform:uppercase;">Código de Acesso</span><span style="font-family:monospace; font-size:1.8em; font-weight:800; letter-spacing:2px;">${ d.token }</span></div>
-                            </div>
-                        </template>
-                    </div>
+
+                <div class="table-wrapper">
+                    <table class="table-delegados">
+                        <thead>
+                            <tr>
+                                <th>NOME</th>
+                                <th>GRUPO / ID</th>
+                                <th>TOKEN</th>
+                                <th style="text-align: center;">CHECK-IN</th>
+                                <th style="text-align: right;">AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="d in delegadosLista" :key="d.token">
+                                <td><div style="font-weight: 600;">${ d.nome }</div></td>
+                                <td><span class="tag">GE ${ d.grupo }</span> <small style="color:#aaa;">${ d.id }</small></td>
+                                <td style="font-family:monospace; font-weight:bold; letter-spacing:1px; color:var(--primary);">${ d.token }</td>
+                                <td style="text-align: center;">
+                                    <button 
+                                        @click="toggleCheckin(d.token)" 
+                                        :class="d.checkin ? 'btn-icon-success' : 'btn-icon-secondary'"
+                                        style="border-radius: 20px; padding: 5px 15px; font-size: 0.8rem;">
+                                        ${ d.checkin ? 'Confirmado' : 'Pendente' }
+                                    </button>
+                                </td>
+                                <td style="text-align: right;">
+                                    <button class="btn-icon-danger" @click="removerDelegado(d.token)">
+                                        <i class="ph ph-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -259,56 +298,26 @@
                 novoAdminUser:'', novoAdminPass:'',
                 tipoPauta: 'SIMPLES', maxVotos: 1, novoCandidato: '', listaCandidatos: [],
                 showModalEdit: false, editData: { id: '', titulo: '', tipo: '', max_escolhas: 1 }, editCandidatos: [], editNovoCandidato: '',
-                nomesArea: '', modoImpressao: false
+                nomesArea: '', modoImpressao: false, showModalGrupo: false
             }},
             computed: {
                 ranking() {
                     if(!this.pautaAtiva || !this.pautaAtiva.resultados) return [];
                     if(this.pautaAtiva.tipo !== 'ELEICAO') return [];
                     return Object.entries(this.pautaAtiva.resultados).map(([nome, votos]) => ({ nome, votos })).sort((a, b) => b.votos - a.votos);
+                },
+                delegadosLista() {
+                    // Achata a lista de grupos para uma lista simples de delegados para facilitar a tabela
+                    let lista = [];
+                    this.grupos.forEach(g => {
+                        g.delegados.forEach(d => {
+                            lista.push({ ...d, grupo: g.numero });
+                        });
+                    });
+                    return lista;
                 }
             },
             methods: {
-                async editarAssembleia() {
-    if (!this.assembleiaAtiva) return;
-    
-    // Encontra o objeto da assembleia atual para pegar o nome
-    const asmAtual = this.assembleias.find(a => a.id === this.assembleiaAtiva);
-    if (!asmAtual) return;
-
-    // Usa um prompt simples do navegador para evitar criar novos modais complexos
-    const novoTitulo = prompt("Novo nome para o evento:", asmAtual.titulo);
-    
-    if (novoTitulo && novoTitulo.trim() !== "") {
-        try {
-            await axios.put(`/api/assembleias/${this.assembleiaAtiva}`, { titulo: novoTitulo });
-            this.fetchData(); // Recarrega a lista
-        } catch (e) {
-            alert("Erro ao renomear evento.");
-        }
-    }
-},
-
-                async deletarAssembleia() {
-                    if (!this.assembleiaAtiva) return;
-                    
-                    const asmAtual = this.assembleias.find(a => a.id === this.assembleiaAtiva);
-                    if (confirm(`ATENÇÃO: Tem certeza que deseja excluir o evento "${asmAtual.titulo}"?\n\nIsso apagará TODAS as pautas e votos deste evento permanentemente.`)) {
-                        try {
-                            await axios.delete(`/api/assembleias/${this.assembleiaAtiva}`);
-                            this.assembleiaAtiva = null; 
-                            await this.fetchData();
-                            if (this.assembleias.length > 0) {
-                                this.assembleiaAtiva = this.assembleias[0].id;
-                                this.ativarAssembleia(); 
-                            } else {
-                                this.assembleiaAtiva = null;
-                            }
-                        } catch (e) {
-                            alert("Erro ao excluir evento.");
-                        }
-                    }
-                },
                 async logar() { try { const r = await axios.post('/api/admin/login', {usuario:this.usuarioInput, senha:this.senhaInput}); this.token=r.data.token; localStorage.setItem('admin_token',this.token); this.init(); } catch{ alert('Erro login'); } },
                 logout() { axios.post('/api/admin/logout'); this.token=null; localStorage.removeItem('admin_token'); },
                 init() { if(this.token) { axios.defaults.headers.common['x-admin-token']=this.token; this.fetchData(); setInterval(() => { if(this.abaAtual==='votacao') this.fetchData(); }, 2000); } },
@@ -352,6 +361,37 @@
                 async removerAdmin(u) { if(confirm('Del?')) await axios.delete('/api/admins/'+u); this.fetchData(); },
                 async criarAssembleia() { await axios.post('/api/assembleias', {titulo:this.novaAsmTitulo}); this.showModalAsm=false; this.novaAsmTitulo=''; this.fetchData(); },
                 async ativarAssembleia() { await axios.post(`/api/assembleias/${this.assembleiaAtiva}/ativar`); this.fetchData(); },
+                
+                // --- NOVAS FUNÇÕES PARA EDITAR/EXCLUIR EVENTO ---
+                async editarAssembleia() {
+                    if (!this.assembleiaAtiva) return;
+                    const asmAtual = this.assembleias.find(a => a.id === this.assembleiaAtiva);
+                    const novoTitulo = prompt("Novo nome para o evento:", asmAtual ? asmAtual.titulo : "");
+                    if (novoTitulo && novoTitulo.trim() !== "") {
+                        try {
+                            await axios.put(`/api/assembleias/${this.assembleiaAtiva}`, { titulo: novoTitulo });
+                            this.fetchData();
+                        } catch (e) { alert("Erro ao renomear evento."); }
+                    }
+                },
+                async deletarAssembleia() {
+                    if (!this.assembleiaAtiva) return;
+                    const asmAtual = this.assembleias.find(a => a.id === this.assembleiaAtiva);
+                    if (confirm(`ATENÇÃO: Tem certeza que deseja excluir o evento "${asmAtual.titulo}"?\n\nIsso apagará TODAS as pautas e votos deste evento permanentemente.`)) {
+                        try {
+                            await axios.delete(`/api/assembleias/${this.assembleiaAtiva}`);
+                            this.assembleiaAtiva = null; 
+                            await this.fetchData();
+                            if (this.assembleias.length > 0) {
+                                this.assembleiaAtiva = this.assembleias[0].id;
+                                this.ativarAssembleia();
+                            } else {
+                                this.assembleiaAtiva = null;
+                            }
+                        } catch (e) { alert("Erro ao excluir evento."); }
+                    }
+                },
+
                 baixarExcel() { if(this.token) window.location.href=`/api/exportar?token=${this.token}`; },
                 updateChart() {
                     if(!this.pautaAtiva) return;
