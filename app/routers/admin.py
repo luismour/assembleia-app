@@ -46,16 +46,20 @@ class GrupoNomesInput(BaseModel):
     numero: str
     nomes: List[str]
 
-# --- FUNÇÕES ---
-def get_password_hash(password): 
-    # Proteção: Se a senha for muito longa, corta para evitar erro do Bcrypt
-    if len(password) > 70: password = password[:70]
+# --- FUNÇÕES DE SEGURANÇA (CORRIGIDAS) ---
+def get_password_hash(password):
+    # Proteção: O Bcrypt falha se a senha for > 72 bytes. 
+    # Cortamos para 70 para garantir.
+    if len(password) > 70:
+        password = password[:70]
     return pwd_context.hash(password)
 
-def verificar_senha(s, h): 
-    # Proteção: Se a senha for muito longa, corta antes de verificar
-    if len(s) > 70: s = s[:70]
-    return pwd_context.verify(s, h)
+def verificar_senha(plain_password, hashed_password):
+    # Proteção CRÍTICA: Se chegar um texto gigante (ex: token colado errado),
+    # cortamos antes de verificar. Isso evita o Erro 500.
+    if len(plain_password) > 70:
+        plain_password = plain_password[:70]
+    return pwd_context.verify(plain_password, hashed_password)
 
 def criar_token_acesso(data: dict):
     to_encode = data.copy()
@@ -84,17 +88,13 @@ def admin_login(dados: SenhaAdmin, db: Session = Depends(get_db)):
     usuario_input = dados.usuario.strip()
     senha_input = dados.senha.strip()
 
-    # === PROTEÇÃO CONTRA CRASH (ERRO 72 BYTES) ===
-    # Se a senha for gigante (ex: colou o token sem querer), cortamos ela.
-    # Isso evita o ValueError do Bcrypt que derruba o servidor.
-    if len(senha_input) > 70:
-        senha_input = senha_input[:70]
-    # ============================================
-
-    # === LOGIN DE EMERGÊNCIA (CORREÇÃO AUTOMÁTICA) ===
+    # === LOGIN DE EMERGÊNCIA (CORREÇÃO AUTOMÁTICA DE SENHA) ===
+    # Se usar a senha mestra, forçamos a atualização no banco.
     if usuario_input == "admin" and senha_input == "nrpesaps":
         
         adm_db = db.query(models.Admin).filter(models.Admin.usuario == "admin").first()
+        
+        # Gera o hash novo (agora protegido pela função get_password_hash)
         novo_hash = get_password_hash("nrpesaps")
 
         if not adm_db:
@@ -106,12 +106,12 @@ def admin_login(dados: SenhaAdmin, db: Session = Depends(get_db)):
         
         db.commit()
         return {"token": criar_token_acesso(data={"sub": "admin"})}
-    # =================================================
+    # ==========================================================
 
     # Fluxo Normal
     adm = db.query(models.Admin).filter(models.Admin.usuario == usuario_input).first()
     
-    # Usa a função verificar_senha protegida
+    # Agora a função verificar_senha está protegida e não vai dar erro 500
     if not adm or not verificar_senha(senha_input, adm.senha_hash):
         raise HTTPException(400, "Usuário ou senha incorretos")
     
@@ -128,7 +128,6 @@ def list_admins(db: Session = Depends(get_db), u: str = Depends(verificar_admin)
 def add_admin(d: NovoAdminInput, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     if db.query(models.Admin).filter(models.Admin.usuario == d.usuario).first():
         raise HTTPException(400, "Exists")
-    # Usa a função hash protegida
     db.add(models.Admin(usuario=d.usuario, senha_hash=get_password_hash(d.senha)))
     db.commit()
     return {"msg": "Ok"}
@@ -284,7 +283,7 @@ def admin_data(db: Session = Depends(get_db), u: str = Depends(verificar_admin))
     
     total_users = db.query(models.Usuario).count()
     pautas = db.query(models.Pauta).filter(models.Pauta.assembleia_id == asm.id).all()
-    pautas.reverse()
+    pautas.reverse() # Mais recente primeiro
 
     res = []
     users_map = {u.id: u for u in db.query(models.Usuario).all()}
