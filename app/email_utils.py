@@ -5,8 +5,10 @@ from pydantic import EmailStr
 MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
 MAIL_FROM = os.getenv("MAIL_FROM", "")
-MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
 MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+
+
+MAIL_PORT = int(os.getenv("MAIL_PORT", 465)) 
 
 conf = ConnectionConfig(
     MAIL_USERNAME = MAIL_USERNAME,
@@ -14,8 +16,8 @@ conf = ConnectionConfig(
     MAIL_FROM = MAIL_FROM,
     MAIL_PORT = MAIL_PORT,
     MAIL_SERVER = MAIL_SERVER,
-    MAIL_STARTTLS = True,
-    MAIL_SSL_TLS = False,
+    MAIL_STARTTLS = False, 
+    MAIL_SSL_TLS = True,  
     USE_CREDENTIALS = True,
     VALIDATE_CERTS = True
 )
@@ -29,7 +31,7 @@ async def enviar_token_email(destinatario: EmailStr, nome: str, token: str, user
         </div>
         
         <p>Olá, <b>{nome}</b>!</p>
-        <p>Seu pré-credenciamento foi realizado com sucesso. Abaixo estão seus dados de acesso para a votação.</p>
+        <p>Seu pré-credenciamento foi realizado com sucesso.</p>
         
         <div style="background-color: #f8fafc; padding: 20px; text-align: center; margin: 25px 0; border-radius: 10px; border: 1px dashed #002d62;">
             <p style="margin: 0; font-size: 0.85em; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">Seu Código de Acesso (Token)</p>
@@ -40,14 +42,9 @@ async def enviar_token_email(destinatario: EmailStr, nome: str, token: str, user
         <div style="background-color: #fff1f2; padding: 15px; border-radius: 8px; border-left: 4px solid #e11d48; margin-top: 20px;">
             <p style="color: #9f1239; margin: 0; font-weight: bold;">⚠️ Atenção:</p>
             <p style="color: #be123c; margin: 5px 0 0 0; font-size: 0.9em;">
-                Este código é pessoal e intransferível. Ao chegar no local do evento, 
-                dirija-se à <b>Mesa de Credenciamento</b> para confirmar sua presença e liberar seu acesso ao sistema de votação.
+                Dirija-se à <b>Mesa de Credenciamento</b> para confirmar sua presença e liberar seu voto.
             </p>
         </div>
-        
-        <p style="margin-top: 30px; font-size: 0.8em; color: #94a3b8; text-align: center;">
-            Mensagem automática do Sistema de Assembleia.
-        </p>
     </div>
     """
 
