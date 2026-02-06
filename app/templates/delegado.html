@@ -174,15 +174,23 @@
                 triggerShake() { this.erroLoginAnim = true; if (navigator.vibrate) navigator.vibrate(200); setTimeout(() => this.erroLoginAnim = false, 400); },
                 toggleCand(nome) {
                     if (this.selecionados.includes(nome)) { this.selecionados = this.selecionados.filter(x => x !== nome); } else {
+                        // FIX: Adicionada crase para interpolação correta
                         if (this.selecionados.length < this.dados.pauta.max_escolhas) { this.selecionados.push(nome); } else { if (navigator.vibrate) navigator.vibrate(200); alert(`Maximum of ${this.dados.pauta.max_escolhas} votes.`); }
                     }
                 },
-                async confirmarEleicao() { if (navigator.vibrate) navigator.vibrate(50); if(confirm(`Confirm vote for: ${this.selecionados.join(', ')}?`)) { this.enviarVoto(this.selecionados); } },
+                async confirmarEleicao() { 
+                    if (navigator.vibrate) navigator.vibrate(50); 
+                    // FIX: Adicionada crase para interpolação correta
+                    if(confirm(`Confirm vote for: ${this.selecionados.join(', ')}?`)) { this.enviarVoto(this.selecionados); } 
+                },
                 async votar(op) { if (navigator.vibrate) navigator.vibrate(50); if(confirm('Confirm vote?')) { this.enviarVoto(op); } },
                 async enviarVoto(valorVoto) {
                     try {
-                        if (!this.user || !this.user.token) return alert("Error: Please login again.");
-                        await axios.post('/api/votar', { token: this.user.token, pauta_id: this.dados.pauta.id, opcao: valorVoto }); 
+                        // FIX: Usa credencial como fallback se token do user for nulo
+                        const tokenReal = this.user.token || this.credencial;
+                        if (!tokenReal) return alert("Error: Please login again.");
+                        
+                        await axios.post('/api/votar', { token: tokenReal, pauta_id: this.dados.pauta.id, opcao: valorVoto }); 
                         this.celebrar(); this.selecionados = []; this.load(); 
                     } catch(e) { 
                         if (e.response && e.response.data) {
@@ -192,22 +200,42 @@
                     } 
                 },
                 celebrar() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); },
-                async load() { if(!this.user) return; try { const res = await axios.get('/api/pauta-ativa?credencial='+this.user.token); this.dados = res.data; } catch {} },
-                async carregarHistorico() { this.view = 'historico'; try { const res = await axios.get('/api/historico?credencial='+this.user.token); this.historico = res.data; } catch {} },
+                async load() { 
+                    if(!this.user) return; 
+                    try { 
+                        const tokenReal = this.user.token || this.credencial;
+                        const res = await axios.get('/api/pauta-ativa?credencial='+tokenReal); 
+                        this.dados = res.data; 
+                    } catch {} 
+                },
+                async carregarHistorico() { 
+                    this.view = 'historico'; 
+                    try { 
+                        const tokenReal = this.user.token || this.credencial;
+                        const res = await axios.get('/api/historico?credencial='+tokenReal); 
+                        this.historico = res.data; 
+                    } catch {} 
+                },
                 
                 async sair() { 
                     if(confirm('Deseja realmente sair?')) { 
-                        try { await axios.post('/api/logout-delegado', { token: this.user.token }); } catch {}
+                        try { 
+                            const tokenReal = this.user.token || this.credencial;
+                            await axios.post('/api/logout-delegado', { token: tokenReal }); 
+                        } catch {}
                         this.user = null; this.dados = null; this.view = 'votar'; this.credencial = ''; this.cpfInput = ''; 
                         clearInterval(this.hbInterval); clearInterval(this.pollInterval);
                     } 
                 },
                 
                 startHeartbeat() {
-                    // Envia sinal a cada 5 segundos
                     this.hbInterval = setInterval(async () => {
                         if(this.user) {
-                            try { await axios.post('/api/heartbeat', { token: this.user.token }); } catch {}
+                            // FIX: Correção do erro 422 - Envia a credencial digitada se o token do objeto user estiver vazio
+                            const tokenReal = this.user.token || this.credencial;
+                            if (tokenReal) {
+                                try { await axios.post('/api/heartbeat', { token: tokenReal }); } catch {}
+                            }
                         }
                     }, 5000);
                 },
