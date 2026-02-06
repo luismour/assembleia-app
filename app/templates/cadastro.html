@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&family=Oswald:wght@500&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #002d62; --bg: #f4f7f9; }
+        :root { --primary: #002d62; --bg: #f4f7f9; --agenda: #4F46E5; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; }
         .card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; border: 1px solid rgba(255,255,255,0.5); }
         .logo { height: 60px; margin-bottom: 20px; }
@@ -25,6 +25,29 @@
         
         .token-card { background: #ecfdf5; border: 2px dashed #10b981; padding: 20px; border-radius: 16px; margin-top: 20px; animation: slideUp 0.5s; }
         .token-val { font-family: 'Oswald'; font-size: 2.5em; color: #047857; letter-spacing: 3px; display: block; margin: 10px 0; font-weight: bold; }
+        
+        /* Botão de Agenda */
+        .btn-agenda {
+            background: linear-gradient(135deg, #4F46E5, #4338ca);
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+            padding: 15px;
+            border-radius: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+            font-size: 1em;
+        }
+        .btn-agenda:hover { filter: brightness(1.05); }
+
         .alert { font-size: 0.8em; background: #fff7ed; color: #c2410c; padding: 12px; border-radius: 8px; margin-top: 20px; border: 1px solid #ffedd5; line-height: 1.4; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -44,19 +67,19 @@
                 <label>Nome Completo</label>
                 <input v-model="nome" placeholder="Ex: João da Silva">
                 
-                <label>E-mail</label>
+                <label>E-mail (Opcional)</label>
                 <input v-model="email" type="email" placeholder="seu@email.com">
                 
                 <label>Número do Grupo</label>
                 <input v-model="grupo" type="number" placeholder="Ex: 107">
             </div>
 
-            <button @click="cadastrar" class="btn" :disabled="loading">${ loading ? 'Validando...' : 'GERAR ACESSO' }</button>
+            <button @click="cadastrar" class="btn" :disabled="loading">${ loading ? 'Gerando...' : 'GERAR ACESSO' }</button>
         </div>
 
         <div v-else>
             <h2>Cadastro Realizado!</h2>
-            <p>O código também foi enviado para seu e-mail.</p>
+            <p>Salve seu código abaixo.</p>
             
             <div class="token-card">
                 <span style="font-size: 0.8em; font-weight: bold; color: #065f46; letter-spacing: 1px;">SEU CÓDIGO DE ACESSO</span>
@@ -64,8 +87,13 @@
                 <span style="font-size: 0.9em; display: block; color: #047857;">ID: <b>${ idGerado }</b></span>
             </div>
 
+            <button @click="salvarNaAgenda" class="btn-agenda">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                SALVAR NA AGENDA
+            </button>
+
             <div class="alert">
-                ⚠️ <b>ATENÇÃO:</b> Seu voto só será liberado após você se apresentar à mesa diretora para confirmar presença.
+                ⚠️ <b>ATENÇÃO:</b> Ao salvar na agenda, seu TOKEN ficará guardado nas "notas/descrição" do evento.
             </div>
 
             <button @click="irParaVotacao" class="btn" style="margin-top: 20px; background: #334155;">IR PARA VOTAÇÃO</button>
@@ -88,8 +116,10 @@
                 },
 
                 async cadastrar() {
-                    if (!this.nome || !this.grupo || !this.cpf || !this.email) return alert("Preencha todos os campos!");
+                    if (!this.nome || !this.grupo || !this.cpf) return alert("Preencha nome, grupo e CPF!");
                     if (this.cpf.length < 14) return alert("CPF incompleto.");
+                    
+                    const emailParaEnviar = this.email || "sem_email@exemplo.com";
 
                     this.loading = true;
                     try {
@@ -97,7 +127,7 @@
                             nome: this.nome, 
                             grupo: this.grupo.toString(),
                             cpf: this.cpf,
-                            email: this.email
+                            email: emailParaEnviar
                         });
                         
                         this.tokenGerado = res.data.token;
@@ -113,6 +143,45 @@
                         this.loading = false;
                     }
                 },
+
+                salvarNaAgenda() {
+                    // Configura os dados do evento
+                    const titulo = "Assembleia Regional Escoteira";
+                    // Datas formatadas para o padrão ICS: AAAAMMDDTHHMMSS
+                    // Data: 15/03/2026 das 08:00 as 17:00
+                    const inicio = "20260315T080000"; 
+                    const fim = "20260315T170000";
+                    
+                    // Coloca o TOKEN na descrição do evento
+                    const descricao = `MEU TOKEN DE VOTAÇÃO: ${this.tokenGerado}\\nID DE USUÁRIO: ${this.idGerado}\\n\\nApresente este código na mesa de credenciamento.`;
+                    const local = "Local do Evento (A Definir)";
+
+                    // Cria o conteúdo do arquivo .ics
+                    const icsMsg = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//EscoteirosPE//AppVotacao//PT
+BEGIN:VEVENT
+UID:${this.idGerado}@escoteirospe.com.br
+DTSTAMP:${inicio}Z
+DTSTART:${inicio}
+DTEND:${fim}
+SUMMARY:${titulo}
+DESCRIPTION:${descricao}
+LOCATION:${local}
+END:VEVENT
+END:VCALENDAR`;
+
+                    // Cria um link invisível para download
+                    const blob = new Blob([icsMsg], { type: 'text/calendar;charset=utf-8' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.setAttribute('download', 'assembleia-2026.ics');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                },
+
                 irParaVotacao() {
                     window.location.href = '/';
                 }
