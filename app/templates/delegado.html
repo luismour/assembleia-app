@@ -93,7 +93,7 @@
                 <div class="card">
                     <div class="user-chip">
                         👤 ${ user.nome } 
-                        <span v-if="user.grupo === '00'" class="group-tag" style="background-color: #b91c1c;">⚜️ Diretoria Regional</span>
+                        <span v-if="user.grupo === '00' || user.grupo == 0" class="group-tag" style="background-color: #b91c1c;">⚜️ Direção Regional</span>
                         <span v-else class="group-tag">GE ${ user.grupo }</span>
                     </div>
 
