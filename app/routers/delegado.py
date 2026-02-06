@@ -31,7 +31,7 @@ class LoginRequest(BaseModel):
 
 class VotoRequest(BaseModel):
     token: str
-    pauta_id: int  # <--- CORREÇÃO: Mudado de str para int
+    pauta_id: str  # <--- CORREÇÃO: Deve ser str para bater com o models.py
     opcao: Union[str, List[str]]
 
 class CadastroInput(BaseModel):
@@ -200,7 +200,7 @@ def get_historico(credencial: str, db: Session = Depends(get_db)):
             res.append({"titulo": p.titulo, "status": p.status, "votos": v_fmt})
     return res
 
-# === AUTO-CADASTRO ATUALIZADO COM E-MAIL ===
+# === AUTO-CADASTRO ATUALIZADO ===
 @router.post("/auto-cadastro")
 async def auto_cadastro(
     dados: CadastroInput, 
