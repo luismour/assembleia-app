@@ -1,5 +1,5 @@
 .env
 __pycache__
 .venv
-disprador.py
+disparador.py
 emails_ja_enviados.txt

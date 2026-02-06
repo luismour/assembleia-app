@@ -91,7 +91,11 @@
                 </div>
 
                 <div class="card">
-                    <div class="user-chip">👤 ${ user.nome } <span class="group-tag">GE ${ user.grupo }</span></div>
+                    <div class="user-chip">
+                        👤 ${ user.nome } 
+                        <span v-if="user.grupo === '00'" class="group-tag" style="background-color: #b91c1c;">⚜️ Diretoria Regional</span>
+                        <span v-else class="group-tag">GE ${ user.grupo }</span>
+                    </div>
 
                     <div v-if="!dados || !dados.pauta">
                          <div class="waiting-box"><div class="radar"><span class="radar-icon">📡</span></div><h3 style="color: #4b5563; font-size: 1.1em; margin: 0;">Aguardando Mesa...</h3></div>
