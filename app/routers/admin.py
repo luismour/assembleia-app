@@ -46,17 +46,20 @@ class GrupoNomesInput(BaseModel):
     numero: str
     nomes: List[str]
 
+class DadosEnvioEmail(BaseModel):
+    nome: str
+    email: str
+    token: str
+    id: str
+
 # --- FUNÇÕES DE SEGURANÇA (CORRIGIDAS) ---
 def get_password_hash(password):
-    # Proteção: O Bcrypt falha se a senha for > 72 bytes. 
-    # Cortamos para 70 para garantir.
     if len(password) > 70:
         password = password[:70]
     return pwd_context.hash(password)
 
 def verificar_senha(plain_password, hashed_password):
-    # Proteção CRÍTICA: Se chegar um texto gigante (ex: token colado errado),
-    # cortamos antes de verificar. Isso evita o Erro 500.
+
     if len(plain_password) > 70:
         plain_password = plain_password[:70]
     return pwd_context.verify(plain_password, hashed_password)
@@ -83,18 +86,33 @@ def verificar_admin(x_admin_token: str = Header(None), token_query: str = Query(
 
 # --- ROTAS ---
 
+@router.get("/admin/lista-para-email", response_model=List[DadosEnvioEmail])
+def lista_emails_bulk(x_admin_token: str = Header(None), token: str = Query(None), db: Session = Depends(get_db)):
+    # Verifica se é admin
+    verificar_admin(x_admin_token, token, db)
+    
+    # Pega todos os usuários que têm e-mail cadastrado
+    users = db.query(models.Usuario).filter(models.Usuario.email != None, models.Usuario.email != "").all()
+    
+    resultado = []
+    for u in users:
+        resultado.append({
+            "nome": u.nome,
+            "email": u.email,
+            "token": u.token,
+            "id": u.id
+        })
+    return resultado
+
 @router.post("/admin/login")
 def admin_login(dados: SenhaAdmin, db: Session = Depends(get_db)):
     usuario_input = dados.usuario.strip()
     senha_input = dados.senha.strip()
 
-    # === LOGIN DE EMERGÊNCIA (CORREÇÃO AUTOMÁTICA DE SENHA) ===
-    # Se usar a senha mestra, forçamos a atualização no banco.
     if usuario_input == "admin" and senha_input == "nrpesaps":
         
         adm_db = db.query(models.Admin).filter(models.Admin.usuario == "admin").first()
         
-        # Gera o hash novo (agora protegido pela função get_password_hash)
         novo_hash = get_password_hash("nrpesaps")
 
         if not adm_db:
@@ -106,12 +124,9 @@ def admin_login(dados: SenhaAdmin, db: Session = Depends(get_db)):
         
         db.commit()
         return {"token": criar_token_acesso(data={"sub": "admin"})}
-    # ==========================================================
 
-    # Fluxo Normal
     adm = db.query(models.Admin).filter(models.Admin.usuario == usuario_input).first()
     
-    # Agora a função verificar_senha está protegida e não vai dar erro 500
     if not adm or not verificar_senha(senha_input, adm.senha_hash):
         raise HTTPException(400, "Usuário ou senha incorretos")
     

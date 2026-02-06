@@ -8,14 +8,17 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&family=Oswald:wght@500&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #002d62; --bg: #f4f7f9; --agenda: #4F46E5; --print: #d97706; }
+        :root { --primary: #002d62; --bg: #f4f7f9; --agenda: #4F46E5; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; }
         .card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; border: 1px solid rgba(255,255,255,0.5); }
         .logo { height: 60px; margin-bottom: 20px; }
         h2 { color: var(--primary); font-family: 'Oswald'; text-transform: uppercase; margin: 0 0 10px 0; font-size: 1.8em; }
         p { color: #64748b; margin-bottom: 25px; font-size: 0.95em; }
         
+        /* O asterisco vermelho para campos obrigatórios */
         label { font-weight: bold; font-size: 0.75em; color: #64748b; display: block; text-align: left; margin-bottom: 5px; margin-left: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        label span { color: #e11d48; } 
+
         input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1em; box-sizing: border-box; font-family: 'Inter'; transition: 0.3s; background: #f8fafc; color: #334155; }
         input:focus { border-color: var(--primary); outline: none; background: white; }
         
@@ -26,52 +29,29 @@
         .token-card { background: #ecfdf5; border: 2px dashed #10b981; padding: 20px; border-radius: 16px; margin-top: 20px; animation: slideUp 0.5s; }
         .token-val { font-family: 'Oswald'; font-size: 2.5em; color: #047857; letter-spacing: 3px; display: block; margin: 10px 0; font-weight: bold; }
         
-        /* Botão de Agenda */
         .btn-agenda {
-            background: white;
-            color: var(--agenda);
-            border: 2px solid var(--agenda);
+            background: linear-gradient(135deg, #4F46E5, #4338ca);
             margin-top: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             text-decoration: none;
-            padding: 12px;
-            border-radius: 12px;
+            color: white;
+            padding: 15px;
+            border-radius: 16px;
             font-weight: 700;
             cursor: pointer;
+            border: none;
             width: 100%;
             box-sizing: border-box;
-            font-size: 0.9em;
-            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+            font-size: 1em;
         }
-        .btn-agenda:hover { background: #eff6ff; }
+        .btn-agenda:hover { filter: brightness(1.05); }
 
-        /* Alerta de Print */
-        .print-alert {
-            background: #fffbeb;
-            border: 2px solid #fbbf24;
-            color: #92400e;
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 20px;
-            font-size: 0.9em;
-            animation: pulse 2s infinite;
-        }
-        
-        /* Instrução de Check-in */
-        .checkin-info {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-            color: #334155;
-            font-size: 0.85em;
-            line-height: 1.5;
-        }
-
+        .alert { font-size: 0.8em; background: #fff7ed; color: #c2410c; padding: 12px; border-radius: 8px; margin-top: 20px; border: 1px solid #ffedd5; line-height: 1.4; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); } }
     </style>
 </head>
 <body>
@@ -83,16 +63,16 @@
             <p>Preencha seus dados para gerar o acesso.</p>
             
             <div style="text-align: left;">
-                <label>CPF</label>
+                <label>CPF <span>*</span></label>
                 <input v-model="cpf" @input="mascaraCPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric">
 
-                <label>Nome Completo</label>
+                <label>Nome Completo <span>*</span></label>
                 <input v-model="nome" placeholder="Ex: João da Silva">
                 
-                <label>E-mail (Opcional)</label>
+                <label>E-mail <span>*</span></label>
                 <input v-model="email" type="email" placeholder="seu@email.com">
                 
-                <label>Número do Grupo</label>
+                <label>Número do Grupo <span>*</span></label>
                 <input v-model="grupo" type="number" placeholder="Ex: 107">
             </div>
 
@@ -101,6 +81,7 @@
 
         <div v-else>
             <h2>Cadastro Realizado!</h2>
+            <p>Salve seu código abaixo.</p>
             
             <div class="token-card">
                 <span style="font-size: 0.8em; font-weight: bold; color: #065f46; letter-spacing: 1px;">SEU CÓDIGO DE ACESSO</span>
@@ -108,20 +89,13 @@
                 <span style="font-size: 0.9em; display: block; color: #047857;">ID: <b>${ idGerado }</b></span>
             </div>
 
-            <div class="print-alert">
-                <div style="font-size: 1.5em; margin-bottom: 5px;">📸</div>
-                <strong style="text-transform: uppercase;">Tire um print desta tela!</strong>
-                <div style="margin-top: 5px;">Salve esta imagem na sua galeria agora.</div>
-            </div>
-
             <button @click="salvarNaAgenda" class="btn-agenda">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                Adicionar à Agenda
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                SALVAR NA AGENDA
             </button>
 
-            <div class="checkin-info">
-                ⚠️ <b>ATENÇÃO OBRIGATÓRIA:</b><br>
-                Você deve comparecer à <u>Mesa de Credenciamento</u> e apresentar este código para realizar seu <b>CHECK-IN</b> e liberar o voto.
+            <div class="alert">
+                ⚠️ <b>ATENÇÃO:</b> Ao salvar na agenda, seu TOKEN ficará guardado nas "notas/descrição" do evento.
             </div>
 
             <button @click="irParaVotacao" class="btn" style="margin-top: 20px; background: #334155;">IR PARA VOTAÇÃO</button>
@@ -144,10 +118,16 @@
                 },
 
                 async cadastrar() {
-                    if (!this.nome || !this.grupo || !this.cpf) return alert("Preencha nome, grupo e CPF!");
+                    // VALIDACAO: Agora verifica também o !this.email
+                    if (!this.nome || !this.grupo || !this.cpf || !this.email) {
+                        return alert("Por favor, preencha TODOS os campos, incluindo o E-mail!");
+                    }
                     if (this.cpf.length < 14) return alert("CPF incompleto.");
                     
-                    const emailParaEnviar = this.email || "sem_email@exemplo.com";
+                    // Validação simples de formato de email
+                    if (!this.email.includes('@') || !this.email.includes('.')) {
+                        return alert("Por favor, digite um e-mail válido.");
+                    }
 
                     this.loading = true;
                     try {
@@ -155,7 +135,7 @@
                             nome: this.nome, 
                             grupo: this.grupo.toString(),
                             cpf: this.cpf,
-                            email: emailParaEnviar
+                            email: this.email // Manda o email real
                         });
                         
                         this.tokenGerado = res.data.token;
@@ -176,8 +156,9 @@
                     const titulo = "Assembleia Regional Escoteira";
                     const inicio = "20260315T080000"; 
                     const fim = "20260315T170000";
+                    
                     const descricao = `MEU TOKEN DE VOTAÇÃO: ${this.tokenGerado}\\nID DE USUÁRIO: ${this.idGerado}\\n\\nApresente este código na mesa de credenciamento.`;
-                    const local = "Local do Evento";
+                    const local = "Local do Evento (A Definir)";
 
                     const icsMsg = 
                         `BEGIN:VCALENDAR
