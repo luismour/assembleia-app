@@ -22,7 +22,11 @@ load_dotenv()
 
 router = APIRouter(prefix="/api")
 
+# --- CONFIGURAÇÕES DE SEGURANÇA ---
 SECRET_KEY = os.getenv("SECRET_KEY", "chave-secreta-padrao")
+# RECUPERA A SENHA MESTRA DO AMBIENTE (Se não houver, usa um fallback, mas avisa para mudar)
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "mudar_senha_em_producao_123")
+
 ALGORITHM = "HS256"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -71,7 +75,9 @@ def verificar_admin(x_admin_token: str = Header(None), token_query: str = Query(
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user = payload.get("sub")
+        # Permite acesso se for o superusuário "admin" ou um admin criado no banco
         if user == "admin": return "admin"
+        
         db_admin = db.query(models.Admin).filter(models.Admin.usuario == user).first()
         if not db_admin: raise HTTPException(401, "Invalid")
         return user
@@ -84,17 +90,26 @@ def admin_login(dados: SenhaAdmin, db: Session = Depends(get_db)):
     usuario_input = dados.usuario.strip()
     senha_input = dados.senha.strip()
 
-    if usuario_input == "admin" and senha_input == "nrpesaps":
+    # 1. VERIFICAÇÃO DE SUPER ADMIN (Via Variável de Ambiente)
+    # Isso garante que você sempre consegue entrar se tiver acesso às configs do servidor
+    if usuario_input == "admin" and senha_input == ADMIN_PASSWORD:
         adm_db = db.query(models.Admin).filter(models.Admin.usuario == "admin").first()
-        novo_hash = get_password_hash("nrpesaps")
-        if not adm_db: db.add(models.Admin(usuario="admin", senha_hash=novo_hash))
-        else: adm_db.senha_hash = novo_hash
+        novo_hash = get_password_hash(ADMIN_PASSWORD)
+        
+        # Cria ou atualiza a senha do user 'admin' no banco para garantir sincronia
+        if not adm_db: 
+            db.add(models.Admin(usuario="admin", senha_hash=novo_hash))
+        else: 
+            adm_db.senha_hash = novo_hash
         db.commit()
+        
         return {"token": criar_token_acesso(data={"sub": "admin"})}
 
+    # 2. VERIFICAÇÃO DE ADMINS NORMAIS (Do Banco de Dados)
     adm = db.query(models.Admin).filter(models.Admin.usuario == usuario_input).first()
     if not adm or not verificar_senha(senha_input, adm.senha_hash):
         raise HTTPException(400, "Usuário ou senha incorretos")
+    
     return {"token": criar_token_acesso(data={"sub": adm.usuario})}
 
 @router.get("/admin/lista-para-email", response_model=List[DadosEnvioEmail])
@@ -174,7 +189,6 @@ def add_asm(d: AssembleiaInput, db: Session = Depends(get_db), u: str = Depends(
     db.commit()
     return nova
 
-# --- NOVAS ROTAS (EDITAR E EXCLUIR EVENTO) ---
 @router.put("/assembleias/{id}")
 def edit_asm(id: str, d: AssembleiaInput, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     asm = db.query(models.Assembleia).filter(models.Assembleia.id == id).first()
@@ -203,7 +217,6 @@ def delete_asm(id: str, db: Session = Depends(get_db), u: str = Depends(verifica
     db.delete(asm)
     db.commit()
     return {"msg": "ok"}
-# ---------------------------------------------
 
 @router.post("/assembleias/{id}/ativar")
 def set_active_asm(id: str, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
