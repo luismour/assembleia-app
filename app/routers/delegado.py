@@ -31,14 +31,14 @@ class LoginRequest(BaseModel):
 
 class VotoRequest(BaseModel):
     token: str
-    pauta_id: str
+    pauta_id: int  # <--- CORREÇÃO: Mudado de str para int
     opcao: Union[str, List[str]]
 
 class CadastroInput(BaseModel):
     nome: str
     grupo: str
     cpf: str
-    email: EmailStr # <--- Validacao de email
+    email: EmailStr
 
 class HeartbeatInput(BaseModel):
     token: str
