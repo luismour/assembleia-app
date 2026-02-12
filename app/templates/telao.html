@@ -22,27 +22,27 @@
         body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
         /* HEADER */
-        header { background: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 10vh; }
+        header { background: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 10vh; z-index: 10; }
         .logo img { height: 60px; }
         .event-title { font-family: 'Oswald'; font-size: 2em; color: var(--primary); text-transform: uppercase; }
         
         /* MAIN CONTENT */
-        main { flex: 1; padding: 40px; display: flex; gap: 40px; align-items: center; height: 80vh; }
+        main { flex: 1; padding: 30px; display: flex; gap: 30px; align-items: stretch; height: 90vh; overflow: hidden; }
         
         /* LEFT: CHART AREA */
-        .chart-area { flex: 1.5; background: white; border-radius: 30px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .chart-container { width: 100%; height: 100%; position: relative; }
+        .chart-area { flex: 2; background: white; border-radius: 30px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; }
+        .chart-container { flex: 1; position: relative; width: 100%; min-height: 0; }
         
         /* RIGHT: INFO AREA */
-        .info-area { flex: 1; display: flex; flex-direction: column; gap: 30px; height: 100%; justify-content: center; }
+        .info-area { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 350px; }
         
-        .pauta-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; border-left: 10px solid var(--primary); }
-        .pauta-label { font-size: 1.2em; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        .pauta-title { font-size: 2.5em; font-weight: 800; color: var(--primary); line-height: 1.2; }
+        .pauta-card { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; border-left: 10px solid var(--primary); flex-shrink: 0; }
+        .pauta-label { font-size: 1em; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
+        .pauta-title { font-size: 1.8em; font-weight: 800; color: var(--primary); line-height: 1.2; }
         
-        .status-card { padding: 30px; border-radius: 20px; text-align: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .status-label { font-size: 1em; opacity: 0.9; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
-        .status-value { font-family: 'Oswald'; font-size: 4em; font-weight: 700; line-height: 1; }
+        .status-card { padding: 20px; border-radius: 20px; text-align: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); animation: popIn 0.5s; flex-shrink: 0; }
+        .status-label { font-size: 0.9em; opacity: 0.9; font-weight: 600; text-transform: uppercase; }
+        .status-value { font-family: 'Oswald'; font-size: 3em; font-weight: 700; line-height: 1; margin-top: 5px; }
         
         /* STATUS COLORS */
         .st-aberta { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
@@ -50,15 +50,28 @@
         .st-reprovada { background: linear-gradient(135deg, #ef4444, #b91c1c); }
         .st-empate { background: linear-gradient(135deg, #f59e0b, #d97706); }
         .st-encerrada { background: #64748b; }
+        .st-concluida { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
 
-        /* TOTAL VOTES */
-        .total-votes { text-align: center; font-size: 1.5em; color: var(--primary); font-weight: 800; margin-top: 20px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .total-votes { text-align: center; font-size: 1.2em; color: var(--primary); font-weight: 800; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); flex-shrink: 0; }
+
+        /* RANKING LIST (Só aparece em ELEIÇÃO) */
+        .ranking-container { flex: 1; background: white; border-radius: 20px; padding: 20px; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .ranking-title { font-family: 'Oswald'; color: var(--primary); font-size: 1.2em; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; margin-bottom: 10px; }
+        .rank-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #f0f2f5; animation: slideIn 0.3s; }
+        .rank-pos { font-weight: 800; color: #cbd5e1; width: 30px; font-size: 1.1em; }
+        .rank-name { flex: 1; font-weight: 600; color: #334155; }
+        .rank-votes { background: #f1f5f9; padding: 4px 12px; border-radius: 20px; font-weight: 800; color: var(--primary); }
+        
+        /* Destaque para os Eleitos */
+        .rank-elected .rank-pos { color: var(--success); }
+        .rank-elected .rank-name { color: var(--primary); }
+        .rank-elected .rank-votes { background: #dcfce7; color: var(--success); }
 
         /* NO CONTENT STATE */
         .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; color: #94a3b8; }
-        .empty-icon { font-size: 5em; margin-bottom: 20px; }
         
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -77,7 +90,7 @@
 
             <div class="info-area">
                 <div class="pauta-card">
-                    <div class="pauta-label">Em Votação</div>
+                    <div class="pauta-label">${ pauta.tipo === 'ELEICAO' ? 'Eleição em Curso' : 'Em Votação' }</div>
                     <div class="pauta-title">${ pauta.titulo }</div>
                 </div>
 
@@ -87,26 +100,44 @@
                 </div>
 
                 <div class="total-votes">
-                    <i class="ph ph-users"></i> ${ pauta.total_votos } VOTOS REGISTRADOS
+                    <i class="ph ph-users"></i> ${ pauta.total_votos } VOTOS
+                </div>
+
+                <div v-if="pauta.tipo === 'ELEICAO'" class="ranking-container">
+                    <div class="ranking-title">CLASSIFICAÇÃO</div>
+                    <div v-for="(cand, idx) in ranking" :key="cand.nome" class="rank-item" :class="{ 'rank-elected': idx < (pauta.max_escolhas || 1) }">
+                        <div class="rank-pos">${ idx + 1 }º</div>
+                        <div class="rank-name">${ cand.nome }</div>
+                        <div class="rank-votes">${ cand.votos }</div>
+                    </div>
                 </div>
             </div>
         </main>
 
         <main v-else>
             <div class="empty-state">
-                <i class="ph ph-presentation-chart empty-icon"></i>
-                <h1>Aguardando início da votação...</h1>
+                <i class="ph ph-presentation-chart" style="font-size: 5em; margin-bottom: 20px;"></i>
+                <h1>Aguardando início...</h1>
             </div>
         </main>
     </div>
 
     <script>
         const { createApp } = Vue;
-        Chart.register(ChartDataLabels); 
+        Chart.register(ChartDataLabels);
 
         createApp({
             delimiters: ['${', '}'],
             data() { return { pauta: null, eventoNome: 'Assembleia', chart: null } },
+            computed: {
+                ranking() {
+                    if(!this.pauta || !this.pauta.resultados) return [];
+                    // Converte objeto resultados em array ordenado
+                    return Object.entries(this.pauta.resultados)
+                        .map(([nome, votos]) => ({ nome, votos }))
+                        .sort((a, b) => b.votos - a.votos);
+                }
+            },
             methods: {
                 async fetchData() {
                     try {
@@ -114,10 +145,12 @@
                         this.eventoNome = r.data.evento;
                         const novaPauta = r.data.pauta;
 
-                        if (!this.pauta || (novaPauta && this.pauta.titulo !== novaPauta.titulo)) {
+                        // Se mudar a pauta, reseta tudo
+                        if (!this.pauta || (novaPauta && this.pauta.titulo !== novaPauta.titulo) || (novaPauta && this.pauta.tipo !== novaPauta.tipo)) {
                             this.pauta = novaPauta;
                             this.renderChart();
                         } else {
+                            // Apenas atualiza dados
                             this.pauta = novaPauta;
                             this.updateChartData();
                         }
@@ -132,6 +165,7 @@
                     if (res === 'APROVADA') return 'st-aprovada';
                     if (res === 'REPROVADA') return 'st-reprovada';
                     if (res === 'EMPATE') return 'st-empate';
+                    if (res === 'ELEIÇÃO CONCLUÍDA' || res === 'CONCLUÍDA') return 'st-concluida';
                     return 'st-encerrada';
                 },
                 renderChart() {
@@ -144,46 +178,68 @@
                         if (this.chart) this.chart.destroy();
 
                         const isEleicao = this.pauta.tipo === 'ELEICAO';
-                        const labels = Object.keys(this.pauta.resultados);
-                        const data = Object.values(this.pauta.resultados);
                         
+                        // Prepara dados ordenados se for eleição
+                        let labels, data;
+                        if (isEleicao) {
+                            const sorted = this.ranking; // Usa o computed ranking
+                            labels = sorted.map(i => i.nome);
+                            data = sorted.map(i => i.votos);
+                        } else {
+                            labels = Object.keys(this.pauta.resultados).map(l => l.toUpperCase());
+                            data = Object.values(this.pauta.resultados);
+                        }
+
+                        // Configura Cores
                         const bgColors = labels.map(l => {
-                            if(l==='favor') return '#10b981'; 
-                            if(l==='contra') return '#ef4444'; 
-                            if(l==='abstencao') return '#cbd5e1'; 
-                            return this.getRandomColor(); 
+                            if(l==='FAVOR' || l==='SIM') return '#10b981'; 
+                            if(l==='CONTRA' || l==='NAO') return '#ef4444'; 
+                            if(l==='ABSTENCAO') return '#94a3b8'; 
+                            return '#3b82f6'; // Azul padrão para candidatos
                         });
 
                         this.chart = new Chart(ctx, {
                             type: isEleicao ? 'bar' : 'doughnut',
                             data: {
-                                labels: labels.map(l => l.toUpperCase()),
+                                labels: labels,
                                 datasets: [{
                                     data: data,
                                     backgroundColor: bgColors,
                                     borderWidth: 0,
-                                    borderRadius: 5
+                                    borderRadius: 8,
+                                    barPercentage: 0.6
                                 }]
                             },
                             options: {
+                                indexAxis: isEleicao ? 'y' : 'x', // Barra horizontal se for eleição
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                layout: { padding: 20 },
+                                layout: { padding: isEleicao ? 0 : 20 },
+                                scales: {
+                                    x: { display: isEleicao, grid: { display: false } }, // Mostra eixo X só em eleição
+                                    y: { display: isEleicao, grid: { display: false }, ticks: { font: { size: 14, weight: 'bold' } } }
+                                },
                                 plugins: {
                                     legend: { 
+                                        display: !isEleicao, // Esconde legenda em eleição (já tem nomes no eixo Y)
                                         position: 'bottom', 
                                         labels: { font: { size: 16, weight: 'bold' }, padding: 20 } 
                                     },
                                     datalabels: {
-                                        color: '#fff',
-                                        font: { weight: 'bold', size: 24 },
+                                        color: isEleicao ? '#002d62' : '#fff',
+                                        anchor: isEleicao ? 'end' : 'center',
+                                        align: isEleicao ? 'end' : 'center',
+                                        font: { weight: 'bold', size: isEleicao ? 18 : 24 },
                                         formatter: (value, ctx) => {
                                             if (value === 0) return '';
+                                            if (isEleicao) return value; // Mostra número absoluto na eleição
+                                            
+                                            // Mostra % na rosca
                                             let sum = 0;
                                             let dataArr = ctx.chart.data.datasets[0].data;
                                             dataArr.map(data => { sum += data; });
                                             let percentage = (value*100 / sum).toFixed(0)+"%";
-                                            return percentage; // Retorna a % dentro da fatia
+                                            return percentage; 
                                         }
                                     }
                                 }
@@ -193,22 +249,29 @@
                 },
                 updateChartData() {
                     if (this.chart && this.pauta) {
-                        this.chart.data.datasets[0].data = Object.values(this.pauta.resultados);
+                        const isEleicao = this.pauta.tipo === 'ELEICAO';
+                        let labels, data;
+
+                        if (isEleicao) {
+                            const sorted = this.ranking;
+                            labels = sorted.map(i => i.nome);
+                            data = sorted.map(i => i.votos);
+                        } else {
+                            labels = Object.keys(this.pauta.resultados).map(l => l.toUpperCase());
+                            data = Object.values(this.pauta.resultados);
+                        }
+
+                        this.chart.data.labels = labels;
+                        this.chart.data.datasets[0].data = data;
                         this.chart.update();
                     } else {
                         this.renderChart();
                     }
-                },
-                getRandomColor() {
-                    const letters = '0123456789ABCDEF';
-                    let color = '#';
-                    for (let i = 0; i < 6; i++) { color += letters[Math.floor(Math.random() * 16)]; }
-                    return color;
                 }
             },
             mounted() {
                 this.fetchData();
-                setInterval(this.fetchData, 2000); 
+                setInterval(this.fetchData, 2000);
             }
         }).mount('#app');
     </script>
