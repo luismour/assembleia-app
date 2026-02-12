@@ -5,7 +5,6 @@ import os
 
 router = APIRouter()
 
-# Configuração dos Templates
 current_dir = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(os.path.dirname(current_dir), "templates")
 templates = Jinja2Templates(directory=templates_dir)

@@ -3,194 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telão</title>
+    <title>Telão - Votação</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@400;600;700;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
     <style>
-        body, html { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f0f2f5 0%, #dfe4ea 100%); overflow: hidden; }
-        #app { display: flex; flex-direction: column; height: 100vh; }
-        
-        .header { background: white; height: 90px; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 10; }
-        .live-badge { background: #fee2e2; color: #b91c1c; padding: 6px 15px; border-radius: 30px; font-weight: bold; display: flex; align-items: center; gap: 10px; font-family: 'Poppins'; }
-        
-        .event-banner { background: linear-gradient(90deg, #002d62 0%, #6a1b9a 100%); color: white; text-align: center; padding: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 5; }
-        
-        .card { 
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); 
-            width: 90%; max-width: 1600px; height: 75vh; 
-            border-radius: 30px; box-shadow: 0 30px 80px rgba(0,0,0,0.15); 
-            display: flex; flex-direction: column; align-items: center; padding: 40px; box-sizing: border-box; margin: auto; 
-            position: relative;
+        :root {
+            --primary: #002d62; 
+            --bg: #f0f2f5;
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --warning: #f59e0b;
         }
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        .status-badge { font-size: 1.2em; padding: 8px 25px; border-radius: 50px; text-transform: uppercase; font-weight: 800; display: inline-block; margin-bottom: 15px; }
-        .aberta { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; } 
-        .encerrada { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        /* HEADER */
+        header { background: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 10vh; }
+        .logo img { height: 60px; }
+        .event-title { font-family: 'Oswald'; font-size: 2em; color: var(--primary); text-transform: uppercase; }
         
-        .res-badge { 
-            font-family: 'Oswald'; font-size: 4em; text-transform: uppercase; 
-            padding: 15px 40px; border-radius: 25px; transform: rotate(-5deg); 
-            display: inline-block; background: rgba(255,255,255,0.95); 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 6px solid; 
-            position: absolute; z-index: 20; right: 20px; top: 20px;
-        }
+        /* MAIN CONTENT */
+        main { flex: 1; padding: 40px; display: flex; gap: 40px; align-items: center; height: 80vh; }
+        
+        /* LEFT: CHART AREA */
+        .chart-area { flex: 1.5; background: white; border-radius: 30px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .chart-container { width: 100%; height: 100%; position: relative; }
+        
+        /* RIGHT: INFO AREA */
+        .info-area { flex: 1; display: flex; flex-direction: column; gap: 30px; height: 100%; justify-content: center; }
+        
+        .pauta-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; border-left: 10px solid var(--primary); }
+        .pauta-label { font-size: 1.2em; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .pauta-title { font-size: 2.5em; font-weight: 800; color: var(--primary); line-height: 1.2; }
+        
+        .status-card { padding: 30px; border-radius: 20px; text-align: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .status-label { font-size: 1em; opacity: 0.9; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
+        .status-value { font-family: 'Oswald'; font-size: 4em; font-weight: 700; line-height: 1; }
+        
+        /* STATUS COLORS */
+        .st-aberta { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .st-aprovada { background: linear-gradient(135deg, #10b981, #059669); }
+        .st-reprovada { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .st-empate { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .st-encerrada { background: #64748b; }
 
-        /* ESTILOS DA LISTA DE RANKING */
-        .ranking-container { width: 100%; max-width: 900px; flex: 1; overflow-y: auto; padding: 20px; margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
-        
-        .rank-item {
-            display: flex; align-items: center; padding: 20px 30px;
-            background: #fff; border-radius: 20px; border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.5s ease;
-        }
-        
-        /* Destaque para os eleitos */
-        .rank-item.elected {
-            background: linear-gradient(90deg, #eff6ff 0%, #fff 100%);
-            border: 2px solid #002d62; transform: scale(1.02); z-index: 2;
-            box-shadow: 0 10px 20px rgba(0, 45, 98, 0.1);
-        }
-        .rank-item.elected .rank-pos { background: #002d62; color: white; }
-        
-        .rank-pos { 
-            font-family: 'Oswald'; font-size: 1.5em; width: 50px; height: 50px; 
-            background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            color: #64748b; margin-right: 20px; font-weight: bold;
-        }
-        .rank-name { flex: 1; font-weight: 700; font-size: 1.4em; color: #1e293b; }
-        .rank-votes { font-family: 'Poppins'; font-weight: 800; font-size: 1.8em; color: #002d62; }
+        /* TOTAL VOTES */
+        .total-votes { text-align: center; font-size: 1.5em; color: var(--primary); font-weight: 800; margin-top: 20px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
 
-        /* Estilos para grafico simples */
-        .chart-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+        /* NO CONTENT STATE */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; color: #94a3b8; }
+        .empty-icon { font-size: 5em; margin-bottom: 20px; }
+        
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
     <div id="app">
-        <header class="header">
-            <div style="display:flex; align-items:center; gap:20px;">
-                <img src="/static/logo-pe.svg" style="height:60px;">
-            <div class="live-badge"><div style="width:10px; height:10px; background:#dc2626; border-radius:50%; animation:blink 1.5s infinite;"></div> AO VIVO</div>
+        <header>
+            <div class="logo"><img src="/static/logo-pe.svg" alt="Logo"></div>
+            <div class="event-title">${ eventoNome }</div>
         </header>
-        
-        <div class="event-banner"><h2 style="margin:0; font-family:'Oswald'; text-transform:uppercase; letter-spacing:2px;">${ dados.evento || '...' }</h2></div>
-        
-        <div style="flex:1; display:flex; align-items:center; justify-content:center;">
-            <div v-if="dados.pauta" class="card">
-                
-                <div style="text-align: center; width: 100%;">
-                    <span :class="['status-badge', dados.pauta.status.toLowerCase()]">● ${ dados.pauta.status }</span>
-                    <h1 style="font-family:'Poppins'; font-size:3em; font-weight:700; color:#002d62; margin:0; line-height:1.1;">${ dados.pauta.titulo }</h1>
-                    <div style="margin-top:10px; font-size:1.2em; color:#64748b; font-weight:600;">
-                        TOTAL DE VOTOS: <span style="color:#002d62; font-size:1.4em;">${ dados.pauta.total_votos }</span>
-                    </div>
+
+        <main v-if="pauta">
+            <div class="chart-area">
+                <div class="chart-container">
+                    <canvas id="graficoTelao"></canvas>
                 </div>
-                
-                <div v-if="dados.pauta.tipo === 'ELEICAO'" class="ranking-container">
-                    <div v-for="(cand, idx) in ranking" :key="cand.nome" 
-                         class="rank-item" 
-                         :class="{ 'elected': idx < (dados.pauta.max_escolhas || 1) }">
-                        
-                        <div class="rank-pos">${ idx + 1 }º</div>
-                        <div class="rank-name">${ cand.nome }</div>
-                        <div class="rank-votes">${ cand.votos }</div>
-                    </div>
+            </div>
+
+            <div class="info-area">
+                <div class="pauta-card">
+                    <div class="pauta-label">Em Votação</div>
+                    <div class="pauta-title">${ pauta.titulo }</div>
                 </div>
 
-                <div v-else class="chart-container">
-                    <div v-if="dados.pauta.status==='ENCERRADA'" class="res-badge" 
-                         :style="{color:dados.pauta.resultado_final==='APROVADA'?'#059669':'#dc2626', borderColor:dados.pauta.resultado_final==='APROVADA'?'#059669':'#dc2626'}">
-                        ${ dados.pauta.resultado_final }
-                    </div>
-                    <canvas id="chart" :style="{opacity: dados.pauta.status==='ENCERRADA'?0.3:1, maxHeight: '400px'}"></canvas>
+                <div :class="['status-card', getStatusClass()]">
+                    <div class="status-label">Situação</div>
+                    <div class="status-value">${ pauta.resultado_final === 'ANDAMENTO' ? pauta.status : pauta.resultado_final }</div>
                 </div>
 
+                <div class="total-votes">
+                    <i class="ph ph-users"></i> ${ pauta.total_votos } VOTOS REGISTRADOS
+                </div>
             </div>
-            
-            <div v-else style="text-align:center; opacity:0.6;">
-                <div style="font-size:8em; color:#002d62;">⚜️</div>
-                <h2 style="font-family:'Oswald'; font-size:3em; color:#002d62;">AGUARDANDO</h2>
+        </main>
+
+        <main v-else>
+            <div class="empty-state">
+                <i class="ph ph-presentation-chart empty-icon"></i>
+                <h1>Aguardando início da votação...</h1>
             </div>
-        </div>
+        </main>
     </div>
-    
-    <style>@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}</style>
-    
+
     <script>
         const { createApp } = Vue;
-        let chart = null;
-        
+        Chart.register(ChartDataLabels); 
+
         createApp({
             delimiters: ['${', '}'],
-            data() { return { dados: { pauta: null, evento: '' } } },
-            
-            computed: {
-                // Lógica de Ordenação do Ranking
-                ranking() {
-                    if(!this.dados.pauta || !this.dados.pauta.resultados) return [];
-                    return Object.entries(this.dados.pauta.resultados)
-                        .map(([nome, votos]) => ({ nome, votos }))
-                        .sort((a, b) => b.votos - a.votos); // Maior voto primeiro
-                }
-            },
-
+            data() { return { pauta: null, eventoNome: 'Assembleia', chart: null } },
             methods: {
-                async fetch() { 
-                    try { 
-                        const r = await axios.get('/api/telao-dados'); 
-                        if(JSON.stringify(this.dados)!==JSON.stringify(r.data)){ 
-                            this.dados=r.data; 
-                            this.upChart(); 
-                        } 
-                    } catch{} 
+                async fetchData() {
+                    try {
+                        const r = await axios.get('/api/telao-dados');
+                        this.eventoNome = r.data.evento;
+                        const novaPauta = r.data.pauta;
+
+                        if (!this.pauta || (novaPauta && this.pauta.titulo !== novaPauta.titulo)) {
+                            this.pauta = novaPauta;
+                            this.renderChart();
+                        } else {
+                            this.pauta = novaPauta;
+                            this.updateChartData();
+                        }
+                    } catch (e) { console.error(e); }
                 },
-                
-                upChart() {
-                    if(!this.dados.pauta) return;
+                getStatusClass() {
+                    if (!this.pauta) return '';
+                    const st = this.pauta.status;
+                    const res = this.pauta.resultado_final;
                     
-                    // Se for Eleição, não desenha gráfico (usa a lista HTML)
-                    if(this.dados.pauta.tipo === 'ELEICAO') {
-                        if(chart) { chart.destroy(); chart = null; }
-                        return;
-                    }
-
-                    // Se for Simples, desenha o gráfico
+                    if (st === 'ABERTA') return 'st-aberta';
+                    if (res === 'APROVADA') return 'st-aprovada';
+                    if (res === 'REPROVADA') return 'st-reprovada';
+                    if (res === 'EMPATE') return 'st-empate';
+                    return 'st-encerrada';
+                },
+                renderChart() {
+                    if (!this.pauta) return;
+                    
                     this.$nextTick(() => {
-                        const ctx = document.getElementById('chart'); if(!ctx) return;
+                        const ctx = document.getElementById('graficoTelao');
+                        if (!ctx) return;
                         
-                        const labels = Object.keys(this.dados.pauta.resultados);
-                        const data = Object.values(this.dados.pauta.resultados);
+                        if (this.chart) this.chart.destroy();
 
-                        if(chart) chart.destroy();
-
-                        Chart.defaults.font.family="'Poppins'";
-                        Chart.defaults.font.size = 16;
+                        const isEleicao = this.pauta.tipo === 'ELEICAO';
+                        const labels = Object.keys(this.pauta.resultados);
+                        const data = Object.values(this.pauta.resultados);
                         
-                        chart = new Chart(ctx, { 
-                            type: 'doughnut', 
-                            data:{ 
-                                labels: labels, 
-                                datasets:[{
-                                    data: data, 
-                                    backgroundColor: ['#10b981','#ef4444','#94a3b8'], 
-                                    borderWidth:0,
-                                    borderRadius: 8
-                                }] 
-                            }, 
-                            options:{ 
-                                responsive:true, 
-                                maintainAspectRatio:false, 
-                                cutout: '65%', 
-                                plugins:{ legend:{ display: true, position:'bottom' } }, 
-                                animation:{ animateScale:true } 
-                            } 
+                        const bgColors = labels.map(l => {
+                            if(l==='favor') return '#10b981'; 
+                            if(l==='contra') return '#ef4444'; 
+                            if(l==='abstencao') return '#cbd5e1'; 
+                            return this.getRandomColor(); 
+                        });
+
+                        this.chart = new Chart(ctx, {
+                            type: isEleicao ? 'bar' : 'doughnut',
+                            data: {
+                                labels: labels.map(l => l.toUpperCase()),
+                                datasets: [{
+                                    data: data,
+                                    backgroundColor: bgColors,
+                                    borderWidth: 0,
+                                    borderRadius: 5
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                layout: { padding: 20 },
+                                plugins: {
+                                    legend: { 
+                                        position: 'bottom', 
+                                        labels: { font: { size: 16, weight: 'bold' }, padding: 20 } 
+                                    },
+                                    datalabels: {
+                                        color: '#fff',
+                                        font: { weight: 'bold', size: 24 },
+                                        formatter: (value, ctx) => {
+                                            if (value === 0) return '';
+                                            let sum = 0;
+                                            let dataArr = ctx.chart.data.datasets[0].data;
+                                            dataArr.map(data => { sum += data; });
+                                            let percentage = (value*100 / sum).toFixed(0)+"%";
+                                            return percentage; // Retorna a % dentro da fatia
+                                        }
+                                    }
+                                }
+                            }
                         });
                     });
+                },
+                updateChartData() {
+                    if (this.chart && this.pauta) {
+                        this.chart.data.datasets[0].data = Object.values(this.pauta.resultados);
+                        this.chart.update();
+                    } else {
+                        this.renderChart();
+                    }
+                },
+                getRandomColor() {
+                    const letters = '0123456789ABCDEF';
+                    let color = '#';
+                    for (let i = 0; i < 6; i++) { color += letters[Math.floor(Math.random() * 16)]; }
+                    return color;
                 }
             },
-            mounted() { setInterval(this.fetch, 2000); this.fetch(); }
+            mounted() {
+                this.fetchData();
+                setInterval(this.fetchData, 2000); 
+            }
         }).mount('#app');
     </script>
 </body>

@@ -6,7 +6,6 @@ from app.routers import admin, delegado
 from app import models
 from app.database import engine
 
-# Cria as tabelas no banco de dados
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()

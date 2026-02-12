@@ -72,7 +72,7 @@
                 <input v-model="email" type="email" placeholder="seu@email.com">
                 
                 <label>Número do Grupo <span>*</span></label>
-                <input v-model="grupo" type="text" inputmode="numeric" placeholder="Ex: 107 (ou 00 para Diretoria)">
+                <input v-model="grupo" type="text" inputmode="numeric" placeholder="Ex: 107">
             </div>
 
             <button @click="cadastrar" class="btn" :disabled="loading">${ loading ? 'Gerando...' : 'GERAR ACESSO' }</button>

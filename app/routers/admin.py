@@ -24,7 +24,6 @@ router = APIRouter(prefix="/api")
 
 # --- CONFIGURAÇÕES DE SEGURANÇA ---
 SECRET_KEY = os.getenv("SECRET_KEY", "chave-secreta-padrao")
-# RECUPERA A SENHA MESTRA DO AMBIENTE (Se não houver, usa um fallback, mas avisa para mudar)
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "mudar_senha_em_producao_123")
 
 ALGORITHM = "HS256"
@@ -55,7 +54,7 @@ class DadosEnvioEmail(BaseModel):
     token: str
     id: str
 
-# --- FUNÇÕES ---
+# --- FUNÇÕES AUXILIARES ---
 def get_password_hash(password):
     if len(password) > 70: password = password[:70]
     return pwd_context.hash(password)
@@ -75,75 +74,40 @@ def verificar_admin(x_admin_token: str = Header(None), token_query: str = Query(
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user = payload.get("sub")
-        # Permite acesso se for o superusuário "admin" ou um admin criado no banco
         if user == "admin": return "admin"
-        
         db_admin = db.query(models.Admin).filter(models.Admin.usuario == user).first()
         if not db_admin: raise HTTPException(401, "Invalid")
         return user
     except JWTError: raise HTTPException(401, "Invalid")
 
-# --- ROTAS ---
-
+# --- ROTAS DE AUTENTICAÇÃO ---
 @router.post("/admin/login")
 def admin_login(dados: SenhaAdmin, db: Session = Depends(get_db)):
     usuario_input = dados.usuario.strip()
     senha_input = dados.senha.strip()
-
-    # 1. VERIFICAÇÃO DE SUPER ADMIN (Via Variável de Ambiente)
-    # Isso garante que você sempre consegue entrar se tiver acesso às configs do servidor
     if usuario_input == "admin" and senha_input == ADMIN_PASSWORD:
         adm_db = db.query(models.Admin).filter(models.Admin.usuario == "admin").first()
         novo_hash = get_password_hash(ADMIN_PASSWORD)
-        
-        # Cria ou atualiza a senha do user 'admin' no banco para garantir sincronia
-        if not adm_db: 
-            db.add(models.Admin(usuario="admin", senha_hash=novo_hash))
-        else: 
-            adm_db.senha_hash = novo_hash
+        if not adm_db: db.add(models.Admin(usuario="admin", senha_hash=novo_hash))
+        else: adm_db.senha_hash = novo_hash
         db.commit()
-        
         return {"token": criar_token_acesso(data={"sub": "admin"})}
-
-    # 2. VERIFICAÇÃO DE ADMINS NORMAIS (Do Banco de Dados)
     adm = db.query(models.Admin).filter(models.Admin.usuario == usuario_input).first()
     if not adm or not verificar_senha(senha_input, adm.senha_hash):
         raise HTTPException(400, "Usuário ou senha incorretos")
-    
     return {"token": criar_token_acesso(data={"sub": adm.usuario})}
 
-@router.get("/admin/lista-para-email", response_model=List[DadosEnvioEmail])
-def lista_emails_bulk(x_admin_token: str = Header(None), token: str = Query(None), db: Session = Depends(get_db)):
-    verificar_admin(x_admin_token, token, db)
-    users = db.query(models.Usuario).filter(models.Usuario.email != None, models.Usuario.email != "").all()
-    resultado = []
-    for u in users:
-        resultado.append({"nome": u.nome, "email": u.email, "token": u.token, "id": u.id})
-    return resultado
+@router.post("/admin/logout")
+def admin_logout():
+    return {"msg": "ok"}
 
-@router.get("/admins")
-def list_admins(db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
-    return db.query(models.Admin).all()
-
-@router.post("/admins")
-def add_admin(d: NovoAdminInput, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
-    if db.query(models.Admin).filter(models.Admin.usuario == d.usuario).first(): raise HTTPException(400, "Exists")
-    db.add(models.Admin(usuario=d.usuario, senha_hash=get_password_hash(d.senha)))
-    db.commit()
-    return {"msg": "Ok"}
-
-@router.delete("/admins/{nome}")
-def del_admin(nome: str, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
-    if nome == u: raise HTTPException(400, "Self delete")
-    db.query(models.Admin).filter(models.Admin.usuario == nome).delete()
-    db.commit()
-    return {"msg": "Ok"}
-
+# --- ROTAS PRINCIPAIS ---
 @router.get("/telao-dados")
 def get_telao(db: Session = Depends(get_db)):
     asm = db.query(models.Assembleia).filter(models.Assembleia.ativa == True).first()
     nome = asm.titulo if asm else "Escoteiros"
     if not asm: return {"evento": nome, "pauta": None}
+    
     pauta = db.query(models.Pauta).filter(models.Pauta.assembleia_id == asm.id, models.Pauta.status == "ABERTA").first()
     if not pauta: pauta = db.query(models.Pauta).filter(models.Pauta.assembleia_id == asm.id).order_by(models.Pauta.id.desc()).first()
     if not pauta: return {"evento": nome, "pauta": None}
@@ -151,6 +115,7 @@ def get_telao(db: Session = Depends(get_db)):
     votos = db.query(models.Voto).filter(models.Voto.pauta_id == pauta.id).all()
     candidatos = json.loads(pauta.candidatos_str) if pauta.candidatos_str else []
     
+    # Contagem de Votos
     if pauta.tipo == "SIMPLES":
         cont = {"favor":0, "contra":0, "abstencao":0}
         for v in votos:
@@ -168,12 +133,29 @@ def get_telao(db: Session = Depends(get_db)):
     res = "ANDAMENTO"
     if pauta.status == "ENCERRADA":
         if pauta.tipo == "SIMPLES":
-            if cont["favor"] > cont["contra"]: res = "APROVADA"
-            elif cont["contra"] >= cont["favor"] and len(votos)>0: res = "REPROVADA"
-            else: res = "SEM VOTOS"
-        else: res = "ELEIÇÃO CONCLUÍDA"
+            if len(votos) == 0:
+                res = "SEM VOTOS"
+            elif cont["favor"] > cont["contra"]:
+                res = "APROVADA"
+            elif cont["contra"] > cont["favor"]:
+                res = "REPROVADA"
+            else:
+                res = "EMPATE"
+        else:
+            res = "ELEIÇÃO CONCLUÍDA"
         
-    return {"evento": nome, "pauta": {"titulo": pauta.titulo, "status": pauta.status, "tipo": pauta.tipo, "max_escolhas": pauta.max_escolhas, "total_votos": len(votos), "resultados": cont, "resultado_final": res}}
+    return {
+        "evento": nome, 
+        "pauta": {
+            "titulo": pauta.titulo, 
+            "status": pauta.status, 
+            "tipo": pauta.tipo, 
+            "max_escolhas": pauta.max_escolhas, 
+            "total_votos": len(votos), 
+            "resultados": cont, 
+            "resultado_final": res
+        }
+    }
 
 @router.get("/assembleias")
 def get_asms(db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
@@ -192,9 +174,7 @@ def add_asm(d: AssembleiaInput, db: Session = Depends(get_db), u: str = Depends(
 @router.put("/assembleias/{id}")
 def edit_asm(id: str, d: AssembleiaInput, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     asm = db.query(models.Assembleia).filter(models.Assembleia.id == id).first()
-    if not asm:
-        raise HTTPException(404, "Evento não encontrado")
-    
+    if not asm: raise HTTPException(404, "Evento não encontrado")
     asm.titulo = d.titulo
     db.commit()
     return {"msg": "ok", "titulo": asm.titulo}
@@ -202,18 +182,11 @@ def edit_asm(id: str, d: AssembleiaInput, db: Session = Depends(get_db), u: str 
 @router.delete("/assembleias/{id}")
 def delete_asm(id: str, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     asm = db.query(models.Assembleia).filter(models.Assembleia.id == id).first()
-    if not asm:
-        raise HTTPException(404, "Evento não encontrado")
-    
-    # 1. Buscar todas as pautas deste evento
+    if not asm: raise HTTPException(404, "Evento não encontrado")
     pautas = db.query(models.Pauta).filter(models.Pauta.assembleia_id == id).all()
-    
-    # 2. Para cada pauta, deletar os votos e depois a pauta
     for p in pautas:
         db.query(models.Voto).filter(models.Voto.pauta_id == p.id).delete()
         db.delete(p)
-    
-    # 3. Deletar a assembleia
     db.delete(asm)
     db.commit()
     return {"msg": "ok"}
@@ -223,6 +196,32 @@ def set_active_asm(id: str, db: Session = Depends(get_db), u: str = Depends(veri
     db.query(models.Assembleia).update({models.Assembleia.ativa: False})
     target = db.query(models.Assembleia).filter(models.Assembleia.id == id).first()
     if target: target.ativa = True
+    db.commit()
+    return {"msg": "Ok"}
+
+@router.get("/admin/lista-para-email", response_model=List[DadosEnvioEmail])
+def lista_emails_bulk(x_admin_token: str = Header(None), token: str = Query(None), db: Session = Depends(get_db)):
+    verificar_admin(x_admin_token, token, db)
+    users = db.query(models.Usuario).filter(models.Usuario.email != None, models.Usuario.email != "").all()
+    resultado = []
+    for u in users: resultado.append({"nome": u.nome, "email": u.email, "token": u.token, "id": u.id})
+    return resultado
+
+@router.get("/admins")
+def list_admins(db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
+    return db.query(models.Admin).all()
+
+@router.post("/admins")
+def add_admin(d: NovoAdminInput, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
+    if db.query(models.Admin).filter(models.Admin.usuario == d.usuario).first(): raise HTTPException(400, "Exists")
+    db.add(models.Admin(usuario=d.usuario, senha_hash=get_password_hash(d.senha)))
+    db.commit()
+    return {"msg": "Ok"}
+
+@router.delete("/admins/{nome}")
+def del_admin(nome: str, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
+    if nome == u: raise HTTPException(400, "Self delete")
+    db.query(models.Admin).filter(models.Admin.usuario == nome).delete()
     db.commit()
     return {"msg": "Ok"}
 
@@ -260,30 +259,20 @@ def list_grupos(db: Session = Depends(get_db), u: str = Depends(verificar_admin)
 @router.post("/usuarios/{token}/checkin")
 def toggle_checkin(token: str, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     usr = db.query(models.Usuario).filter(models.Usuario.token == token).first()
-    if usr:
-        usr.checkin = not usr.checkin
-        db.commit()
-        return {"msg": "ok"}
+    if usr: usr.checkin = not usr.checkin; db.commit(); return {"msg": "ok"}
     raise HTTPException(404)
 
 @router.delete("/usuarios/{token}")
 def del_user(token: str, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     usr = db.query(models.Usuario).filter(models.Usuario.token == token).first()
-    if usr:
-        db.query(models.Voto).filter(models.Voto.usuario_id == usr.id).delete()
-        db.delete(usr)
-        db.commit()
-        return {"msg": "ok"}
+    if usr: db.query(models.Voto).filter(models.Voto.usuario_id == usr.id).delete(); db.delete(usr); db.commit(); return {"msg": "ok"}
     raise HTTPException(404)
 
 @router.delete("/grupos/{n}")
 def del_grp(n: str, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     usrs = db.query(models.Usuario).filter(models.Usuario.grupo == n).all()
-    for usr in usrs:
-        db.query(models.Voto).filter(models.Voto.usuario_id == usr.id).delete()
-        db.delete(usr)
-    db.commit()
-    return {"msg": "ok"}
+    for usr in usrs: db.query(models.Voto).filter(models.Voto.usuario_id == usr.id).delete(); db.delete(usr)
+    db.commit(); return {"msg": "ok"}
 
 @router.get("/dados-admin")
 def admin_data(db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
@@ -320,7 +309,11 @@ def admin_data(db: Session = Depends(get_db), u: str = Depends(verificar_admin))
             cont = dict(sorted(cont.items(), key=lambda i: i[1], reverse=True))
         final = "ANDAMENTO"
         if p.status == "ENCERRADA":
-            if p.tipo == "SIMPLES": final = "APROVADA" if cont["favor"] > cont["contra"] else "REPROVADA"
+            if p.tipo == "SIMPLES": 
+                if len(votos)==0: final="SEM VOTOS"
+                elif cont["favor"] > cont["contra"]: final = "APROVADA" 
+                elif cont["contra"] > cont["favor"]: final = "REPROVADA"
+                else: final = "EMPATE"
             else: final = "CONCLUÍDA"
         res.append({"id": p.id, "titulo": p.titulo, "status": p.status, "tipo": p.tipo, "candidatos": cands, "max_escolhas": p.max_escolhas, "total_votos": len(votos), "esperados": total_users, "resultados": cont, "resultado_final": final, "votos_detalhados": dets})
     return {"pautas": res, "assembleia": asm.titulo}
@@ -338,21 +331,14 @@ def add_pauta(d: PautaInput, db: Session = Depends(get_db), u: str = Depends(ver
 def edit_pauta(id: str, d: PautaInput, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     p = db.query(models.Pauta).filter(models.Pauta.id == id).first()
     if not p: raise HTTPException(404)
-    p.titulo = d.titulo
-    p.tipo = d.tipo
-    p.max_escolhas = d.max_escolhas
-    p.candidatos_str = json.dumps(d.candidatos)
+    p.titulo = d.titulo; p.tipo = d.tipo; p.max_escolhas = d.max_escolhas; p.candidatos_str = json.dumps(d.candidatos)
     db.commit()
     return {"msg": "ok"}
 
 @router.delete("/pautas/{id}")
 def del_pauta(id: str, db: Session = Depends(get_db), u: str = Depends(verificar_admin)):
     p = db.query(models.Pauta).filter(models.Pauta.id == id).first()
-    if p:
-        db.query(models.Voto).filter(models.Voto.pauta_id == id).delete()
-        db.delete(p)
-        db.commit()
-        return {"msg": "ok"}
+    if p: db.query(models.Voto).filter(models.Voto.pauta_id == id).delete(); db.delete(p); db.commit(); return {"msg": "ok"}
     raise HTTPException(404)
 
 @router.post("/pautas/{id}/status")
@@ -369,54 +355,44 @@ def exportar(x_admin_token: str = Header(None), token: str = Query(None), db: Se
     verificar_admin(x_admin_token, token, db)
     asm = db.query(models.Assembleia).filter(models.Assembleia.ativa == True).first()
     tn = asm.titulo if asm else "Relatorio"
-    
     wb = Workbook()
     hf = Font(name='Calibri', size=12, bold=True, color="FFFFFF")
     fill = PatternFill(start_color="002d62", end_color="002d62", fill_type="solid")
     ca = Alignment(horizontal='center', vertical='center')
     bd = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
-
-    # ABA 1: RESUMO
+    
     ws1 = wb.active; ws1.title = "Resumo"
     ws1.merge_cells('A1:E1'); ws1['A1'].value=f"RELATÓRIO: {tn.upper()}"; ws1['A1'].font=Font(size=14, bold=True, color="002d62"); ws1['A1'].alignment=ca
     ws1.append(["Ordem", "Pauta", "Tipo", "Status", "Votos"])
     for c in ws1[2]: c.font=hf; c.fill=fill; c.alignment=ca
-    
     pautas = db.query(models.Pauta).filter(models.Pauta.assembleia_id == asm.id).all() if asm else []
     for i, p in enumerate(pautas, 1):
         v_count = db.query(models.Voto).filter(models.Voto.pauta_id == p.id).count()
         ws1.append([i, p.titulo, p.tipo, p.status, v_count])
         for cell in ws1[ws1.max_row]: cell.border=bd; cell.alignment=ca
-    
-    # ABA 2: DETALHAMENTO DE VOTOS
+        
     ws2 = wb.create_sheet("Detalhamento Votos")
     ws2.append(["Pauta", "ID", "Nome", "Grupo", "Voto"])
     for c in ws2[1]: c.font=hf; c.fill=fill; c.alignment=ca
-    
     users_map = {u.id: u for u in db.query(models.Usuario).all()}
     for p in pautas:
         votos = db.query(models.Voto).filter(models.Voto.pauta_id == p.id).all()
         for v in votos:
             usr = users_map.get(v.usuario_id)
             val = json.loads(v.escolha_str)
-            if p.tipo == "SIMPLES":
-                vf = val.upper()
-                if val == "favor": vf = "A FAVOR"
-            else:
-                vf = ", ".join(val) if isinstance(val, list) else str(val)
+            vf = val.upper() if p.tipo == "SIMPLES" and val != "favor" else ("A FAVOR" if val=="favor" else str(val))
+            if isinstance(val, list): vf = ", ".join(val)
             ws2.append([p.titulo, v.usuario_id, usr.nome if usr else "?", f"GE {usr.grupo if usr else '-'}", vf])
             for cell in ws2[ws2.max_row]: cell.border=bd
     ws2.column_dimensions['A'].width=40; ws2.column_dimensions['C'].width=35; ws2.column_dimensions['E'].width=50
     
-    ws3 = wb.create_sheet("Credenciados (Emails)")
+    ws3 = wb.create_sheet("Credenciados")
     ws3.append(["ID", "Nome", "Grupo", "Email", "CPF", "Token", "Check-in"])
     for c in ws3[1]: c.font=hf; c.fill=fill; c.alignment=ca
-    
     todos_usuarios = db.query(models.Usuario).all()
     for u in todos_usuarios:
         ws3.append([u.id, u.nome, u.grupo, u.email, u.cpf, u.token, "SIM" if u.checkin else "NÃO"])
         for cell in ws3[ws3.max_row]: cell.border=bd
-    
     ws3.column_dimensions['B'].width=35; ws3.column_dimensions['D'].width=35; ws3.column_dimensions['E'].width=15
     
     buf = io.BytesIO(); wb.save(buf); buf.seek(0)
