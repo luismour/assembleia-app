@@ -18,6 +18,9 @@
             --success: #10b981; 
             --danger: #ef4444; 
             --warning: #f59e0b;
+            --gold: #fbbf24;
+            --silver: #94a3b8;
+            --bronze: #b45309;
         }
         body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
@@ -27,23 +30,43 @@
         .event-title { font-family: 'Oswald'; font-size: 2em; color: var(--primary); text-transform: uppercase; }
         
         /* MAIN CONTENT */
-        main { flex: 1; padding: 30px; display: flex; gap: 30px; align-items: stretch; height: 90vh; overflow: hidden; }
+        main { flex: 1; padding: 40px; display: grid; grid-template-columns: 350px 1fr; gap: 40px; height: 90vh; overflow: hidden; }
         
-        /* LEFT: CHART AREA */
-        .chart-area { flex: 2; background: white; border-radius: 30px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; }
-        .chart-container { flex: 1; position: relative; width: 100%; min-height: 0; }
+        /* SIDEBAR (INFO) - Esquerda */
+        .info-sidebar { display: flex; flex-direction: column; gap: 30px; justify-content: center; }
         
-        /* RIGHT: INFO AREA */
-        .info-area { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 350px; }
+        .pauta-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: left; border-left: 10px solid var(--primary); }
+        .pauta-label { font-size: 1.2em; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .pauta-title { font-size: 2.2em; font-weight: 800; color: var(--primary); line-height: 1.1; word-wrap: break-word; }
         
-        .pauta-card { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; border-left: 10px solid var(--primary); flex-shrink: 0; }
-        .pauta-label { font-size: 1em; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
-        .pauta-title { font-size: 1.8em; font-weight: 800; color: var(--primary); line-height: 1.2; }
+        .status-card { padding: 30px; border-radius: 20px; text-align: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); animation: popIn 0.5s; }
+        .status-label { font-size: 1em; opacity: 0.9; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
+        .status-value { font-family: 'Oswald'; font-size: 3.5em; font-weight: 700; line-height: 1; }
         
-        .status-card { padding: 20px; border-radius: 20px; text-align: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); animation: popIn 0.5s; flex-shrink: 0; }
-        .status-label { font-size: 0.9em; opacity: 0.9; font-weight: 600; text-transform: uppercase; }
-        .status-value { font-family: 'Oswald'; font-size: 3em; font-weight: 700; line-height: 1; margin-top: 5px; }
+        .total-votes { text-align: center; font-size: 1.5em; color: var(--primary); font-weight: 800; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        /* CONTENT AREA (Direita) - Muda conforme o tipo */
+        .content-area { background: white; border-radius: 30px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: center; }
         
+        /* ESTILO PARA GRÁFICO (VOTAÇÃO SIMPLES) */
+        .chart-container { width: 100%; height: 100%; position: relative; }
+
+        /* ESTILO PARA RANKING (ELEIÇÃO) */
+        .scoreboard-header { display: flex; justify-content: space-between; padding-bottom: 20px; border-bottom: 2px solid #f0f2f5; margin-bottom: 20px; font-family: 'Oswald'; color: #64748b; font-size: 1.2em; letter-spacing: 1px; }
+        .score-list { display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; max-height: 100%; }
+        .score-item { display: flex; align-items: center; padding: 15px 20px; border-radius: 15px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.3s ease; border: 1px solid #e2e8f0; flex-shrink: 0; }
+        .score-bar { position: absolute; top: 0; left: 0; height: 100%; background: rgba(0, 45, 98, 0.05); z-index: 0; transition: width 1s ease; }
+        .pos-badge { width: 50px; height: 50px; border-radius: 50%; background: #e2e8f0; color: #64748b; font-family: 'Oswald'; font-size: 1.5em; display: flex; align-items: center; justify-content: center; margin-right: 20px; z-index: 1; font-weight: bold; flex-shrink: 0; }
+        .name { flex: 1; font-size: 1.8em; font-weight: 700; color: var(--primary); z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .votes { font-family: 'Oswald'; font-size: 2.2em; font-weight: 700; color: var(--primary); z-index: 1; background: white; padding: 5px 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); min-width: 80px; text-align: center; }
+
+        /* Destaques Ranking */
+        .rank-1 .pos-badge { background: var(--gold); color: white; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.4); }
+        .rank-1 .score-bar { background: rgba(251, 191, 36, 0.1); }
+        .rank-1 { border: 2px solid var(--gold); transform: scale(1.01); }
+        .rank-2 .pos-badge { background: var(--silver); color: white; }
+        .rank-3 .pos-badge { background: var(--bronze); color: white; }
+
         /* STATUS COLORS */
         .st-aberta { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
         .st-aprovada { background: linear-gradient(135deg, #10b981, #059669); }
@@ -52,26 +75,8 @@
         .st-encerrada { background: #64748b; }
         .st-concluida { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
 
-        .total-votes { text-align: center; font-size: 1.2em; color: var(--primary); font-weight: 800; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); flex-shrink: 0; }
-
-        /* RANKING LIST (Só aparece em ELEIÇÃO) */
-        .ranking-container { flex: 1; background: white; border-radius: 20px; padding: 20px; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
-        .ranking-title { font-family: 'Oswald'; color: var(--primary); font-size: 1.2em; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; margin-bottom: 10px; }
-        .rank-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #f0f2f5; animation: slideIn 0.3s; }
-        .rank-pos { font-weight: 800; color: #cbd5e1; width: 30px; font-size: 1.1em; }
-        .rank-name { flex: 1; font-weight: 600; color: #334155; }
-        .rank-votes { background: #f1f5f9; padding: 4px 12px; border-radius: 20px; font-weight: 800; color: var(--primary); }
-        
-        /* Destaque para os Eleitos */
-        .rank-elected .rank-pos { color: var(--success); }
-        .rank-elected .rank-name { color: var(--primary); }
-        .rank-elected .rank-votes { background: #dcfce7; color: var(--success); }
-
-        /* NO CONTENT STATE */
-        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; color: #94a3b8; }
-        
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; color: #94a3b8; grid-column: 1 / -1; }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -82,15 +87,9 @@
         </header>
 
         <main v-if="pauta">
-            <div class="chart-area">
-                <div class="chart-container">
-                    <canvas id="graficoTelao"></canvas>
-                </div>
-            </div>
-
-            <div class="info-area">
+            <div class="info-sidebar">
                 <div class="pauta-card">
-                    <div class="pauta-label">${ pauta.tipo === 'ELEICAO' ? 'Eleição em Curso' : 'Em Votação' }</div>
+                    <div class="pauta-label">${ pauta.tipo === 'ELEICAO' ? 'Eleição' : 'Votação' }</div>
                     <div class="pauta-title">${ pauta.titulo }</div>
                 </div>
 
@@ -100,24 +99,42 @@
                 </div>
 
                 <div class="total-votes">
-                    <i class="ph ph-users"></i> ${ pauta.total_votos } VOTOS
-                </div>
-
-                <div v-if="pauta.tipo === 'ELEICAO'" class="ranking-container">
-                    <div class="ranking-title">CLASSIFICAÇÃO</div>
-                    <div v-for="(cand, idx) in ranking" :key="cand.nome" class="rank-item" :class="{ 'rank-elected': idx < (pauta.max_escolhas || 1) }">
-                        <div class="rank-pos">${ idx + 1 }º</div>
-                        <div class="rank-name">${ cand.nome }</div>
-                        <div class="rank-votes">${ cand.votos }</div>
+                    <i class="ph ph-users-three" style="font-size: 1.5em;"></i>
+                    <div>
+                        <div style="font-size: 0.5em; text-transform: uppercase; color: #666; font-weight: 600;">Total Computado</div>
+                        ${ pauta.total_votos }
                     </div>
                 </div>
+            </div>
+
+            <div class="content-area">
+                
+                <div v-if="pauta.tipo === 'SIMPLES'" class="chart-container">
+                    <canvas id="graficoTelao"></canvas>
+                </div>
+
+                <div v-else class="ranking-wrapper" style="height: 100%; display: flex; flex-direction: column;">
+                    <div class="scoreboard-header">
+                        <span>CANDIDATO</span>
+                        <span>VOTOS</span>
+                    </div>
+                    <div class="score-list">
+                        <div v-for="(item, index) in ranking" :key="item.nome" :class="['score-item', 'rank-' + (index+1)]">
+                            <div class="score-bar" :style="{ width: getPercentage(item.votos) + '%' }"></div>
+                            <div class="pos-badge">${ index + 1 }º</div>
+                            <div class="name">${ item.nome }</div>
+                            <div class="votes">${ item.votos }</div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
 
         <main v-else>
             <div class="empty-state">
-                <i class="ph ph-presentation-chart" style="font-size: 5em; margin-bottom: 20px;"></i>
-                <h1>Aguardando início...</h1>
+                <i class="ph ph-presentation-chart" style="font-size: 6em; margin-bottom: 20px; opacity: 0.5;"></i>
+                <h1 style="font-size: 2em; opacity: 0.7;">Aguardando Início...</h1>
             </div>
         </main>
     </div>
@@ -132,10 +149,13 @@
             computed: {
                 ranking() {
                     if(!this.pauta || !this.pauta.resultados) return [];
-                    // Converte objeto resultados em array ordenado
                     return Object.entries(this.pauta.resultados)
                         .map(([nome, votos]) => ({ nome, votos }))
                         .sort((a, b) => b.votos - a.votos);
+                },
+                maxVotes() {
+                    if (this.ranking.length === 0) return 1;
+                    return this.ranking[0].votos || 1; 
                 }
             },
             methods: {
@@ -144,15 +164,19 @@
                         const r = await axios.get('/api/telao-dados');
                         this.eventoNome = r.data.evento;
                         const novaPauta = r.data.pauta;
-
-                        // Se mudar a pauta, reseta tudo
-                        if (!this.pauta || (novaPauta && this.pauta.titulo !== novaPauta.titulo) || (novaPauta && this.pauta.tipo !== novaPauta.tipo)) {
+                        
+                        if (!this.pauta || (novaPauta && (this.pauta.titulo !== novaPauta.titulo || this.pauta.tipo !== novaPauta.tipo))) {
                             this.pauta = novaPauta;
-                            this.renderChart();
+                            if (this.pauta && this.pauta.tipo === 'SIMPLES') {
+                                this.renderChart();
+                            } else {
+                                if(this.chart) { this.chart.destroy(); this.chart = null; }
+                            }
                         } else {
-                            // Apenas atualiza dados
                             this.pauta = novaPauta;
-                            this.updateChartData();
+                            if (this.pauta && this.pauta.tipo === 'SIMPLES') {
+                                this.updateChartData();
+                            }
                         }
                     } catch (e) { console.error(e); }
                 },
@@ -160,46 +184,35 @@
                     if (!this.pauta) return '';
                     const st = this.pauta.status;
                     const res = this.pauta.resultado_final;
-                    
                     if (st === 'ABERTA') return 'st-aberta';
                     if (res === 'APROVADA') return 'st-aprovada';
                     if (res === 'REPROVADA') return 'st-reprovada';
                     if (res === 'EMPATE') return 'st-empate';
-                    if (res === 'ELEIÇÃO CONCLUÍDA' || res === 'CONCLUÍDA') return 'st-concluida';
+                    if (res.includes('CONCLUÍDA')) return 'st-concluida';
                     return 'st-encerrada';
                 },
+                getPercentage(votes) {
+                    return (votes / this.maxVotes) * 100;
+                },
                 renderChart() {
-                    if (!this.pauta) return;
-                    
                     this.$nextTick(() => {
                         const ctx = document.getElementById('graficoTelao');
                         if (!ctx) return;
                         
                         if (this.chart) this.chart.destroy();
 
-                        const isEleicao = this.pauta.tipo === 'ELEICAO';
-                        
-                        // Prepara dados ordenados se for eleição
-                        let labels, data;
-                        if (isEleicao) {
-                            const sorted = this.ranking; // Usa o computed ranking
-                            labels = sorted.map(i => i.nome);
-                            data = sorted.map(i => i.votos);
-                        } else {
-                            labels = Object.keys(this.pauta.resultados).map(l => l.toUpperCase());
-                            data = Object.values(this.pauta.resultados);
-                        }
+                        const labels = Object.keys(this.pauta.resultados).map(l => l.toUpperCase());
+                        const data = Object.values(this.pauta.resultados);
 
-                        // Configura Cores
                         const bgColors = labels.map(l => {
                             if(l==='FAVOR' || l==='SIM') return '#10b981'; 
                             if(l==='CONTRA' || l==='NAO') return '#ef4444'; 
                             if(l==='ABSTENCAO') return '#94a3b8'; 
-                            return '#3b82f6'; // Azul padrão para candidatos
+                            return '#3b82f6';
                         });
 
                         this.chart = new Chart(ctx, {
-                            type: isEleicao ? 'bar' : 'doughnut',
+                            type: 'doughnut',
                             data: {
                                 labels: labels,
                                 datasets: [{
@@ -207,39 +220,27 @@
                                     backgroundColor: bgColors,
                                     borderWidth: 0,
                                     borderRadius: 8,
-                                    barPercentage: 0.6
+                                    hoverOffset: 10
                                 }]
                             },
                             options: {
-                                indexAxis: isEleicao ? 'y' : 'x', // Barra horizontal se for eleição
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                layout: { padding: isEleicao ? 0 : 20 },
-                                scales: {
-                                    x: { display: isEleicao, grid: { display: false } }, // Mostra eixo X só em eleição
-                                    y: { display: isEleicao, grid: { display: false }, ticks: { font: { size: 14, weight: 'bold' } } }
-                                },
+                                layout: { padding: 40 },
                                 plugins: {
                                     legend: { 
-                                        display: !isEleicao, // Esconde legenda em eleição (já tem nomes no eixo Y)
                                         position: 'bottom', 
-                                        labels: { font: { size: 16, weight: 'bold' }, padding: 20 } 
+                                        labels: { font: { size: 18, weight: 'bold' }, padding: 30 } 
                                     },
                                     datalabels: {
-                                        color: isEleicao ? '#002d62' : '#fff',
-                                        anchor: isEleicao ? 'end' : 'center',
-                                        align: isEleicao ? 'end' : 'center',
-                                        font: { weight: 'bold', size: isEleicao ? 18 : 24 },
+                                        color: '#fff',
+                                        font: { weight: 'bold', size: 32 },
                                         formatter: (value, ctx) => {
                                             if (value === 0) return '';
-                                            if (isEleicao) return value; // Mostra número absoluto na eleição
-                                            
-                                            // Mostra % na rosca
                                             let sum = 0;
                                             let dataArr = ctx.chart.data.datasets[0].data;
                                             dataArr.map(data => { sum += data; });
-                                            let percentage = (value*100 / sum).toFixed(0)+"%";
-                                            return percentage; 
+                                            return (value*100 / sum).toFixed(0)+"%";
                                         }
                                     }
                                 }
@@ -248,21 +249,8 @@
                     });
                 },
                 updateChartData() {
-                    if (this.chart && this.pauta) {
-                        const isEleicao = this.pauta.tipo === 'ELEICAO';
-                        let labels, data;
-
-                        if (isEleicao) {
-                            const sorted = this.ranking;
-                            labels = sorted.map(i => i.nome);
-                            data = sorted.map(i => i.votos);
-                        } else {
-                            labels = Object.keys(this.pauta.resultados).map(l => l.toUpperCase());
-                            data = Object.values(this.pauta.resultados);
-                        }
-
-                        this.chart.data.labels = labels;
-                        this.chart.data.datasets[0].data = data;
+                    if (this.chart) {
+                        this.chart.data.datasets[0].data = Object.values(this.pauta.resultados);
                         this.chart.update();
                     } else {
                         this.renderChart();
