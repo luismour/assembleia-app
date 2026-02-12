@@ -24,46 +24,77 @@
         }
         body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        /* HEADER */
-        header { background: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 10vh; z-index: 10; }
-        .logo img { height: 60px; }
-        .event-title { font-family: 'Oswald'; font-size: 2em; color: var(--primary); text-transform: uppercase; }
+        /* HEADER (Barra Fixa do Evento) */
+        header { background: white; padding: 10px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 8vh; z-index: 20; }
+        .logo img { height: 50px; }
+        .event-title { font-family: 'Oswald'; font-size: 1.5em; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* MAIN LAYOUT */
+        main { flex: 1; padding: 20px 40px 40px 40px; display: flex; flex-direction: column; gap: 20px; height: 92vh; }
+
+        /* TOP BAR: Título da Pauta + Ao Vivo */
+        .top-banner { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: white; padding: 20px 30px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-left: 15px solid var(--primary);
+            flex-shrink: 0;
+        }
+        .pauta-info { flex: 1; }
+        .pauta-label { font-size: 1em; color: #666; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .pauta-title { font-size: 2.5em; font-weight: 800; color: var(--primary); line-height: 1.1; text-transform: uppercase; }
+
+        /* LIVE INDICATOR */
+        .live-badge {
+            display: flex; align-items: center; gap: 10px;
+            background: #fee2e2; color: #ef4444; 
+            padding: 8px 20px; border-radius: 50px;
+            font-family: 'Oswald'; font-weight: 700; font-size: 1.2em; letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+        }
+        .live-dot {
+            width: 12px; height: 12px; background: #ef4444; border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* CONTENT GRID */
+        .content-grid { display: grid; grid-template-columns: 300px 1fr; gap: 30px; flex: 1; overflow: hidden; }
+
+        /* LEFT SIDEBAR (Status e Totais) */
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
         
-        /* MAIN CONTENT */
-        main { flex: 1; padding: 40px; display: grid; grid-template-columns: 350px 1fr; gap: 40px; height: 90vh; overflow: hidden; }
-        
-        /* SIDEBAR (INFO) - Esquerda */
-        .info-sidebar { display: flex; flex-direction: column; gap: 30px; justify-content: center; }
-        
-        .pauta-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: left; border-left: 10px solid var(--primary); }
-        .pauta-label { font-size: 1.2em; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        .pauta-title { font-size: 2.2em; font-weight: 800; color: var(--primary); line-height: 1.1; word-wrap: break-word; }
-        
-        .status-card { padding: 30px; border-radius: 20px; text-align: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); animation: popIn 0.5s; }
+        .status-card { 
+            padding: 30px; border-radius: 20px; text-align: center; color: white; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); flex: 1; display: flex; flex-direction: column; justify-content: center;
+            transition: background 0.5s;
+        }
         .status-label { font-size: 1em; opacity: 0.9; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
-        .status-value { font-family: 'Oswald'; font-size: 3.5em; font-weight: 700; line-height: 1; }
-        
-        .total-votes { text-align: center; font-size: 1.5em; color: var(--primary); font-weight: 800; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .status-value { font-family: 'Oswald'; font-size: 3em; font-weight: 700; line-height: 1; }
 
-        /* CONTENT AREA (Direita) - Muda conforme o tipo */
-        .content-area { background: white; border-radius: 30px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: center; }
-        
-        /* ESTILO PARA GRÁFICO (VOTAÇÃO SIMPLES) */
-        .chart-container { width: 100%; height: 100%; position: relative; }
+        .total-card {
+            background: white; padding: 30px; border-radius: 20px; text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); color: var(--primary);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+        }
+        .total-val { font-family: 'Oswald'; font-size: 3.5em; font-weight: 700; line-height: 1; }
+        .total-lbl { font-size: 0.9em; font-weight: 700; color: #64748b; text-transform: uppercase; }
 
-        /* ESTILO PARA RANKING (ELEIÇÃO) */
-        .scoreboard-header { display: flex; justify-content: space-between; padding-bottom: 20px; border-bottom: 2px solid #f0f2f5; margin-bottom: 20px; font-family: 'Oswald'; color: #64748b; font-size: 1.2em; letter-spacing: 1px; }
-        .score-list { display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; max-height: 100%; }
-        .score-item { display: flex; align-items: center; padding: 15px 20px; border-radius: 15px; background: #f8fafc; position: relative; overflow: hidden; transition: all 0.3s ease; border: 1px solid #e2e8f0; flex-shrink: 0; }
-        .score-bar { position: absolute; top: 0; left: 0; height: 100%; background: rgba(0, 45, 98, 0.05); z-index: 0; transition: width 1s ease; }
-        .pos-badge { width: 50px; height: 50px; border-radius: 50%; background: #e2e8f0; color: #64748b; font-family: 'Oswald'; font-size: 1.5em; display: flex; align-items: center; justify-content: center; margin-right: 20px; z-index: 1; font-weight: bold; flex-shrink: 0; }
-        .name { flex: 1; font-size: 1.8em; font-weight: 700; color: var(--primary); z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .votes { font-family: 'Oswald'; font-size: 2.2em; font-weight: 700; color: var(--primary); z-index: 1; background: white; padding: 5px 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); min-width: 80px; text-align: center; }
+        /* RIGHT AREA (Chart / Ranking) */
+        .display-area { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+        .chart-container { width: 100%; height: 100%; }
 
-        /* Destaques Ranking */
+        /* RANKING STYLES */
+        .scoreboard-header { display: flex; justify-content: space-between; padding-bottom: 15px; border-bottom: 2px solid #f0f2f5; margin-bottom: 15px; font-family: 'Oswald'; color: #94a3b8; font-size: 1.1em; letter-spacing: 1px; }
+        .score-list { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; height: 90%; padding-right: 5px; }
+        .score-item { display: flex; align-items: center; padding: 12px 20px; border-radius: 12px; background: #f8fafc; position: relative; overflow: hidden; border: 1px solid #e2e8f0; flex-shrink: 0; }
+        .score-bar { position: absolute; top: 0; left: 0; height: 100%; background: rgba(0, 45, 98, 0.08); z-index: 0; transition: width 1s ease; }
+        .pos-badge { width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0; color: #64748b; font-family: 'Oswald'; font-size: 1.4em; display: flex; align-items: center; justify-content: center; margin-right: 20px; z-index: 1; font-weight: bold; flex-shrink: 0; }
+        .name { flex: 1; font-size: 1.6em; font-weight: 700; color: var(--primary); z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .votes { font-family: 'Oswald'; font-size: 2em; font-weight: 700; color: var(--primary); z-index: 1; background: white; padding: 2px 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); min-width: 70px; text-align: center; }
+
+        /* DESTAQUES RANKING */
         .rank-1 .pos-badge { background: var(--gold); color: white; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.4); }
-        .rank-1 .score-bar { background: rgba(251, 191, 36, 0.1); }
-        .rank-1 { border: 2px solid var(--gold); transform: scale(1.01); }
+        .rank-1 .score-bar { background: rgba(251, 191, 36, 0.15); }
+        .rank-1 { border: 2px solid var(--gold); transform: scale(1.01); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .rank-2 .pos-badge { background: var(--silver); color: white; }
         .rank-3 .pos-badge { background: var(--bronze); color: white; }
 
@@ -75,8 +106,9 @@
         .st-encerrada { background: #64748b; }
         .st-concluida { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
 
-        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; color: #94a3b8; grid-column: 1 / -1; }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .empty-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; height: 100%; }
+
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
 </head>
 <body>
@@ -87,54 +119,59 @@
         </header>
 
         <main v-if="pauta">
-            <div class="info-sidebar">
-                <div class="pauta-card">
-                    <div class="pauta-label">${ pauta.tipo === 'ELEICAO' ? 'Eleição' : 'Votação' }</div>
+            <div class="top-banner">
+                <div class="pauta-info">
+                    <div class="pauta-label">
+                        <i class="ph" :class="pauta.tipo === 'ELEICAO' ? 'ph-users-three' : 'ph-gavel'"></i>
+                        ${ pauta.tipo === 'ELEICAO' ? 'ELEIÇÃO EM CURSO' : 'VOTAÇÃO DA PAUTA' }
+                    </div>
                     <div class="pauta-title">${ pauta.titulo }</div>
                 </div>
-
-                <div :class="['status-card', getStatusClass()]">
-                    <div class="status-label">Situação</div>
-                    <div class="status-value">${ pauta.resultado_final === 'ANDAMENTO' ? pauta.status : pauta.resultado_final }</div>
-                </div>
-
-                <div class="total-votes">
-                    <i class="ph ph-users-three" style="font-size: 1.5em;"></i>
-                    <div>
-                        <div style="font-size: 0.5em; text-transform: uppercase; color: #666; font-weight: 600;">Total Computado</div>
-                        ${ pauta.total_votos }
-                    </div>
+                <div class="live-badge" v-if="pauta.status === 'ABERTA'">
+                    <div class="live-dot"></div> AO VIVO
                 </div>
             </div>
 
-            <div class="content-area">
-                
-                <div v-if="pauta.tipo === 'SIMPLES'" class="chart-container">
-                    <canvas id="graficoTelao"></canvas>
+            <div class="content-grid">
+                <div class="sidebar">
+                    <div :class="['status-card', getStatusClass()]">
+                        <div class="status-label">STATUS</div>
+                        <div class="status-value">${ pauta.resultado_final === 'ANDAMENTO' ? pauta.status : pauta.resultado_final }</div>
+                    </div>
+                    <div class="total-card">
+                        <div class="total-val">${ pauta.total_votos }</div>
+                        <div class="total-lbl">Votos Computados</div>
+                    </div>
                 </div>
 
-                <div v-else class="ranking-wrapper" style="height: 100%; display: flex; flex-direction: column;">
-                    <div class="scoreboard-header">
-                        <span>CANDIDATO</span>
-                        <span>VOTOS</span>
+                <div class="display-area">
+                    <div v-if="pauta.tipo === 'SIMPLES'" class="chart-container">
+                        <canvas id="graficoTelao"></canvas>
                     </div>
-                    <div class="score-list">
-                        <div v-for="(item, index) in ranking" :key="item.nome" :class="['score-item', 'rank-' + (index+1)]">
-                            <div class="score-bar" :style="{ width: getPercentage(item.votos) + '%' }"></div>
-                            <div class="pos-badge">${ index + 1 }º</div>
-                            <div class="name">${ item.nome }</div>
-                            <div class="votes">${ item.votos }</div>
+
+                    <div v-else style="height: 100%; display: flex; flex-direction: column;">
+                        <div class="scoreboard-header">
+                            <span>CANDIDATO / OPÇÃO</span>
+                            <span>TOTAL VOTOS</span>
+                        </div>
+                        <div class="score-list">
+                            <div v-for="(item, index) in ranking" :key="item.nome" :class="['score-item', 'rank-' + (index+1)]">
+                                <div class="score-bar" :style="{ width: getPercentage(item.votos) + '%' }"></div>
+                                <div class="pos-badge">${ index + 1 }º</div>
+                                <div class="name">${ item.nome }</div>
+                                <div class="votes">${ item.votos }</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </main>
 
-        <main v-else>
+        <main v-else style="align-items: center; justify-content: center;">
             <div class="empty-state">
-                <i class="ph ph-presentation-chart" style="font-size: 6em; margin-bottom: 20px; opacity: 0.5;"></i>
-                <h1 style="font-size: 2em; opacity: 0.7;">Aguardando Início...</h1>
+                <i class="ph ph-monitor-play" style="font-size: 6em; margin-bottom: 20px; opacity: 0.3;"></i>
+                <h1 style="font-size: 2.5em; opacity: 0.6; margin: 0;">AGUARDANDO INÍCIO</h1>
+                <p style="opacity: 0.4; font-size: 1.2em;">O sistema está pronto para votação</p>
             </div>
         </main>
     </div>
@@ -164,7 +201,7 @@
                         const r = await axios.get('/api/telao-dados');
                         this.eventoNome = r.data.evento;
                         const novaPauta = r.data.pauta;
-                        
+
                         if (!this.pauta || (novaPauta && (this.pauta.titulo !== novaPauta.titulo || this.pauta.tipo !== novaPauta.tipo))) {
                             this.pauta = novaPauta;
                             if (this.pauta && this.pauta.tipo === 'SIMPLES') {
@@ -191,23 +228,25 @@
                     if (res.includes('CONCLUÍDA')) return 'st-concluida';
                     return 'st-encerrada';
                 },
-                getPercentage(votes) {
-                    return (votes / this.maxVotes) * 100;
-                },
+                getPercentage(votes) { return (votes / this.maxVotes) * 100; },
                 renderChart() {
                     this.$nextTick(() => {
                         const ctx = document.getElementById('graficoTelao');
                         if (!ctx) return;
-                        
                         if (this.chart) this.chart.destroy();
 
-                        const labels = Object.keys(this.pauta.resultados).map(l => l.toUpperCase());
+                        const labels = Object.keys(this.pauta.resultados).map(l => {
+                            if(l==='favor') return 'A FAVOR';
+                            if(l==='contra') return 'CONTRA';
+                            if(l==='abstencao') return 'ABSTENÇÃO';
+                            return l.toUpperCase();
+                        });
                         const data = Object.values(this.pauta.resultados);
-
+                        
                         const bgColors = labels.map(l => {
-                            if(l==='FAVOR' || l==='SIM') return '#10b981'; 
-                            if(l==='CONTRA' || l==='NAO') return '#ef4444'; 
-                            if(l==='ABSTENCAO') return '#94a3b8'; 
+                            if(l==='A FAVOR') return '#10b981'; 
+                            if(l==='CONTRA') return '#ef4444'; 
+                            if(l==='ABSTENÇÃO') return '#94a3b8'; 
                             return '#3b82f6';
                         });
 
@@ -219,8 +258,8 @@
                                     data: data,
                                     backgroundColor: bgColors,
                                     borderWidth: 0,
-                                    borderRadius: 8,
-                                    hoverOffset: 10
+                                    borderRadius: 10,
+                                    hoverOffset: 15
                                 }]
                             },
                             options: {
@@ -228,18 +267,14 @@
                                 maintainAspectRatio: false,
                                 layout: { padding: 40 },
                                 plugins: {
-                                    legend: { 
-                                        position: 'bottom', 
-                                        labels: { font: { size: 18, weight: 'bold' }, padding: 30 } 
-                                    },
+                                    legend: { position: 'bottom', labels: { font: { size: 20, weight: 'bold' }, padding: 30 } },
                                     datalabels: {
                                         color: '#fff',
-                                        font: { weight: 'bold', size: 32 },
+                                        font: { weight: 'bold', size: 36 },
                                         formatter: (value, ctx) => {
                                             if (value === 0) return '';
                                             let sum = 0;
-                                            let dataArr = ctx.chart.data.datasets[0].data;
-                                            dataArr.map(data => { sum += data; });
+                                            ctx.chart.data.datasets[0].data.map(data => { sum += data; });
                                             return (value*100 / sum).toFixed(0)+"%";
                                         }
                                     }
